@@ -1,10 +1,10 @@
 import React from "react"
 import { Link } from "gatsby"
-import BlockContent from "@sanity/block-content-to-react"
 
 import Layout from "../components/layout"
 import Image from "../components/image"
 import SEO from "../components/seo"
+import ListItem from "../components/listItem"
 
 const IndexPage = ({data}) => (
   <Layout>
@@ -12,15 +12,10 @@ const IndexPage = ({data}) => (
     {console.log(data)}
     <h1>Wolfw.xyz</h1>
     {
-      data.allSanityPost.edges.map(({ node }) => (
-        <div key={node.id}>
-          <h2>{node.title}</h2>
-          <img src={node.mainImage.asset.url}></img>
-        </div>
+      data.allSanityProjectWolf.edges.map(({ node }) => (
+        <ListItem node={node} key={node.id}></ListItem>
       ))
     }
-    <p>Welcome to your new Gatsby site.</p>
-    <Link to="/page-2/">Go to page 2</Link>
   </Layout>
 )
 
@@ -28,7 +23,7 @@ export default IndexPage
 
 export const query = graphql `
   query MyQuery {
-    allSanityPost {
+    allSanityProjectWolf {
       edges {
         node {
           id
