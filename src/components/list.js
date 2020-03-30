@@ -1,7 +1,7 @@
 import { Link } from "gatsby"
 import PropTypes from "prop-types"
 import React from "react"
-import ListItem from "./listItem"
+import ListItem from "./listItem.js"
 
 import "./list.css"
 
