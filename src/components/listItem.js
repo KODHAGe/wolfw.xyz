@@ -2,9 +2,12 @@ import { Link } from "gatsby"
 import PropTypes from "prop-types"
 import React from "react"
 
+import style from "./listItem.module.css"
+
 const ListItem = ({ node }) => (
-  <Link to={node.slug.current}>
-    <h2>{node.title}</h2>
+  <Link className={style.listlink} to={'/' + node.slug.current}>
+    {console.log(node)}
+    <p>{node.title}</p>
     <img src={node.mainImage.asset.url}></img>
   </Link>
 )

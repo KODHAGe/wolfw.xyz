@@ -1,0 +1,12 @@
+.listlink {
+  padding: 1rem;
+  width: 640px;
+  display: block;
+  /*border: 1px solid rgb(216, 216, 216);*/
+}
+
+img {
+  position: relative;
+  width: 100%;
+}
+

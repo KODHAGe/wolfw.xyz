@@ -4,51 +4,22 @@ import { Link } from "gatsby"
 import Layout from "../components/layout"
 import Image from "../components/image"
 import SEO from "../components/seo"
-import ListItem from "../components/listItem"
+import List from "../components/list"
 
 const IndexPage = ({data}) => (
   <Layout>
-    <SEO title="Home" />
-    {console.log(data)}
-    <h1>Wolfw.xyz</h1>
-    {
-      data.allSanityProjectWolf.edges.map(({ node }) => (
-        <ListItem node={node} key={node.id}></ListItem>
-      ))
-    }
+    <SEO title="wolfw.xyz" />
+    <h1 className="siteTitle">wolfw.xyz</h1>
+    <div className="description">I am a painter of the digital world, the web is my canvas.</div>
+    <div className="contact">
+    </div>
+    <div className="main">
+      <p><Link to="/projects">projects</Link></p>
+      <p><Link to="/about">about</Link></p>
+      <p><Link to="/cv">cv</Link></p>
+      <p><a href="https://github.com/KODHAGe">github</a></p>
+    </div>
   </Layout>
 )
 
 export default IndexPage
-
-export const query = graphql `
-  query MyQuery {
-    allSanityProjectWolf {
-      edges {
-        node {
-          id
-          title
-          slug {
-            _key
-            _type
-            current
-          }
-          publishedAt
-          author {
-            id
-            name
-          }
-          mainImage {
-            _key
-            _type
-            asset {
-              id
-              url
-            }
-          }
-          _rawBody
-        }
-      }
-    }
-  }
-`

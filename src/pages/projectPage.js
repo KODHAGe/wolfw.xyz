@@ -4,7 +4,7 @@ import React from "react"
 import BlockContent from "@sanity/block-content-to-react"
 
 const ProjectPage = ({ pageContext }) => (
-  <Link>
+  <div>
     {console.log(pageContext)}
     <h2>{pageContext.title}</h2>
     <BlockContent 
@@ -13,7 +13,7 @@ const ProjectPage = ({ pageContext }) => (
       projectId="5re0s6iv"
       dataset="prod"
     ></BlockContent>
-  </Link>
+  </div>
 )
 
 export default ProjectPage
