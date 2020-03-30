@@ -1,7 +1,7 @@
 import { Link } from "gatsby"
 import PropTypes from "prop-types"
 import React from "react"
-import CvListItem from "./CvListItem.js"
+import CvListItem from "./cvListItem"
 
 import style from "./cvList.module.css"
 
