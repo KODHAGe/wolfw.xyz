@@ -39,10 +39,10 @@ function draw(id, props, color) {
     g.style.strokeDasharray = props.dasharray
     g.style.strokeWidth = props.width
     g.style.strokeLinecap = "round"
-    console.log(g.getBBox().width)
     let width = props.position[0] - g.getBBox().width / 2
+    let height = props.position[1] - g.getBBox().height / 2
     //console.log(width)
-    g.style.transform = "translate("+ width +"px, "+props.position[1]+"px) rotate("+props.rotation+"deg)"
+    g.style.transform = "translate("+ width +"px, "+ height +"px) rotate("+props.rotation+"deg)"
   }
 }
 

@@ -1,6 +1,6 @@
 .element {
   /*stroke-dasharray: 10;*/
-  animation: dash 30s linear infinite;
+  animation: dash 5s ease-in-out forwards;
   /*transform: translateX(0)*/
 }
 
@@ -9,6 +9,6 @@
     stroke-dashoffset: 0;
   }
   to {
-    stroke-dashoffset: 100;
+    stroke-dashoffset: 80;
   }
 }
