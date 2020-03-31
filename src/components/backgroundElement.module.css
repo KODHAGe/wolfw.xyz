@@ -1,0 +1,14 @@
+.element {
+  /*stroke-dasharray: 10;*/
+  animation: dash 30s linear infinite;
+  /*transform: translateX(0)*/
+}
+
+@keyframes dash {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: 100;
+  }
+}

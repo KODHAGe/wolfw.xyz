@@ -8,6 +8,7 @@
 import React from "react"
 import PropTypes from "prop-types"
 import { useStaticQuery, graphql } from "gatsby"
+import Background from "./background"
 
 import "./layout.css"
 
@@ -26,6 +27,7 @@ const Layout = ({ children }) => {
     <>
       <div>
         <main>{children}</main>
+        <Background></Background>
       </div>
     </>
   )
