@@ -27,22 +27,28 @@ function draw(id, props, color) {
 
   for (var i = 0; i < props.gridSize; i++) {
     // Path features
-    let path = createPath(props.frequency, props.amplitude, props.gridDistance * i, props.offset * i)
+
+    let path = createPath(props.frequency, props.amplitude, props.gridDistance * i, props.offset * i, props.totalWidth)
     path.style.stroke = color
     path.style.fill = 'none'
 
     // Group features
     g.appendChild(path)
-    g.setAttribute("stroke-dasharray", props.dasharray)
-    g.setAttribute("stroke-width", props.width)
-    g.setAttribute("stroke-linecap", "round")
-    g.setAttribute("transform", "translate(0, 200) rotate("+props.rotation+")")
+    g.style.transformOrigin = "center"
+    g.style.transformBox = "fill-box"
+    g.style.strokeDasharray = props.dasharray
+    g.style.strokeWidth = props.width
+    g.style.strokeLinecap = "round"
+    console.log(g.getBBox().width)
+    let width = props.position[0] - g.getBBox().width / 2
+    //console.log(width)
+    g.style.transform = "translate("+ width +"px, "+props.position[1]+"px) rotate("+props.rotation+"deg)"
   }
 }
 
-function createPath(frequency, amplitude, top = 0, offset = 0) {
+function createPath(frequency, amplitude, top = 0, offset = 0, totalWidth = 2000) {
   var path = []
-  for (var x = 0; x <= 2000; x++) {
+  for (var x = 0; x <= totalWidth; x++) {
     var angle = (x / frequency) * Math.PI * 2
     var y = top + Math.sin(angle) * (amplitude / 2)
     // M = move to, L = line to
@@ -64,14 +70,16 @@ BackgroundElement.propTypes = {
 BackgroundElement.defaultProps = {
   id: 'g',
   element: {
-    rotation: 10,
+    rotation: -45,
     width: 1,
     dasharray: 10,
     frequency: 10,
     amplitude: 20,
     gridDistance: 10,
     offset: 1,
-    gridSize: 3
+    gridSize: 6,
+    totalWidth: 200,
+    position: [Math.max(window.innerWidth/2), Math.max(window.innerHeight)/2]
   },
   color: 'black'
 }

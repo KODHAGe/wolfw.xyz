@@ -16,33 +16,36 @@ const ProjectsPage = ({data}) => (
 export default ProjectsPage
 
 export const query = graphql `
-  query MyQuery {
-    allSanityProjectWolf {
-      edges {
-        node {
+query MyQuery {
+  allSanityProjectWolf {
+    edges {
+      node {
+        id
+        title
+        slug {
+          _key
+          _type
+          current
+        }
+        publishedAt
+        author {
           id
-          title
-          slug {
-            _key
-            _type
-            current
-          }
-          publishedAt
-          author {
+          name
+        }
+        mainImage {
+          _key
+          _type
+          asset {
             id
-            name
-          }
-          mainImage {
-            _key
-            _type
-            asset {
-              id
-              url
+            url
+            fluid(maxWidth: 700) {
+              ...GatsbySanityImageFluid
             }
           }
-          _rawBody
         }
+        _rawBody
       }
     }
   }
+}
 `
