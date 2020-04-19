@@ -1,8 +1,7 @@
-import PropTypes, { object, string } from "prop-types"
+import { object, string } from "prop-types"
 import React, { useEffect } from "react"
 
 import style from "./backgroundElement.module.css"
-console.log(style)
 
 const BackgroundElement = ({ id, element, color }) => {
 
@@ -41,7 +40,6 @@ function draw(id, props, color) {
     g.style.strokeLinecap = "round"
     let width = props.position[0] - g.getBBox().width / 2
     let height = props.position[1] - g.getBBox().height / 2
-    //console.log(width)
     g.style.transform = "translate("+ width +"px, "+ height +"px) rotate("+props.rotation+"deg)"
   }
 }

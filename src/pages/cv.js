@@ -1,17 +1,16 @@
 import React from "react"
-import { Link } from "gatsby"
+//import { Link } from "gatsby"
 
 import Layout from "../components/layout"
-import Image from "../components/image"
 import SEO from "../components/seo"
 
 import CvList from "../components/cvList"
 
 const CvPage = ({data}) => (
-  <Layout>
+  <Layout whitebox="true">
     <SEO title="curriculum vitae" />
     <strong>Wolf Wikgren</strong>
-    <p>designer, developer</p><p>web, data art and visualization</p>
+    <p>designer, developer</p><p>ux, ui, data art and visualization</p>
     <p>helsinki, finland</p>
     <p>1989</p>
     <CvList></CvList>

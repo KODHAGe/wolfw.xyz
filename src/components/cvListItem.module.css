@@ -1,5 +1,6 @@
 .cvlistitem {
   margin-top: 3rem;
+  text-align: left;
 }
 
 .timetag {
@@ -18,9 +19,12 @@
 
 .clients {
   margin-bottom: 0.5rem;
-  font-weight: bold;
+  font-style: italic;
+}
+
+.clients:before {
 }
 
 .keywords {
-  font-style: italic;
+  font-weight: bold;
 }

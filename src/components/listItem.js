@@ -1,5 +1,5 @@
 import { Link } from "gatsby"
-import PropTypes from "prop-types"
+//import PropTypes from "prop-types"
 import Img from "gatsby-image"
 import React from "react"
 
