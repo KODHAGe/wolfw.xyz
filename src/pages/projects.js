@@ -1,5 +1,5 @@
 import React from "react"
-//import { Link } from "gatsby"
+import { Link } from "gatsby"
 
 import Layout from "../components/layout"
 import SEO from "../components/seo"
@@ -8,6 +8,8 @@ import List from "../components/list"
 const ProjectsPage = ({data}) => (
   <Layout>
     <SEO title="projects" />
+    <Link className="backlink" to="/">← BACK</Link>
+    <h1>Projects</h1>
     <List items={data.allSanityProjectWolf.edges}></List>
   </Layout>
 )

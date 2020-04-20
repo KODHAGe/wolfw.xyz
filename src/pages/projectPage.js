@@ -1,11 +1,11 @@
-//import { Link } from "gatsby"
+import { Link } from "gatsby"
 //import PropTypes from "prop-types"
 import React from "react"
 import BlockContent from "@sanity/block-content-to-react"
 
 const ProjectPage = ({ pageContext }) => (
   <div>
-    {console.log(pageContext)}
+    <Link className="backlink" to="/projects">← BACK</Link>
     <h2>{pageContext.title}</h2>
     <BlockContent 
       blocks={pageContext.body}

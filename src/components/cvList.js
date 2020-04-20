@@ -37,8 +37,15 @@ const CvList = ({ items }) => (
     <CvListItem dates="2012 – 2012" position="Intern of everything" company="TWO" clients="Projects for: Nokia, Eevil Stöö, Disco Dislocated" keywords="concept design, photography, event production">
     Internship at the good people of creative agency TWO (RIP). Photography, concept development, event organizing, graphic & web design, coffee brewing, general entrepreneurship.
     </CvListItem>
-    <CvListItem dates="2008 – present" position="Digital designer" company="GRH" clients="" keywords="web design, creative coding, digital art">
+    <CvListItem dates="2012 – present" position="Digital designer" company="GRH" clients="" keywords="web design, creative coding, digital art">
     The digital part of a two person freelance design team, currently under the moniker of GRH – the latest in a line of freelance web design work & more experimental output since my late teens.
+    </CvListItem>
+    <CvListTitle>Other more/less relevant skills</CvListTitle>
+    <CvListItem>
+      I am adept at several digital design tools, like Sketch & Adobe Suite and always trying to add more of these into my skillset. 
+      I am familiar with many design methods and methodologies – like different forms of design sprints and applied variations of design thinking – and very interested in the theory behind them. I particularly enjoy building prototypes, conducting user interviews, surveys, fieldwork and teaching others the use of tools familiar to me. 
+      I am a proficient front-end web developer, experienced in building software with javascript based tools such as React, Vue and Angular. When needed, diving into the back-end is not unfamiliar with applied experience in node.js and PHP.
+      I am fluent in Finnish, Swedish and English at a native level (both written and oral, with a CPE-certificate for the English part).
     </CvListItem>
   </div>
 )

@@ -15,7 +15,8 @@ const IndexPage = ({data}) => (
       <p><Link to="/projects">projects</Link></p>
       <p><Link to="/about">about</Link></p>
       <p><Link to="/cv">cv</Link></p>
-      <p><a href="https://github.com/KODHAGe">github</a></p>
+      <p><a href="https://github.com/KODHAGe" target="_blank">github</a></p>
+      <p><a href="https://www.linkedin.com/in/wwwolf/" target="_blank">linkedin</a></p>
     </div>
   </Layout>
 )
