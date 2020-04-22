@@ -7,8 +7,8 @@ import style from "./listItem.module.css"
 
 const ListItem = ({ node }) => (
   <Link className={style.listlink} to={'/' + node.slug.current}>
-    <p>{node.title}</p>
     <Img fluid={node.mainImage.asset.fluid}></Img>
+    <div className={style.listtitle}>{node.title} →</div>
   </Link>
 )
 

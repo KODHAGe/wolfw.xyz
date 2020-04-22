@@ -1,5 +1,5 @@
 .cvlistitem {
-  margin-top: 3rem;
+  margin-top: 2.5rem;
   text-align: left;
 }
 
@@ -27,4 +27,10 @@
 
 .keywords {
   font-weight: bold;
+}
+
+@media print {
+  .cvlistitem {
+    margin-top: 1.5rem!important;
+  }
 }

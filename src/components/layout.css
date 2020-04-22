@@ -33,3 +33,35 @@ footer {
   font-size: 0.8rem;
   margin-top: 0.5rem;
 }
+
+@page {
+  margin: 0;
+}
+
+@media print {
+  footer {
+    position: fixed!important;
+    bottom: 0!important;
+  }
+  header {
+    position: fixed!important;
+    top: 0!important;
+  }
+  .whitebox {
+    width: 500px!important;
+  }
+  .backlink {
+    display:none!important;
+    height: 0!important;
+  }
+  a {
+    color: black!important;
+    text-decoration: none!important;
+  }
+  body {
+    font-size:12px!important;
+  }
+  .break-after {
+    page-break-after: always!important;
+  }
+}

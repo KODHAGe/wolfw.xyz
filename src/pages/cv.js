@@ -13,9 +13,8 @@ const CvPage = ({data}) => (
     <h1>CV</h1>
     <strong>Wolf Wikgren</strong>
     <p>designer, developer</p><p>ux, ui, data art and visualization</p>
-    <p>helsinki, finland</p>
-    <p>1989</p>
-    <a href="mailto:wolf@grh.fi">email me maybe</a>
+    <p>helsinki, finland, 1989</p>
+    <a href="mailto:wolf@grh.fi">wolf@grh.fi</a>
     <CvList></CvList>
   </Layout>
 )

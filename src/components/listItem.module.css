@@ -3,10 +3,19 @@
   width: 640px;
   display: block;
   /*border: 1px solid rgb(216, 216, 216);*/
+  text-decoration: none;
 }
 
 img {
   position: relative;
   width: 100%;
 }
+
+.listtitle {
+  color: black;
+  text-decoration: none;
+  margin-bottom: 2rem;
+}
+
+
 

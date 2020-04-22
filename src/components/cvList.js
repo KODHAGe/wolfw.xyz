@@ -21,6 +21,7 @@ const CvList = ({ items }) => (
     <CvListItem dates="2008 - 2011" position="(uncompleted) B.Sci. in Computer Science" company="University of Helsinki" clients="" keywords="computer science 101, miscellaneous academia">
       Studies in computer science, mathematics and (most importantly) cognitive science and philosophy, that set me off a different path leading to the abandonment of the pursuit of this degree.
     </CvListItem>
+    <div className="break-after"></div>
     <CvListTitle>Recent positions</CvListTitle>
     <CvListItem dates="2017 – present" position="Designer ∨ Developer" company="Frantic" clients="Clients: SOK, Kemira, Pihlajalinna, Posti, VTV" keywords="ux-design, ui-design, user research, prototyping, front-end development">
       A hybrid role between development and design, consulting clients in topics ranging from design research, ui- and ux-design to front-end development with modern js-technologies.
@@ -34,12 +35,13 @@ const CvList = ({ items }) => (
     <CvListItem dates="2013 – 2014" position="Data journalist, interactive graphic designer" company="STT" clients="" keywords="data journalism, information design, data visualization, web development">
       From internship to thesis project to full-time position. Pioneering projects of digital journalism and online data visualization as the first employee of the STT data newsdesk.
     </CvListItem>
-    <CvListItem dates="2012 – 2012" position="Intern of everything" company="TWO" clients="Projects for: Nokia, Eevil Stöö, Disco Dislocated" keywords="concept design, photography, event production">
+    {/*<CvListItem dates="2012 – 2012" position="Intern of everything" company="TWO" clients="Projects for: Nokia, Eevil Stöö, Disco Dislocated" keywords="concept design, photography, event production">
     Internship at the good people of creative agency TWO (RIP). Photography, concept development, event organizing, graphic & web design, coffee brewing, general entrepreneurship.
-    </CvListItem>
+</CvListItem>*/}
     <CvListItem dates="2012 – present" position="Digital designer" company="GRH" clients="" keywords="web design, creative coding, digital art">
     The digital part of a two person freelance design team, currently under the moniker of GRH – the latest in a line of freelance web design work & more experimental output since my late teens.
     </CvListItem>
+    <div className="break-after"></div>
     <CvListTitle>Other more/less relevant skills</CvListTitle>
     <CvListItem>
       I am adept at several digital design tools, like Sketch & Adobe Suite and always trying to add more of these into my skillset. 
