@@ -77,7 +77,7 @@ BackgroundElement.defaultProps = {
     offset: 1,
     gridSize: 6,
     totalWidth: 200,
-    position: [Math.max(window.innerWidth/2), Math.max(window.innerHeight)/2]
+    position: [Math.max(1000/2), Math.max(800)/2]
   },
   color: 'black'
 }
