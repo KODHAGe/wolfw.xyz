@@ -1,0 +1,25 @@
+.projectBlock {
+  text-align: left;
+  padding: 1rem;
+  background-color: white;
+}
+
+.projectBlock figure {
+  margin: 0;
+  margin-bottom: 2rem;
+  box-shadow: 5px 5px 10px #f5f5f5, -5px -5px 10px #fafafa;
+}
+
+.projectVideo {
+  margin: 1rem;
+  width: calc(100% - 2rem)!important;
+  max-width: 640px!important;
+}
+
+@media screen and (max-width: 600px) {
+  .projectVideo {
+    margin: 0rem;
+    margin-bottom: 1rem;
+    width: 100%!important;
+  }
+}

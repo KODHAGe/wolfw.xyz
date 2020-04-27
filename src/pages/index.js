@@ -8,7 +8,7 @@ const IndexPage = ({data}) => (
   <Layout>
     <SEO title="wolfw.xyz" />
     <h1 className="siteTitle">wolfw.xyz</h1>
-    <div className="description">I am a painter of the digital world, the web is my canvas.</div>
+    <div className="description">I make web happen, both the beautiful and useful kind.</div>
     <div className="contact">
     </div>
     <div className="main">

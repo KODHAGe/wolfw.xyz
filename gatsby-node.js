@@ -16,6 +16,23 @@ exports.createPages = async ({ graphql, actions }) => {
               current
             }
             _rawBody
+            categories {
+              id
+              title
+            }
+            mainVideo {
+              _key
+              _type
+              asset {
+                _key
+                _type
+                status
+                assetId
+                playbackId
+                filename
+                thumbTime
+              }
+            }
           }
         }
       }
@@ -33,7 +50,8 @@ exports.createPages = async ({ graphql, actions }) => {
       context: { 
         slug: edge.node.slug.current,
         title: edge.node.title,
-        body: edge.node._rawBody
+        body: edge.node._rawBody,
+        video: edge.node.mainVideo 
       },
     })
   })

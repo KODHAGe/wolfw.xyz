@@ -1,0 +1,7 @@
+@font-face {
+  font-family: Necto Mono;
+  font-weight: 400;
+  font-style: normal;
+  src: url("Necto-Mono.woff2") format("woff2"), url("Necto-Mono.woff") format("woff");
+  font-display: swap;
+}

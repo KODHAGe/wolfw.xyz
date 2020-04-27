@@ -1,7 +1,10 @@
 .background {
-  height: 100%;
-  width: 100%;
+  height: calc(100% - 1rem);
+  width: calc(100% - 1rem);
   position: fixed;
   bottom: 0;
-  z-index: -1;
+  z-index: 0;
+  left: 0;
+  margin: 0.5rem;
+  background-color: white;
 }

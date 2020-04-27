@@ -1,5 +1,4 @@
 import React from "react"
-import { Link } from "gatsby"
 
 import Layout from "../components/layout"
 import SEO from "../components/seo"
@@ -8,7 +7,12 @@ import List from "../components/list"
 const ProjectsPage = ({data}) => (
   <Layout>
     <SEO title="projects" />
-    <Link className="backlink" to="/">← BACK</Link>
+    <a className="backlink" href="/" onClick={(e) => {
+        e.preventDefault()
+        window.history.back()
+      }}
+      >← BACK
+    </a>
     <h1>Projects</h1>
     <List items={data.allSanityProjectWolf.edges}></List>
   </Layout>
@@ -18,7 +22,7 @@ export default ProjectsPage
 
 export const query = graphql `
 query MyQuery {
-  allSanityProjectWolf {
+  allSanityProjectWolf(sort: {fields: publishedAt, order: DESC}) {
     edges {
       node {
         id
@@ -45,6 +49,10 @@ query MyQuery {
           }
         }
         _rawBody
+        categories {
+          title
+          id
+        }
       }
     }
   }

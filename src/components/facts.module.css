@@ -1,3 +1,29 @@
 .fact {
-  height: 2rem;
+  height: 3rem;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.button {
+  border: 1px solid black;
+  display: inline-block;
+  padding: 1rem;
+  margin-top: 1rem;
+  box-shadow: black 4px 4px;
+  transition: box-shadow 0.5s;
+}
+
+.button:hover {
+  cursor: pointer;
+  box-shadow: black 2px 2px;
+  transition: box-shadow 0.5s;
+}
+
+.button:active {
+  box-shadow: black 0px 0px;
+  transition: box-shadow 0.25s;
+}
+
+a {
+  text-decoration: none;
 }

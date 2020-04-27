@@ -1,19 +1,41 @@
-import { Link } from "gatsby"
-//import PropTypes from "prop-types"
 import React from "react"
 import BlockContent from "@sanity/block-content-to-react"
+import Layout from "../components/layout"
+import SEO from "../components/seo"
+import Video from "sanity-mux-player"
+
+import "./projects.css"
 
 const ProjectPage = ({ pageContext }) => (
-  <div>
-    <Link className="backlink" to="/projects">← BACK</Link>
+  <Layout>
+    <SEO title={pageContext.title} />
+    <a className="backlink" href="/" onClick={(e) => {
+        e.preventDefault()
+        window.history.back()
+      }}
+      >← BACK
+    </a>
     <h2>{pageContext.title}</h2>
-    <BlockContent 
+    { pageContext.video ?
+    <Video
+      assetDocument={pageContext.video.asset}
+      autoload={true}
+      autoplay={true}
+      muted={true}
+      showControls={false}
+      className="projectVideo"
+    >  
+    </Video>
+    : null
+    }
+
+    <BlockContent className="projectBlock"
       blocks={pageContext.body}
-      imageOptions={{w: 320, h: 240, fit: 'max'}}
+      imageOptions={{w: 640, fit: 'max'}}
       projectId="5re0s6iv"
       dataset="prod"
     ></BlockContent>
-  </div>
+  </Layout>
 )
 
 export default ProjectPage

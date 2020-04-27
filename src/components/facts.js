@@ -5,38 +5,45 @@ import style from "./facts.module.css"
 
 const List = ({ facts }) => {
 
-  const [progress] = useState([0])
-  const [progressBar, setProgressBar] = useState("[----------]")
+  const [progress, setProgress] = useState([0])
+  const [progressBar, setProgressBar] = useState("[——————————]")
   const [show, setShow] = useState(facts[0])
   const update = (max) => {
-    if(progress.length < facts.length) {
+    if(progress != "done" && progress.length < facts.length) {
       let numba = randomIntBetween(0, facts.length - 1)
       while (progress.includes(numba)) {
         numba = randomIntBetween(0, facts.length - 1)
       }
       progress.push(numba)
       setShow(facts[numba])
-      let block = "█"
+      let block = "="
       let blockNumber = Math.floor(((progress.length - 1) / (facts.length - 1))*10)
-      console.log(((progress.length - 1) / (facts.length - 1)), blockNumber)
       let blocks = block.repeat(blockNumber)
-      let line = "-"
+      let line = "—"
       let lines = line.repeat(10 - blockNumber)
       setProgressBar("["+blocks+""+lines+"]")
     } else {
+      setProgress("done") // okay man this is ugly 
       setShow("You've attained all facts available. Now let me know something about you.")
     }
   }
 
   return (
     <div>
-      <p>Some facts about me, at the time of writing.</p>
+      <p>Some facts about me, true at the time of writing:</p>
       <p className={style.fact}>
         {show}
       </p>
-      <button onClick={update}>get to know more</button>
-      <p>{progressBar} {Math.floor(((progress.length - 1) / (facts.length - 1))*100)}%</p>
-
+      {
+        (progress != 'done') ?
+        <div className={style.button} onClick={update} href="#">get to know better</div>
+        : <a className={style.button} href="mailto:wolf@grh.fi">send me some some facts</a>
+      }
+      <p>{progressBar} {
+        (progress != 'done') ?
+        Math.floor(((progress.length - 1) / (facts.length - 1))*100)
+        : "100"
+        }%</p>
     </div>
   )
 }

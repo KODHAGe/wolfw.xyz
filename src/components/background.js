@@ -21,7 +21,6 @@ const Background = ({ items }) => {
 
   return (
     <svg id="background" className={style.background}>
-      {console.log(elementProps)}
       {!browser ? null : <BackgroundElement id="extra" element={elementProps[0]}></BackgroundElement>}
       {!browser ? null : <BackgroundElement id="extwo" element={elementProps[1]}></BackgroundElement>}
       {!browser ? null : <BackgroundElement id="exthree" element={elementProps[2]}></BackgroundElement>}

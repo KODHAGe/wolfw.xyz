@@ -1,5 +1,4 @@
 import React from "react"
-import { Link } from "gatsby"
 
 import Layout from "../components/layout"
 import SEO from "../components/seo"
@@ -8,7 +7,12 @@ import CvList from "../components/cvList"
 
 const CvPage = ({data}) => (
   <Layout whitebox="true">
-    <Link className="backlink" to="/">← BACK</Link>
+    <a className="backlink" href="/" onClick={(e) => {
+      e.preventDefault()
+      window.history.back()
+    }}>
+      ← BACK
+    </a>
     <SEO title="curriculum vitae" />
     <h1>CV</h1>
     <strong>Wolf Wikgren</strong>

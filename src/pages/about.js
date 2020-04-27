@@ -1,5 +1,4 @@
 import React from "react"
-import { Link } from "gatsby"
 import Img from "gatsby-image"
 
 import Layout from "../components/layout"
@@ -8,9 +7,13 @@ import Facts from "../components/facts"
 
 const AboutPage = ({data}) => (
   <Layout whitebox="true">
-    <SEO title="about" />
-    {console.log(data.sanityAuthor.image)}
-    <Link className="backlink" to="/">← BACK</Link>
+    <SEO title="about wolf" />
+    <a className="backlink" href="/" onClick={(e) => {
+        e.preventDefault()
+        window.history.back()
+      }}
+      >← BACK
+    </a>
     <h1>About me</h1>
     <Img fluid={data.sanityAuthor.image.asset.fluid}></Img>
     <div className="caption">(DISCLAIMER: Usually my beard ain't this hobo, my hair ain't that nappy.)</div>

@@ -1,14 +1,27 @@
+html {
+  background-color: rgb(188, 137, 255);
+}
+
 body {
-  font-family: 'Necto Mono'
+  font-family: 'Necto Mono', sans;
+  margin: 1rem;
+}
+
+a {
+  color: black;
 }
 
 main {
   margin: auto;
-  width: 640px;
+  max-width: 640px;
   text-align: center;
   padding: 2rem;
-  /*box-shadow:  7px 7px 41px #f2f2f2, 
-             -7px -7px 41px #ffffff;*/
+  position: relative;
+  z-index: 1;
+}
+
+main p a {
+  color: black;
 }
 
 .whitebox {
@@ -32,6 +45,10 @@ footer {
 .caption {
   font-size: 0.8rem;
   margin-top: 0.5rem;
+}
+
+@media screen and (max-width: 600px) {
+
 }
 
 @page {
