@@ -6,6 +6,17 @@ module.exports = {
   },
   plugins: [
     {
+      resolve: `gatsby-plugin-google-analytics`,
+      options: {
+        trackingId: "UA-245054-12",
+        head: false,
+        anonymize: true,
+        respectDNT: true,
+        pageTransitionDelay: 100,
+        defer: false
+      },
+    },
+    {
       resolve: 'gatsby-source-sanity',
       options: {
         projectId: '5re0s6iv',
