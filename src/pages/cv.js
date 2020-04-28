@@ -20,6 +20,7 @@ const CvPage = ({data}) => (
     <p>helsinki, finland, 1989</p>
     <a href="mailto:wolf@grh.fi">wolf@grh.fi</a>
     <CvList></CvList>
+    <button class="printButton" onClick={() => {window.print()}}><span role="img" aria-label="print icon">🖨</span> Print</button>
   </Layout>
 )
 

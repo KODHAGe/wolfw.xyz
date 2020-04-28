@@ -4,7 +4,7 @@ html {
 
 body {
   font-family: 'Necto Mono', sans;
-  margin: 1rem;
+  margin-top: 1rem;
 }
 
 a {
@@ -84,6 +84,15 @@ footer {
   margin-top: 0.5rem;
 }
 
+.printButton {
+  margin-top: 2rem;
+  font-family: 'Necto Mono';
+}
+
+.printButton:hover {
+  cursor: pointer;
+}
+
 @media screen and (max-width: 600px) {
 
 }
@@ -117,5 +126,8 @@ footer {
   }
   .break-after {
     page-break-after: always!important;
+  }
+  .printButton {
+    display: none;
   }
 }

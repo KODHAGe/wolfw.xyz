@@ -18,7 +18,7 @@ const PasswordProtect = () => {
   };
 
   return (
-    <Layout>
+    <Layout whitebox="true">
       <strong>if you have a password you can enter</strong>
       <form onSubmit={onSubmit}>
         <input
