@@ -30,7 +30,7 @@ const List = ({ facts }) => {
 
   return (
     <div>
-      <p>Some facts about me, true at the time of writing:</p>
+      <p>Hi, I'm Wolf Wikgren. Below you can get to know some truths (true at the time of writing, not aiming for permanence) about me.</p>
       <p className={style.fact}>
         {show}
       </p>

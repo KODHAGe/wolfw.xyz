@@ -9,6 +9,7 @@ body {
 
 a {
   color: black;
+  text-decoration: underline;
 }
 
 main {
@@ -22,6 +23,32 @@ main {
 
 main p a {
   color: black;
+  text-decoration: underline;
+}
+
+.button {
+  border: 1px solid black;
+  display: block;
+  padding: 1rem;
+  margin-top: 1rem;
+  box-shadow: black 4px 4px;
+  transition: box-shadow 0.5s;
+  background-color: white;
+}
+
+.button:hover {
+  cursor: pointer;
+  box-shadow: black 2px 2px;
+  transition: box-shadow 0.5s;
+}
+
+.button:active {
+  box-shadow: black 0px 0px;
+  transition: box-shadow 0.25s;
+}
+
+.description {
+  margin-bottom: 2rem;
 }
 
 .whitebox {

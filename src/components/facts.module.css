@@ -6,7 +6,7 @@
 
 .button {
   border: 1px solid black;
-  display: inline-block;
+  display: block;
   padding: 1rem;
   margin-top: 1rem;
   box-shadow: black 4px 4px;
