@@ -9,7 +9,7 @@ const List = ({ facts }) => {
   const [progressBar, setProgressBar] = useState("[——————————]")
   const [show, setShow] = useState(facts[0])
   const update = (max) => {
-    if(progress != "done" && progress.length < facts.length) {
+    if(progress !== "done" && progress.length < facts.length) {
       let numba = randomIntBetween(0, facts.length - 1)
       while (progress.includes(numba)) {
         numba = randomIntBetween(0, facts.length - 1)
@@ -35,12 +35,12 @@ const List = ({ facts }) => {
         {show}
       </p>
       {
-        (progress != 'done') ?
-        <div className={style.button} onClick={update} href="#">get to know better</div>
+        (progress !== 'done') ?
+        <button className={style.button} onClick={update}>get to know better</button>
         : <a className={style.button} href="mailto:wolf@grh.fi">send me some some facts</a>
       }
       <p>{progressBar} {
-        (progress != 'done') ?
+        (progress !== 'done') ?
         Math.floor(((progress.length - 1) / (facts.length - 1))*100)
         : "100"
         }%</p>

@@ -17,6 +17,14 @@ module.exports = {
       },
     },
     {
+      resolve: '@mkitio/gatsby-theme-password-protect',
+      options: {
+        password: process.env.NOT_VERY_SECRET,
+        partialMatching: true,
+        pagePaths: ['/cv'],
+      }
+    },
+    {
       resolve: 'gatsby-source-sanity',
       options: {
         projectId: '5re0s6iv',

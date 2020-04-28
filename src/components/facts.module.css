@@ -2,6 +2,7 @@
   height: 3rem;
   font-weight: bold;
   font-size: 1.2rem;
+  margin-bottom: 3rem;
 }
 
 .button {
@@ -11,6 +12,9 @@
   margin-top: 1rem;
   box-shadow: black 4px 4px;
   transition: box-shadow 0.5s;
+  width: 100%;
+  font-family: 'Necto Mono';
+  font-size: 1rem;
 }
 
 .button:hover {
@@ -24,6 +28,7 @@
   transition: box-shadow 0.25s;
 }
 
-a {
+a.button {
   text-decoration: none;
+  width: auto!important;
 }

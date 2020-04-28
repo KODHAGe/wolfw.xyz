@@ -12,6 +12,12 @@ a {
   text-decoration: underline;
 }
 
+.textlink {
+  margin-top: 2rem;
+  text-decoration: underline;
+  display:inline-block;
+}
+
 main {
   margin: auto;
   max-width: 640px;
@@ -45,6 +51,10 @@ main p a {
 .button:active {
   box-shadow: black 0px 0px;
   transition: box-shadow 0.25s;
+}
+
+a.button {
+  text-decoration: none;
 }
 
 .description {
