@@ -1,0 +1,7 @@
+{
+  "build": {
+    "env": {
+      "NOT_VERY_SECRET": "@not_very_secret"
+    }
+  }
+}
