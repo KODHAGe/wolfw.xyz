@@ -23,8 +23,11 @@ const CvList = ({ items }) => (
     </CvListItem>
     <div className="break-after"></div>
     <CvListTitle>Recent positions</CvListTitle>
-    <CvListItem dates="2017 – present" position="Designer ∨ Developer" company="Frantic" clients="Clients: SOK, Kemira, Pihlajalinna, Posti, VTV" keywords="ux-design, ui-design, user research, prototyping, front-end development">
-      A hybrid role between development and design, consulting clients in topics ranging from design research, ui- and ux-design to front-end development with modern js-technologies.
+    <CvListItem dates="2020 – present" position="Data analyst | Team lead" company="State Treasury" clients="" keywords="data analysis, data visualization, ui-design, project management">
+      Data analyst role in the #Tietokiri-project, leading the State Treasury analytics team. Responsible for visualizing and reporting data as well as general project and day-to-day team management.
+    </CvListItem>
+    <CvListItem dates="2017 – 2020" position="Designer ∨ Developer" company="Frantic" clients="Clients: SOK, Kemira, Pihlajalinna, Posti, VTV" keywords="ux-design, ui-design, user research, prototyping, front-end development">
+      A hybrid role between development and design, consulting clients in topics ranging from design research, ui- and ux-design to front-end development with modern javascript-technologies.
     </CvListItem>
     <CvListItem dates="2015 – 2017" position="Development specialist (part-time)" company="STT" clients="" keywords="ux-design, ui-design, front-end development, data analysis, data visualization">
       Part-time developer role along studies, with shift toward design and development of internal analytics and simple AI tools.

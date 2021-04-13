@@ -16,7 +16,7 @@ const CvPage = ({data}) => (
     <SEO title="curriculum vitae" />
     <h1>CV</h1>
     <strong>Wolf Wikgren</strong>
-    <p>designer, developer</p><p>ux, ui, data art and visualization</p>
+    <p>designer, developer</p><p>interface, experience, data, art and visualization</p>
     <p>helsinki, finland, 1989</p>
     <a href="mailto:wolf@grh.fi">wolf@grh.fi</a>
     <CvList></CvList>

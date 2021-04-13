@@ -8,11 +8,18 @@ const IndexPage = ({data}) => (
   <Layout>
     <SEO title="@" />
     <h1 className="siteTitle">wolfw.xyz</h1>
-    <div className="description">I make web happen, both the beautiful and the useful kind.</div>
+    <div className="description">
+      I am Wolf (Wikgren).
+      <br></br>
+      I make web happen, both beautiful and useful.
+    </div>
     <div className="contact">
     </div>
     <div className="main">
-      <Link className="button"  to="/projects">projects</Link>
+      <div className="doubleButton">
+        <Link className="button" to="/work">work</Link>
+        <Link className="button" to="/art">art</Link>
+      </div>
       <Link className="button" to="/about">about</Link>
       <Link className="button" to="/cv">cv <span role="img" aria-label="locked">🔒</span></Link>
       <a className="button" href="https://github.com/KODHAGe" target="_blank" rel="noopener noreferrer">github</a>

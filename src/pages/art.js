@@ -13,7 +13,7 @@ const ProjectsPage = ({data}) => (
       }}
       >← BACK
     </a>
-    <h1>Projects</h1>
+    <h1>Projects: Art & Research</h1>
     <List items={data.allSanityProjectWolf.edges}></List>
   </Layout>
 )
@@ -21,8 +21,8 @@ const ProjectsPage = ({data}) => (
 export default ProjectsPage
 
 export const query = graphql `
-query MyQuery {
-  allSanityProjectWolf(sort: {fields: publishedAt, order: DESC}) {
+query MyArtQuery {
+  allSanityProjectWolf(filter: {categories: {elemMatch: {title: {eq: "Experiment"}}}}, sort: {fields: publishedAt, order: DESC}) {
     edges {
       node {
         id

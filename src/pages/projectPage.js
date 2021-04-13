@@ -4,7 +4,7 @@ import Layout from "../components/layout"
 import SEO from "../components/seo"
 import Video from "sanity-mux-player"
 
-import "./projects.css"
+import "./projectPage.css"
 
 const ProjectPage = ({ pageContext }) => (
   <Layout>

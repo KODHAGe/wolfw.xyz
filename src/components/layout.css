@@ -32,6 +32,16 @@ main p a {
   text-decoration: underline;
 }
 
+.doubleButton {
+  display: flex;
+  justify-content: space-between;
+}
+
+.doubleButton .button {
+  width: calc(50% - 3rem);
+  align-self: flex-start;
+}
+
 .button {
   border: 1px solid black;
   display: block;
