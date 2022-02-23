@@ -119,10 +119,8 @@ elementProps[6] = {
 }
 
 function getRandomIntAround(value) {
-  //console.log(value)
   let min = Math.ceil(value * 0.5);
   let max = Math.floor(value * 1.5);
-  //console.log(Math.floor(Math.random() * (max - min + 1)) + min)
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 

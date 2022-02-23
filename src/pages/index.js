@@ -9,9 +9,9 @@ const IndexPage = ({data}) => (
     <SEO title="@" />
     <h1 className="siteTitle">wolfw.xyz</h1>
     <div className="description">
-      I am Wolf (Wikgren).
+      Hi, I'm Wolf W
       <br></br>
-      I make web happen, both beautiful and useful.
+      I make web happen - both beautiful and useful.
     </div>
     <div className="contact">
     </div>

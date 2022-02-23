@@ -7,7 +7,6 @@ import { setSessionPassword } from '../utils/utils'
 import Layout from '../../../components/layout'
 
 import style from './PasswordProtect.module.css'
-console.log(style)
 const PasswordProtect = () => {
   const [password, setPassword] = useState('');
 

@@ -1,7 +1,7 @@
 module.exports = {
   siteMetadata: {
     title: `wolfw.xyz`,
-    description: `I am Wolf (Wikgren). I make web happen, both beautiful and useful.`,
+    description: `I am Wolf. I make (mainly) web happen - both beautiful and useful.`,
     author: `@KODHAGe`,
   },
   plugins: [
@@ -19,7 +19,7 @@ module.exports = {
     {
       resolve: '@mkitio/gatsby-theme-password-protect',
       options: {
-        password: process.env.NOT_VERY_SECRET,
+        password: process.env.GATSBY_NO_SECRET,
         partialMatching: true,
         pagePaths: ['/cv', '/agency-work'],
       }
