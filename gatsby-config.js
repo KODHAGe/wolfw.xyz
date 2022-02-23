@@ -21,7 +21,7 @@ module.exports = {
       options: {
         password: process.env.NOT_VERY_SECRET,
         partialMatching: true,
-        pagePaths: ['/cv'],
+        pagePaths: ['/cv', '/agency-work'],
       }
     },
     {
