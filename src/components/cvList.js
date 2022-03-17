@@ -19,7 +19,7 @@ const CvList = ({ items }) => (
         <li>Responsible for client communications with the government ministries</li>
         <li>Developing and designing custom visualizations in react/d3/highcharts and standard based dashboards in PowerBI</li>
         <li>Developing the iterative modes of work within the team (Scrum-inspired)</li>
-        <li>Championing applied design thinking in client work (iterative define -> ideate -> prototype -> deliver -phases)</li>
+        <li>Championing applied design thinking in client work (iterative define -&gt; ideate -&gt; prototype -&gt; deliver -phases)</li>
       </ul>
     </CvListItem>
     <CvListItem dates="2017 – 2020" position="Designer ∨ Developer" company="Frantic" clients="Clients: SOK, Kemira, Pihlajalinna, Posti, VTV" keywords="ux-design, ui-design, user research, prototyping, front-end development">
