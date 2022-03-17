@@ -9,12 +9,12 @@ import style from "./cvList.module.css"
 const CvList = ({ items }) => (
   <div className={style.cvlist}>
     <CvListTitle>Recent positions</CvListTitle>
-    <CvListItem dates="2020 – present" position="Data analyst | Team lead" company="The State Treasury of Finland" clients="Clients: Government ministries of Finland" keywords="data analysis, data visualization, ui-design, team management, ux/product design">
+    <CvListItem dates="2020 – present" position="Data analyst | Team lead" company="The State Treasury of Finland" clients="Clients: Government ministries of Finland" keywords="">
       Leading the data analytics team at the State Treasury in a role between practise and management.
       <ul>
         <li>Proactively identifying and addressing potential cases for data analysis</li>
         <li>Responsible for client communications with the government ministries</li>
-        <li>Leading visual analytics, data visualization and data product design competencies</li>
+        <li>Leading visual analytics, data visualization and data product/ux design competencies</li>
         <li>Supporting in data engineering/analytics development related technical tasks</li>
         <li>Responsible for client communications with the government ministries</li>
         <li>Developing and designing custom visualizations in react/d3/highcharts and standard based dashboards in PowerBI</li>
@@ -22,7 +22,7 @@ const CvList = ({ items }) => (
         <li>Championing applied design thinking in client work (iterative define -&gt; ideate -&gt; prototype -&gt; deliver -phases)</li>
       </ul>
     </CvListItem>
-    <CvListItem dates="2017 – 2020" position="Designer ∨ Developer" company="Frantic" clients="Clients: SOK, Kemira, Pihlajalinna, Posti, VTV" keywords="ux-design, ui-design, user research, prototyping, front-end development">
+    <CvListItem dates="2017 – 2020" position="Designer ∨ Developer" company="Frantic" clients="Clients: SOK, Kemira, Pihlajalinna, Posti, VTV" keywords="">
       Working as a designer/developer in both consulting and project roles in a digital agency setting.
       <ul>
         <li>UI Design of multiple projects in several fields, ranging from mobile apps to process management software</li>
@@ -33,7 +33,7 @@ const CvList = ({ items }) => (
         <li>Developing my ability to learn and adapt very quickly into different roles, teams, requirements and sets of users</li>
       </ul>
     </CvListItem>
-    <CvListItem dates="2015 – 2017" position="Development specialist (part-time)" company="STT" clients="" keywords="ux-design, ui-design, front-end development, data analysis, data visualization">
+    <CvListItem dates="2015 – 2017" position="Development specialist (part-time)" company="STT" clients="" keywords="">
       Continued but separate contract working part-time during further university studies, with main responsibility over an internal analytics tool project and news robotics tests.
       <ul>
         <li>End-to-end ownership of design and development for a unique news throughput analytics service from co-developed concept to finalized product prototype</li>
@@ -46,7 +46,7 @@ const CvList = ({ items }) => (
         <li>Handover of final prototype to production, that would later go on to receive <a href="https://stt.fi/stt-tarkkailija-dni-rahoitus/">Google Digital News Initiative funding (in Finnish)</a></li>
       </ul>
     </CvListItem>
-    <CvListItem dates="2014 – 2015" position="Digital service developer/designer" company="STT" clients="Clients: Iltalehti, KSML, Apu, Veikkaus" keywords="ux-design, ui-design, front-end development, data visualization">
+    <CvListItem dates="2014 – 2015" position="Digital service developer/designer" company="STT" clients="Clients: Iltalehti, KSML, Apu, Veikkaus" keywords="">
       Research, development and design of new visualization based tools and products for STT media service clients.
       <ul>
         <li>Responsible for UX/UI and code implementation of data visualization tools</li>
@@ -54,7 +54,7 @@ const CvList = ({ items }) => (
         <li>Data visualization with tools like QGis, Mapbox, Leaflet, jQuery, custom javascript</li>
       </ul>
     </CvListItem>
-    <CvListItem dates="2013 – 2014" position="Data journalist, interactive graphic designer" company="STT" clients="" keywords="data journalism, information design, data visualization, web development/design">
+    <CvListItem dates="2013 – 2014" position="Data journalist, interactive graphic designer" company="STT" clients="" keywords="">
       From internship to thesis project to full-time position. Pioneering projects of digital journalism and online data visualization as the first employee of the STT data newsdesk.
       <ul>
         <li>Designing interactive news graphics with a focus on data visualization</li>
@@ -65,7 +65,7 @@ const CvList = ({ items }) => (
     {/*<CvListItem dates="2012 – 2012" position="Intern of everything" company="TWO" clients="Projects for: Nokia, Eevil Stöö, Disco Dislocated" keywords="concept design, photography, event production">
     Internship at the good people of creative agency TWO (RIP). Photography, concept development, event organizing, graphic & web design, coffee brewing, general entrepreneurship.
     </CvListItem>*/}
-    <CvListItem dates="2012 – present" position="Digital designer" company="GRH" clients="" keywords="web design, creative coding, digital art">
+    <CvListItem dates="2012 – present" position="Digital designer" company="GRH" clients="" keywords="">
     The digital part of a two person freelance design team, currently under the moniker of GRH – the latest in a line of freelance web design work & more experimental output since my late teens.
     </CvListItem>
     <div className="break-after"></div>
