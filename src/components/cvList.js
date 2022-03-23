@@ -13,7 +13,6 @@ const CvList = ({ items }) => (
       Leading the data analytics team at the State Treasury in a role between practise and management.
       <ul>
         <li>Proactively identifying and addressing potential cases for data analysis</li>
-        <li>Responsible for client communications with the government ministries</li>
         <li>Leading visual analytics, data visualization and data product/ux design competencies</li>
         <li>Supporting in data engineering/analytics development related technical tasks</li>
         <li>Responsible for client communications with the government ministries</li>
@@ -33,6 +32,7 @@ const CvList = ({ items }) => (
         <li>Developing my ability to learn and adapt very quickly into different roles, teams, requirements and sets of users</li>
       </ul>
     </CvListItem>
+    <div className="break-after"></div>
     <CvListItem dates="2015 – 2017" position="Development specialist (part-time)" company="STT" clients="" keywords="">
       Continued but separate contract working part-time during further university studies, with main responsibility over an internal analytics tool project and news robotics tests.
       <ul>
@@ -64,22 +64,22 @@ const CvList = ({ items }) => (
     </CvListItem>
     {/*<CvListItem dates="2012 – 2012" position="Intern of everything" company="TWO" clients="Projects for: Nokia, Eevil Stöö, Disco Dislocated" keywords="concept design, photography, event production">
     Internship at the good people of creative agency TWO (RIP). Photography, concept development, event organizing, graphic & web design, coffee brewing, general entrepreneurship.
-    </CvListItem>*/}
+    </CvListItem>
     <CvListItem dates="2012 – present" position="Digital designer" company="GRH" clients="" keywords="">
     The digital part of a two person freelance design team, currently under the moniker of GRH – the latest in a line of freelance web design work & more experimental output since my late teens.
-    </CvListItem>
+    </CvListItem>*/}
     <div className="break-after"></div>
     <CvListTitle>Education</CvListTitle>
-    <CvListItem dates="2015 - 2019" position="MA in New Media Design and Production" company="Aalto University School of Arts, Design and Architecture" clients="" keywords="design research, interaction design, interface design, data visualization, creative coding">
-      Graduated as Master of Arts from the Aalto Media Lab. Studies in a wide range of creative topics, with a focus on user interfaces, data visualization and design research. Some of these projects are viewable in the projects-section.
+    <CvListItem dates="2015 - 2019" position="MA in New Media Design and Production" company="Aalto University School of Arts, Design and Architecture" clients="" keywords="">
+      Graduated as Master of Arts from the Aalto Media Lab. Studies in a wide range of creative topics, with a focus on user interfaces, data visualization and design research.
     </CvListItem>
-    <CvListItem dates="2013 – 2013" position="Erasmus exchange" company="Glasgow Caledonian University" clients="" keywords="user-centered design methods, experience design, ui-design">
+    <CvListItem dates="2013 – 2013" position="Erasmus exchange" company="Glasgow Caledonian University" clients="" keywords="">
       Exchange studies at the Graphic Design for Digital Media program on courses focusing on user-centered design tools and methods, user interface and user experience design.
     </CvListItem>
-    <CvListItem dates="2011 - 2015" position="BEng. in Media Technology" company="Metropolia University of Applied Sciences" clients="" keywords="web development, digital design, graphic production, 3d-graphics">
+    <CvListItem dates="2011 - 2015" position="BEng. in Media Technology" company="Metropolia University of Applied Sciences" clients="" keywords="">
       Graduated with a Bachelor of Engineering degree in Media Technology, with a specialisation in digital media and content production. Heavy on practical web development, with a side of design methods, 3d-graphics and printing production.
     </CvListItem>
-    <CvListItem dates="2008 - 2011" position="(uncompleted) B.Sci. in Computer Science" company="University of Helsinki" clients="" keywords="computer science 101, miscellaneous academia">
+    <CvListItem dates="2008 - 2011" position="(uncompleted) B.Sci. in Computer Science" company="University of Helsinki" clients="" keywords="">
       Studies in computer science, mathematics and (most importantly) cognitive science and philosophy, that set me off a different path leading to the abandonment of the pursuit of this degree.
     </CvListItem>
     <div className="break-after"></div>
