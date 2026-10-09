@@ -1,0 +1,343 @@
+{
+  "approval-rates": {
+    "group": "work",
+    "http": "200",
+    "title": "Approval rates",
+    "lines": [
+      "A customized timeline graph for displaying graphable, quantitative data in juxtaposition with qualitative, textual data to explain the reactions of the graph.",
+      "This particular graph illustrates the approval ratings of Russian leaders, approval rates of EU and US in Russia as well as showing key points in the Russian political sphere. The idea was not to present any particular hypotheses or conclusions, but to explore the given datasets by juxtaposing them with events that might affect them, leaving interpretation to the user while giving them all the information possible."
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/5428e1ce0cb237b936aab120d57c3ccb781d125a-958x962.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/957dca00ec6bcbb3aded0dc4cc6d721ae57d69db-1368x1268.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/9fbf7af9d2dc70e809dfab868d12521ded521494-1374x1334.png?w=640&amp;fit=max"
+    ],
+    "hasVideo": true
+  },
+  "brb-email": {
+    "group": "work",
+    "http": "200",
+    "title": "brb.email",
+    "lines": [
+      "A custom photo/microblog for an around-the-world journey, created in collaboration with",
+      "karkkikammo",
+      ". Exploring the modality of 'instant messaging' in its aesthetic, brb.email turns the medium into a one-way stream.",
+      "Juxtaposing the one-to-many type communication that a blog affords with the visual look of a daily use many-to-many -communication platform aims to create a sense of familiarity and comfort in the interface for readers while not requiring as constant interaction/attention from the content creators a real instant messaging platform would. In order to still allow readers a form of communicating back a reactions-system was designed to allow instant feedback and notification of presence that does not require immediate reaction from the part of the content producer. A map feature was added as a context specific aide to communicate current location that could be updated on an even more real-time basis than the image/text feed.",
+      "Familiarity of the user interface and web-basedeness ensured the success of brb.email: Keeping stress-levels for both readers and content producers while effectively communicating the progress of the journey (Thanks mum, for all the weird emoji!), and functioning as a live documentation that one does not have to scourge through WhatsApp-logs to get back to.",
+      "Check it out.",
+      "Process:",
+      "Concept design",
+      "User experience modeling, interviews",
+      "Visual design",
+      "Development as a PWA-app using Angular + Firebase + Cloudinary + Mapbox"
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/37a21898b9be7c7f57f9b5001953e80e22f58622-1218x1750.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/678458f8692f2ae0fb8644bdb6ecf633e92a799e-2180x1706.png?w=640&amp;fit=max"
+    ],
+    "hasVideo": false
+  },
+  "diabetes": {
+    "group": "work",
+    "http": "200",
+    "title": "Diabetes",
+    "lines": [
+      "A common type of map-based visualization designed, developed and published as a part of the news production of the finnish news agency",
+      "STT",
+      ". This is only one example of a design that saw frequent use with multiple variations and themes.",
+      "Working together with a writing journalist, the incidence of diabetes in Finland was explored. The process included collecting data from different official sources and combining these to create the base dataset for the story.",
+      "The end result included this Leaflet-based interactive choropleth map of the incidence number in all Finnish municipalities, juxtaposed with potentially interesting underlying data.",
+      "Tech: Leaflet.js, ArcGIS"
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/35cf06efae49e3526b9e7306f7cd54772e5a48cf-1106x1206.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/ecb800ce1c41ece2dcae8ec8f6ec14106d706c94-1316x1350.png?w=640&amp;fit=max"
+    ],
+    "hasVideo": true
+  },
+  "digitaalinenkirjallisuus-fi": {
+    "group": "work",
+    "http": "200",
+    "title": "digitaalinenkirjallisuus.fi",
+    "lines": [
+      "A collaborative project between me and Karkkikammo, a more in depth project description in Finnish can be found @",
+      "karkkikammo.net",
+      ". The project comprised of the visual design for the digital channels of the Digitaalinen Kirjallisuus - Digital Literature -project, focusing especially on the website accessible at",
+      "digitaalinenkirjallisuus.fi"
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/869cbdeda0a757aa622497f19efdb3261bb9c9ba-1948x1356.png?w=640&amp;fit=max"
+    ],
+    "hasVideo": false
+  },
+  "election-day-results": {
+    "group": "work",
+    "http": "200",
+    "title": "Election day results",
+    "lines": [
+      "As part of the news package produced for the parliamentary elections of early 2015 in Finland, we at STT produced a set of real-time visualizations of the election result data. Working together in a team of a graphic designer, visual journalist, back-end developer and various journalistic personnel, I was responsible for the development, concept and user experience of the front-end displaying this data – the result being these four visualizations.",
+      "We were tasked to design deveral different views into the data, and deliver these as a package to STT clients. A modular approach was taken – in order for the customers to get the most out of these graphics, they were produced as separate views: The new parliament, the vote distribution of parties, those who did not get re-elected and all those who received votes. This allowed the customers to build their own results pages by embedding our live graphics to custom pages in their web publications – which turned out very popular during election night, closing in on 300 000 users in total across all of our clients' publications during the election night.",
+      "Tech: Azure, jQuery, chart.js"
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/754cfe4306710cf662ee45689d3c90d162874683-938x874.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/7cc86455d26ca1abbee939d4ad3d9428d53b0315-880x548.png?w=640&amp;fit=max"
+    ],
+    "hasVideo": true
+  },
+  "ilmastonmuuttajat-climate-changers": {
+    "group": "work",
+    "http": "200",
+    "title": "Ilmastonmuuttajat – Climate changers",
+    "lines": [
+      "A website for Ilmastonmuuttajat, a writing competition for youths around the theme of climate change, created in collaboration with",
+      "karkkikammo",
+      ".",
+      "More content will follow, watch this space.",
+      "Check it out.",
+      "Process:",
+      "Visual design",
+      "Wordpress-development"
+    ],
+    "images": [],
+    "hasVideo": false
+  },
+  "kaekriaeinen": {
+    "group": "work",
+    "http": "200",
+    "title": "Käkriäinen",
+    "lines": [
+      "Käkriäinen is a magazine by students at the University of Helsinki students of Finnish Literature. It contains literary ciritiques, interviews and original content with each issue relating to a particular theme.",
+      "With",
+      "karkkikammo",
+      ", we designed and produced two issues, 3/2016 and 4/2016 with the themes of Virtuality and Death respectively and aimed at creating print and digital experiences that support each other, while also strongly supporting the theme and the writing within.",
+      "The theme of virtuality was taken on as building an interface within an interface – through the re-creation of an old macintosh System 6 interface to browse through the content. The theme of Death was tackled more lightly, with illustrations by dead authors portraying different types of death.",
+      "The digital editions were developed utilizing a standard Wordpress/Bedrock -setup with custom a custom built Sage-based theme for Death and a somewhat esoteric jQuery-frontend for Virtuality.",
+      "Have a look:",
+      "Käkriäinen.fi and the Death issue",
+      "The Virtuality issue",
+      "Print edition of Virtuality",
+      "Print edition of Death"
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/05d3a614c626d80e2741d3a4b8f4aeba86daad49-2366x1468.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/4a4e8baea0baed1e1eb1a96d860620496eb209b3-1190x1194.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/84c96ba5df279fc9d581c1f5fb7c87cb26314d80-2322x1370.png?w=640&amp;fit=max"
+    ],
+    "hasVideo": false
+  },
+  "lukiovertailu-high-school-comparison": {
+    "group": "work",
+    "http": "200",
+    "title": "Lukiovertailu – High school comparison",
+    "lines": [
+      "This application was developed for STT news agency as a part of my final thesis to Metropolia University of Applied Sciences.",
+      "The project included all aspects of the application development process, from developing the back end in node.js, data processing and visualization to designing and implementing the front-end. More thorough documentation of this process can be found in my thesis paper.",
+      "Tech: MongoDB, node.js, jQuery",
+      "Link",
+      "Paper on Theseus"
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/5952ac5a4551d81dd67ab3c467050771eb6e04c9-1390x1318.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/8a2972bc1face4f1325de67330889a2f6446d4e0-1214x1260.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/ed6626e0bcb7c02ca6d531373aa304f1a8dddda1-1070x1034.png?w=640&amp;fit=max"
+    ],
+    "hasVideo": true
+  },
+  "runokuu-2020": {
+    "group": "work",
+    "http": "200",
+    "title": "Runokuu 2020",
+    "lines": [
+      "A collaborative with project with",
+      "Karkkikammo",
+      "for Nuoren Voiman Liitto to design the visual theme for Runokuu - Poetry Moon Festival 2020. A more throrough description of the project can be found at",
+      "karkkikammo.net",
+      ". My focus during the project was on the digital and motion design aspects of the theme and creating tools to dynamically and automatically create different versions of animated theme elements."
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/61601ac23b95edca02b71afc22fac2703a6919cf-640x454.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/f48f125da5dfe8ab49c8342b857afdf5c29e08e9-364x640.png?w=640&amp;fit=max"
+    ],
+    "hasVideo": false
+  },
+  "stt-tarkkailija": {
+    "group": "work",
+    "http": "200",
+    "title": "STT Tarkkailija",
+    "lines": [
+      "I worked on the concept, design and development of the first prototype of the STT Tarkkailija analytics and monitoring tool, that would later go on to receive generous funding from",
+      "Google DNI",
+      "for its' later iterations.",
+      "Working together with stakeholders within the news organization – sales, management and staff writers –  I defined the initial requirements of a system for monitoring and analysing the produced news output, and the throughput of that material on to customers' platforms. In collaboration with technology partners I explored what data is available for use on the platform and designed user interfaces and visualizations based on the melding of those constraints and identified user needs, assessing what kind of metrics would be viable to show. The beta/prototype version of the software was then realized utilizing ember.js",
+      "Process:",
+      "Stakeholder requirement mapping",
+      "User need assessment",
+      "Data gathering and assessment",
+      "Performance indicator design",
+      "Data visualization",
+      "User interface design",
+      "Development and user testing"
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/3e21ca1b45cc991c756eb81dc24d674b3cf892c5-1964x1386.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/8a3586935f53e9a8b8df8e81581c3cc2abf62494-1872x1218.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/bb8ff610f792c1a732260c23e64da25755eda2db-1004x1408.png?w=640&amp;fit=max"
+    ],
+    "hasVideo": false
+  },
+  "veikkaus-beneficiaries": {
+    "group": "work",
+    "http": "200",
+    "title": "Veikkaus beneficiaries",
+    "lines": [
+      "Every year, the national lottery company of Finland distributes millions of euros of their profits back into the economy in the form of culture, sports, youth and science funding. While the recipients of these grants have been made public in prior years, we worked with Veikkaus to develop a tool in which this distribution could be observed in a more transparent fashion – this application being the end result of that process.",
+      "Tech: jQuery, TaffyDB, Leaflet.js"
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/4d7cfda9aac158811939b521605135054ccc291e-1912x1416.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/d328bcbfd94bf177334b737b026644bc5ce9124a-880x1146.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/e2d2c4ace2226dfb8ec1ca0a071ec040243d2a05-644x540.png?w=640&amp;fit=max"
+    ],
+    "hasVideo": true
+  },
+  "visualizing-government": {
+    "group": "work",
+    "http": "200",
+    "title": "Visualizing government",
+    "lines": [
+      "As a part of the State Treasury data analyst team, our mission is to make the wealth of data produced by different processes of government accessible and understandable. Visual exploratory analysis is often a key part in succeeding in this - enabling the translation of data into insight, insight into decisionmaking. And ultimately, better outcomes for us all. Hopefully.",
+      "Using methods of UX, UI and data visualization I have produced data-driven products that have been published as part of ministry reports, utilized as tools for human resource development or become parts of the developing https://www.exploreadministration.fi/ -portal."
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/19553fb5bb9bffd156ce4598df10a00edbab1248-900x1179.svg?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/25602c604557bbdba5b1610206db06bb7a71eefe-2880x1770.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/57dbf425c89c5adfab160b69bee3a9ec29fd61f2-2880x2048.png?w=640&amp;fit=max"
+    ],
+    "hasVideo": false
+  },
+  "beyond-shape": {
+    "group": "art",
+    "http": "200",
+    "title": "Beyond Shape",
+    "lines": [
+      "My thesis project for MA in New Media Production at Aalto University.",
+      "More content will follow, watch this space.",
+      "Check out the print edition on Aaltodoc",
+      "Contribute to the data collection",
+      "Process",
+      "Defining the 'third wave of visualization'",
+      "Developing a concept of visualizing data in a way that could also communicate some of the fuzziness, uncertainty of interpretation included in the presentation.",
+      "Building a text-to-emotional-attribute API utilizing the natural language understanding platforms of IBM Watson, Google Cloud and Azure",
+      "Building a real-time user research platform for collecting quantifiable perception data of visual-attribute – emotional-attribute pairs in Vue",
+      "Automate user research data gathering utilizing Amazon Mechanical Turk",
+      "Design and implement an experimental neural network that extrapolates visual attributes from emotional attributes in Tensorflow",
+      "Design a visualization of visual attribute outcomes utilizing React and Aframe (three.js)",
+      "Re-render visualizations in Blender"
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/0095770621d6cd675a8d46ebff154103c0890929-3508x2480.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/16ab2d7ab7737cdac7104955a7b2cf31fb62bf83-2560x1440.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/6987a1e41304477cfe51dd470c1149bb57190c63-1920x1080.png?w=640&amp;fit=max"
+    ],
+    "hasVideo": false
+  },
+  "conversions": {
+    "group": "art",
+    "http": "200",
+    "title": "Conversions",
+    "lines": [
+      "Conversion is an ongoing research/art project exploring concepts of Inversions within the medium of Photography, mapping the boundary between interior and exterior form of architecture. To be expanded.",
+      "Conversion #1",
+      "Conversion #3"
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/3bdb3c70f5e3ec05112ccf36c0adaa9b81edc28e-14044x9934.jpg?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/8c59c3928c86b8d14a9b5be5fc0d54734ce9152a-4000x2829.jpg?w=640&amp;fit=max"
+    ],
+    "hasVideo": false
+  },
+  "eurovision-som": {
+    "group": "art",
+    "http": "200",
+    "title": "Eurovision Self-Organized",
+    "lines": [
+      "Eurovision Self-Organized is an exploration of both Eurovision and",
+      "Self-Organizing Map neural networks.",
+      "We analyzed eurovision entries, breaking them down into quantifiable attributes and processed them with the SOM to find groups of similarities within the set of songs. This visualization is a real-time demo of organizing the map",
+      "with this library",
+      ", and placing the values within the organized map, created with",
+      "peity",
+      "and plain javascript. This visualization was created as part of the Information Visualization and Design course at Aalto MediaLab, in collaboration with",
+      "Marija Erjavec",
+      ".",
+      "Check out the demo here:",
+      "Process:",
+      "Brainstorming, ideation",
+      "Identifying quantifiable metrics within popular music",
+      "Processing Eurovision entries break them down into identified attributes using both manual and software assisted means",
+      "Developing a SOM-network that utilizes the quantified attributes",
+      "Visualizing the progress and end result of that SOM-network",
+      "Building a functional web-based prototype of the tool"
+    ],
+    "images": [],
+    "hasVideo": true
+  },
+  "i-can-t-let-you-do-that-human": {
+    "group": "art",
+    "http": "200",
+    "title": "I can't let you do that, human",
+    "lines": [
+      "Kinects + Printers === A bad time",
+      "Borne out of the frustration everyone feels toward terrible user experiences with software and hardware, we explored the concept of 'fooling' machines through this Kinect based undetection game. The game consists of a physical location in which the player tries to pass a Kinect-sensor undetected in order to press an emergency stop button on the other side of the space. Built with Node.js, Javascript and OSCeleton and presented at Media Lab Spring Demo Day 2016."
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/658ada5f30b9c02a65378a1e4e0ff4d10f0600ec-1974x1422.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/73a84b769d28900b54593f7e9abbdcc41e574d56-1594x682.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/e138fe2623d99079bf1f59ba1fe2cb0ae86f6baf-1786x1450.png?w=640&amp;fit=max"
+    ],
+    "hasVideo": true
+  },
+  "instru-mental": {
+    "group": "art",
+    "http": "200",
+    "title": "Instru-mental",
+    "lines": [
+      "An instrument of instruments, rain of emoji.",
+      "Built with OpenFrameworks, node.js and plain javascript-in-a-browser, Instru-mental allows remote control of sound through any networked, gyroscope or accelerometer equipped device through tilting and moving. The networked device controls the point of gravity in a visualization created in OpenFrameworks, which in turn controls the sound generated, allowing the user a unique interface with which to control the sound. Course project for Multimedia Authoring @ Aalto University."
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/5ad1068e90c18ff243846f6082e3cc53a93ee791-2456x1402.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/753851c932bc98ffab47de2588914c02bf4c404b-1478x1278.png?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/85fdef5b676069de3c2eb95f84328f7ee5dcec09-1930x1286.png?w=640&amp;fit=max"
+    ],
+    "hasVideo": true
+  },
+  "inversion": {
+    "group": "art",
+    "http": "200",
+    "title": "Inversions",
+    "lines": [
+      "Inversions is an ongoing art/research project into design, technology and control.",
+      "The internals of things tend to be more interesting than the surface. But its the surface that affects us, the part that we interact with, the things we recognize and form bonds with. Surfaces - of both hardware and software kinds - have a continuous low-key control of most things in our lives. Not in an ominous sense, necessarily. But in the sense that most everyday things we do is mediated by surfaces.",
+      "Something like \"Playing PlayStation\" becomes a complex interaction of multiple surfaces - screens, controllers and software - with the ultimate goal of releasing hormones that we then process and take apart into excitement, joy, release, frustration and whatever other feelings we are prone to interpret into that particular burst into our brains. Systems within systems and layers of technology - some of the more complex things that humans tend to make, like microprocessors and simulated intelligence in software. We press the button on a surface, the system interprets this and gives us pixels that delight us. Complexity and all those layers of technological interpretation and representation distilled to us pressing a button a receiving an emotion in return. The surface represents us this - not a PS-controller, but a surface to an emotion feeding system.",
+      "The innards are forgotten, ultimately the system becomes its surface. And the surface becomes indistinguishable from the reaction we have to the system.",
+      "Our interactions with these surfaces (and through them the systems they are tied to and ultimately, the world) are often defined and well thought out, sometimes less so. And regardless of whether there was an attempt of designing said interaction or not, living beings are utterly unpredictable in their input and output which leads to unexpected results. A system designed to delight has the possibility of infuriating through a poor interaction or an unsuitable surface. Sometimes our human end interpreter sours to particular interactions - the easy burst of endorphins of videogames becomes a pang of shame for not doing something 'more productive'.",
+      "The immediate nature of transmission and the opportunity for confusing results makes these surfaces and interesting subject of exploration. Taking objects of technology and bursts of emotion they cause, I try to map the border between exterior and interior - spilling the guts out from within the surface in order to highlight it.",
+      "Inversion #4 - Mixed media (Frame + Joystick)",
+      "\"When we were little we always used to play a lot of Amiga with my brother when we got back from school. For a couple hours usually before our parents would arrive home, we'd be home alone playing. There was this week when one of our two controllers had broken, so we'd have to take turns, no multiplayer. I was being an asshole and not letting my little brother play, he would of course get incredibly angry. Angry to the point of screaming at me. By the end of the week I was at it again, not letting him play. This time not letting a peep at first, he walked into the kitchen and came back with a large cooking knife pointing at me loudly shouting me to let him play. My time to scream, scared I threw the only thing I had in hand at him - our only working joystick. I missed. It cracked. He put down the knife. We never told anyone, I don't remember how what we told our parents broke the controller. But we didn't get to play that weekend.\"",
+      "Inversion #5.1 - Mixed media (Frame + cable casing + screws)",
+      "\"If you've ever completely taken apart something and attempted to put it together again without proper inventory of nuts and bolts, you'll realize how that last missing little screw found lying on the carpet can seem like a prized jewel.\"",
+      "Inversion #1 - Mixed media (Frame + gamepad)",
+      "\"I've read of people getting mad at their gaming systems and breaking stuff. Like, people throwing wiimotes at TV:s. Sure, I get angry playing stuff as well but to become destructive? For sure that seems crazy. Or at least it was to me. I'd had a regularly terrible day, trying to unwind playing a few games. But the terrible day follows me into the game, loss after loss. I don't know why I keep playing, but usually you win after a match or two. Even if you lose a few, its really difficult sometimes to end on a loss. But this time, there is no easy matchup, no win. It feels a bit like exiting the body - I can feel myself squeezing the controller as tightly as I can but not exactly controlling myself. Twisting, left hand upward right hand downward until I hear the plastic crack a bit. Lifting the controller up in my right hand and throwing it into the ground with all my force. Pieces come loose. I regain control. I make myself a rule of not playing more than three losses in a row.\"",
+      "Inversion #8 - Mixed media (Frame, TFT-monitor)",
+      "\"As a wimpy kid I had more friends online than away from my keyboard. Or, if not more, at least we were a lot more close with my online friends, which was always a bit difficult for the adults around us to understand. We'd talk all day from good morning to good night. So it was not at all odd for me, that my first romantic relationships would also happen over the internet. To me, sitting in the glow of a computer screen in the middle of the night equalled candlelit dates and unrivaled intimacy beyond physical boundaries.\""
+    ],
+    "images": [
+      "https://cdn.sanity.io/images/5re0s6iv/prod/2a957c77c9c43860b48f50a6690082975c09aa58-4608x3464.jpg?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/41e760b814a1390681e21f64bb86e8ecea9338eb-4064x2988.jpg?w=640&amp;fit=max",
+      "https://cdn.sanity.io/images/5re0s6iv/prod/4b28066c699e5271b97ddc36072fd7f2b5561754-3995x2999.jpg?w=640&amp;fit=max"
+    ],
+    "hasVideo": false
+  }
+}

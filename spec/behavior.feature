@@ -204,7 +204,7 @@ Feature: Facts widget
     # facts.js:13-16 — rejection sampling
 
   Scenario: The progress bar fills as facts are revealed
-    Given the widget contains 36 facts
+    Given the widget contains 37 facts
     And I have revealed 18
     Then the indicator shows approximately halfway
     # facts.js:20-24 — ten cells, floor(((n-1)/(len-1))*10)

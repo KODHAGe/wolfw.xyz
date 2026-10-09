@@ -52,23 +52,23 @@ suggests.
 
 ---
 
-## G3 — Project body content is entirely unspec'd
+## G3 — Project body content — **RESOLVED**
 
-**Unknown.** 18 projects exist (12 work, 6 art). Their `_rawBody` Portable Text
-is authored in Sanity and rendered by `@sanity/block-content-to-react`. No
-project's body content has been inventoried — which block types appear (images,
-code, pull quotes, custom types), which are used, and how they render.
+**Resolution (2026-10-09).** All 18 project bodies recovered from the live
+deployment. Extraction script and raw output preserved in
+`extract/live-projects.json` and `extract/live/`.
 
-**Detected by.** `projectPage.js:32-37` delegates all rendering to the library.
-Spot check of `/election-day-results` shows a title and a Mux reference but the
-body was not parsed.
+- 12 work projects, 6 art projects, slug-for-slug identical to the live site
+- Bodies, titles, Sanity image URLs and per-project video flags captured
+- `Tech:` trailer lines preserved as a labelled field
 
-**Cost to close.** Fetch one page per project and enumerate block types. Moderate
-effort, and the result is mostly *data* rather than *specification* — so this
-gap is cheap to close but large in volume.
+Written to `rebuild/src/content/projects/*.md`. The rebuild now carries the
+site's actual portfolio content rather than placeholders — 23 static pages, up
+from 11.
 
-**Rebuild must decide.** Whether Sanity block content stays Portable Text, and
-whether custom block types exist that the current renderer would drop.
+**Still partly open:** `publishedAt` was not recoverable from the rendered page
+(it only ever appeared as a sort key in the listing query), so dates are set to a
+placeholder and need the Sanity export (G1) to resolve properly.
 
 ---
 

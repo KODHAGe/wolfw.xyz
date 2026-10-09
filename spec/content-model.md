@@ -118,7 +118,7 @@ Not part of the Sanity model. Full inventory in `extract/pass-a/content.md`.
 | Home page copy and links | `index.js:10-27` | 1 title, 2 lines prose, 7 links |
 | CV identity block | `cv.js:19-21` | name, 3 descriptor lines, location |
 | CV history | `cvList.js:9-95` | 3 sections, 12 active entries, 2 commented out |
-| Facts array | `facts.js:56-94` | 36 entries |
+| Facts array | `facts.js:56-94` | 37 entries |
 
 **This is the model's real shape.** Four of the site's five pages are backed by
 CMS content; the identity-bearing content — everything a CV is *for* — is hardcoded

@@ -314,7 +314,7 @@ facts are exhausted the button becomes a mailto link and the message changes.
 
 ### R7.1 Facts content
 
-36 facts in `facts.js:56-94`. Move to data, not JSX.
+37 facts in `facts.js:56-94`. Move to data, not JSX.
 
 ### R7.2 State mutation is direct (defect)
 

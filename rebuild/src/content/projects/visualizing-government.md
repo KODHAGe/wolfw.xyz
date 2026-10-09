@@ -1,11 +1,11 @@
 ---
 title: "Visualizing government"
 slug: "visualizing-government"
-categories: ["Web"]
-publishedAt: 2019-11-02
-summary: "Making public-sector data legible."
+categories: ["Web", "Visualization"]
+publishedAt: 2020-01-01
+summary: "As a part of the State Treasury data analyst team, our mission is to make the wealth of data produced by different processes of government accessible and unders"
 hasVideo: false
 private: false
 ---
 
-Work on making government data understandable to the people it describes.
+Using methods of UX, UI and data visualization I have produced data-driven products that have been published as part of ministry reports, utilized as tools for human resource development or become parts of the developing https://www.exploreadministration.fi/ -portal.
