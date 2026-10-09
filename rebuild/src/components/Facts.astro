@@ -1,0 +1,132 @@
+---
+/*
+ * Facts widget. recovered.md#R7.
+ *
+ * One of exactly two islands on the site (the other is the password gate).
+ *
+ * Two defects in the legacy implementation are fixed rather than reproduced,
+ * per desired.md#D5:
+ *
+ *  1. Division by zero. facts.js:20 and facts.js:44 both computed
+ *     (n-1)/(facts.length-1). With one fact that is /0. The progress is now
+ *     computed against a guard, and a single-fact list is legal — the schema in
+ *     content.config.ts enforces min(2) but the widget must not depend on that.
+ *  2. In-place state mutation. facts.js:17 did progress.push(numba) on a state
+ *     array, with the author's own comment "okay man this is ugly". Now a new
+ *     array per update.
+ *
+ * Behaviour preserved: facts reveal one at a time, never repeat within a
+ * session, and the widget exhausts into a mailto invitation rather than looping.
+ */
+export interface Props {
+  facts: string[];
+}
+
+const { facts } = Astro.props;
+---
+
+<div class="facts" data-facts={JSON.stringify(facts)}>
+  <p>
+    Hi, I'm Wolf Wikgren. Below you can get to know some truths (true at the time
+    of writing, not aiming for permanence) about me.
+  </p>
+
+  <p class="fact" data-fact aria-live="polite">{facts[0]}</p>
+
+  <p>
+    <button class="btn btn--solid" type="button" data-advance>
+      get to know better
+    </button>
+    <a class="btn btn--solid" href="mailto:wolf@grh.fi" data-done hidden>
+      send me some some facts
+    </a>
+  </p>
+
+  <p class="facts-progress" data-progress aria-hidden="true"></p>
+</div>
+
+<script>
+  interface FactsState {
+    facts: string[];
+    seen: number[];
+    done: boolean;
+  }
+
+  function init(root: HTMLElement) {
+    // Guard against double-init: the script both queries on first evaluation
+    // and re-runs on astro:page-load. Without this the advance handler is
+    // attached twice and every click advances two facts.
+    if (root.dataset.ready === "true") return;
+    root.dataset.ready = "true";
+
+    const facts: string[] = JSON.parse(root.dataset.facts ?? "[]");
+    if (facts.length === 0) return;
+
+    const factEl = root.querySelector<HTMLElement>("[data-fact]")!;
+    const advanceBtn = root.querySelector<HTMLButtonElement>("[data-advance]")!;
+    const doneLink = root.querySelector<HTMLElement>("[data-done]")!;
+    const progressEl = root.querySelector<HTMLElement>("[data-progress]")!;
+
+    const state: FactsState = { facts, seen: [], done: false };
+
+    /*
+     * The progress bar is the ten-cell glyph the legacy site drew:
+     * "=" repeated floor((n-1)/(len-1)*10), "—" for the remainder.
+     *
+     * The division is guarded. Legacy divided by (facts.length - 1) unguarded
+     * (facts.js:20, facts.js:44); with a single fact that is 0/0 and the
+     * progress renders NaN.
+     */
+    function render() {
+      const total = state.facts.length;
+      const shown = state.seen.length;
+      const ratio = total <= 1 ? 1 : (shown - 1) / (total - 1);
+      const filled = Math.floor(Math.min(Math.max(ratio, 0), 1) * 10);
+      const pct = Math.floor(ratio * 100);
+
+      progressEl.textContent = `[${"=".repeat(filled)}${"—".repeat(10 - filled)}] ${
+        state.done ? "100" : pct
+      }%`;
+    }
+
+    function show(text: string) {
+      // aria-live already set on the element; swap text so screen readers announce.
+      factEl.textContent = text;
+    }
+
+    function advance() {
+      if (state.done) return;
+
+      const unseen = state.facts
+        .map((_, i) => i)
+        .filter((i) => !state.seen.includes(i));
+
+      if (unseen.length === 0) {
+        state.done = true;
+        show("You've attained all facts available. Now let me know something about you.");
+        advanceBtn.hidden = true;
+        doneLink.hidden = false;
+        render();
+        return;
+      }
+
+      // Legacy rejection-sampled randomIntBetween (facts.js:13-16) to avoid
+      // repeats. Same intent; picking from the unseen set directly is simpler
+      // and cannot loop.
+      const pick = unseen[Math.floor(Math.random() * unseen.length)];
+      // New array, not a mutation of the old one.
+      state.seen = [...state.seen, pick];
+      show(state.facts[pick]);
+      render();
+    }
+
+    advanceBtn.addEventListener("click", advance);
+    render();
+  }
+
+  // Astro swaps the body on navigation, so init per page view rather than once.
+  document.querySelectorAll<HTMLElement>(".facts").forEach(init);
+  document.addEventListener("astro:page-load", () => {
+    document.querySelectorAll<HTMLElement>(".facts").forEach(init);
+  });
+</script>

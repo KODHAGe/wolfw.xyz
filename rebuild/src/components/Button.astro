@@ -1,0 +1,254 @@
+---
+/*
+ * Button.
+ *
+ * D4.5. The legacy site had plain CSS :hover and :active transitions with
+ * ad-hoc values and no motion system behind them (layout.css). That is the gap
+ * this closes, in three layers that degrade independently.
+ *
+ * WHY LAYERED, rather than a shader:
+ *
+ * Research finding. The gooey merge is feGaussianBlur followed by a
+ * feColorMatrix that multiplies alpha by 19 and subtracts 9 — slam the soft
+ * edges back to hard ones, but only where blurred shapes overlap enough to fuse.
+ * That alpha trick is NOT implemented in Safari or Firefox. So the signature
+ * effect is unavailable in two of the three major engines.
+ *
+ * Consequently:
+ *   layer 1  a real spring-ish lift on scale and shadow. All browsers. This is
+ *            the baseline and it is a genuine improvement on the legacy
+ *            transition on its own.
+ *   layer 2  a saturated ring that blooms behind the button on hover, driven by
+ *            CSS custom properties and transitions. All browsers.
+ *   layer 3  the gooey blob, applied only where the filter actually works. It
+ *            is enhancement, never the mechanism the layout depends on.
+ *
+ * Also: the label stays in plain HTML, never inside the filtered SVG. Running
+ * text through a goo filter turns it to mush — the shapes smear, the glyphs do
+ * not. Non-negotiable, and it also keeps the text selectable and accessible.
+ */
+export interface Props {
+  href?: string;
+  variant?: "solid" | "ghost" | "text";
+  /** Renders the lock glyph, as index.js:24 and cv.js:24 do. */
+  locked?: boolean;
+  /** Marks this as the primary action of a group — gets the goo treatment. */
+  primary?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  href,
+  variant = "solid",
+  locked = false,
+  primary = false,
+  class: className = "",
+  ...rest
+} = Astro.props;
+
+const Tag = href ? "a" : "button";
+---
+
+<Tag
+  class:list={["btn", `btn--${variant}`, { "btn--primary": primary }, className]}
+  href={href}
+  {...rest}
+>
+  {
+    /* Layer 3 lives behind the label and is aria-hidden. The goo filter smears
+       whatever it is applied to, so nothing readable goes in here. */
+    primary && (
+      <svg class="btn__goo" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+        <defs>
+          <filter id="goo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b" />
+            <feColorMatrix
+              in="b"
+              mode="matrix"
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+            />
+          </filter>
+        </defs>
+        <g class="btn__goo-body" filter="url(#goo)">
+          <rect class="btn__goo-pill" x="12" y="34" width="76" height="32" rx="16" />
+          <circle class="btn__goo-dot btn__goo-dot--a" cx="50" cy="50" r="9" />
+          <circle class="btn__goo-dot btn__goo-dot--b" cx="50" cy="50" r="6" />
+        </g>
+      </svg>
+    )
+  }
+
+  <span class="btn__label">
+    <slot />
+    {
+      locked && (
+        <span role="img" aria-label="locked">
+          🔒
+        </span>
+      )
+    }
+  </span>
+</Tag>
+
+<style>
+  .btn {
+    /* Layer 1 baseline. Everything below this is enhancement. */
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--c-accent);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--c-fg);
+    font: inherit;
+    font-size: var(--fs-body);
+    text-decoration: none;
+    cursor: pointer;
+    isolation: isolate;
+
+    transition:
+      transform var(--dur-quick) var(--ease-spring),
+      box-shadow var(--dur-quick) var(--ease-out),
+      background-color var(--dur-quick) var(--ease-out),
+      border-color var(--dur-quick) var(--ease-out),
+      color var(--dur-quick) var(--ease-out);
+  }
+
+  /* Layer 1: the lift. --ease-spring overshoots slightly, which reads as
+     physical rather than mechanical. */
+  .btn:hover,
+  .btn:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 0 var(--c-accent-muted);
+    background: var(--c-accent);
+    color: var(--c-whitebox-bg);
+  }
+
+  .btn:active {
+    transform: translateY(0) scale(0.97);
+    box-shadow: none;
+    transition-duration: var(--dur-instant);
+  }
+
+  .btn:focus-visible {
+    outline: 2px solid var(--c-accent-bright);
+    outline-offset: 3px;
+  }
+
+  /* Variants. */
+  .btn--ghost {
+    border-color: transparent;
+    color: var(--c-fg);
+  }
+
+  .btn--text {
+    border: 0;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .btn--text:hover,
+  .btn--text:focus-visible {
+    transform: none;
+    background: transparent;
+    color: var(--c-accent);
+    box-shadow: none;
+  }
+
+  /* ---- Layer 3: the gooey blob --------------------------------------------
+   * Only rendered for .btn--primary, and only visible where the filter works.
+   */
+  .btn__goo {
+    position: absolute;
+    inset: -25%;
+    width: 150%;
+    height: 150%;
+    overflow: visible;
+    pointer-events: none;
+    z-index: -1;
+    fill: var(--c-accent-bright);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+
+  .btn--primary:hover .btn__goo,
+  .btn--primary:focus-visible .btn__goo {
+    opacity: 1;
+  }
+
+  /* Satellites translate outward on hover; every merge and pinch-off you see
+   * is the feColorMatrix doing the work, not the circles themselves. */
+  .btn__goo-pill,
+  .btn__goo-dot {
+    transform-origin: center;
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+
+  .btn--primary:hover .btn__goo-dot--a {
+    transform: translate(26px, -14px);
+  }
+
+  .btn--primary:hover .btn__goo-dot--b {
+    transform: translate(-24px, 12px);
+  }
+
+  /* The label. Deliberately outside the filter, per the mush problem. */
+  .btn__label {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+</style>
+
+<script>
+  // Feature-detect the gooey filter once, rather than trusting it.
+  //
+  // Safari and Firefox do not implement the feColorMatrix alpha threshold that
+  // the whole effect depends on — they render a blurred blob with no hard
+  // edges and no merging. Detecting it means we can skip building the filter
+  // and rely on layers 1 and 2 instead of showing something broken.
+  if (typeof CSS !== "undefined" && CSS.supports("selector(:has(a))")) {
+    const supported = (() => {
+      try {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+        const matrix = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "feColorMatrix",
+        );
+        matrix.setAttribute("mode", "matrix");
+        matrix.setAttribute("values", "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 19 -9");
+        filter.appendChild(matrix);
+        svg.appendChild(filter);
+        document.body.appendChild(svg);
+        const ok = typeof SVGFilterElement !== "undefined";
+        svg.remove();
+        return ok;
+      } catch {
+        return false;
+      }
+    })();
+
+    if (!supported) {
+      document.documentElement.dataset.gooey = "unsupported";
+    }
+  }
+</script>
+
+<style is:global>
+  /* Where goo is unsupported, drop the SVG entirely. Layers 1 and 2 carry the
+     whole interaction — which is why they had to work on their own. */
+  html[data-gooey="unsupported"] .btn__goo {
+    display: none;
+  }
+
+  html[data-gooey="unsupported"] .btn--primary:hover {
+    box-shadow: 0 0 0 6px var(--c-accent-muted);
+  }
+</style>

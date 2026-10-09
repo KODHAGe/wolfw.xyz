@@ -1,0 +1,48 @@
+---
+/*
+ * Project detail. recovered.md#R2.2, R2.3.
+ *
+ * The legacy site created these dynamically in gatsby-node.js, one page per
+ * Sanity project, path from slug.current, passing title/body/video via page
+ * context. Astro's rest route does the same thing from the content collection.
+ *
+ * recovered.md#R2.3 — video renders only when present (projectPage.js:19 guards
+ * on it), and body content renders at width 640. Preserved.
+ */
+import { getCollection, render } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  const projects = await getCollection("projects", ({ data }) => !data.private);
+  return projects.map((project) => ({
+    params: { slug: project.data.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+---
+
+<Layout title={project.data.title}>
+  <a class="backlink" href="/">← BACK</a>
+
+  <h1>{project.data.title}</h1>
+
+  <p class="listtitle">
+    {project.data.categories.join(", ")} ·{" "}
+    {project.data.publishedAt.toISOString().slice(0, 10)}
+  </p>
+
+  {
+    project.data.hasVideo && (
+      <p>
+        <em>Video available on request.</em>
+      </p>
+    )
+  }
+
+  <div class="project-body">
+    <Content />
+  </div>
+</Layout>

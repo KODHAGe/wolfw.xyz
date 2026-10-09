@@ -1,0 +1,333 @@
+/*
+ * Global styles.
+ *
+ * Ported from the legacy layout.css (142 lines, unspec'd in the spec —
+ * gaps.md#G4). Selector names and structure are preserved from the recovered
+ * zone so parity checking against behavior.feature stays meaningful.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-mono);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--c-fg);
+  background: transparent;
+  /* Legacy had no scroll-driven behaviour. D4.2 adds it: reduced-motion is
+     already neutralised in tokens.css. */
+  scroll-behavior: smooth;
+}
+
+h1,
+h2,
+h3 {
+  line-height: var(--lh-tight);
+  font-weight: 400;
+  margin: 0 0 var(--space-4);
+}
+
+h1 {
+  font-size: var(--fs-title);
+}
+
+p {
+  max-width: var(--measure);
+  margin: 0 0 var(--space-3);
+}
+
+a {
+  color: var(--c-fg);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--c-accent-bright);
+  outline-offset: 3px;
+}
+
+/* ---- Layout modes. recovered.md#R8.1 -------------------------------------- */
+
+main {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-7);
+}
+
+/* The alternate mode used by /about, /cv and the password gate. */
+main.whitebox {
+  background: var(--c-whitebox-bg);
+  border: 1px solid var(--c-accent-muted);
+}
+
+/* ---- Home page. recovered.md#R3 ------------------------------------------ */
+
+.site-title {
+  margin-bottom: var(--space-4);
+}
+
+.description {
+  font-size: var(--fs-large);
+  margin-bottom: var(--space-5);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.double-button {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+/* ---- Back link. recovered.md#R2.4 --------------------------------------- */
+
+.backlink {
+  display: inline-block;
+  margin-bottom: var(--space-4);
+  text-decoration: none;
+  transition: transform var(--dur-quick) var(--ease-out);
+}
+
+.backlink:hover {
+  transform: translateX(-4px);
+}
+
+/* ---- Project lists ------------------------------------------------------- */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+}
+
+.listlink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.listlink img {
+  border: 1px solid var(--c-accent-muted);
+  max-width: 100%;
+  height: auto;
+}
+
+.listtitle {
+  margin-top: var(--space-2);
+  font-size: var(--fs-small);
+  letter-spacing: 0.02em;
+}
+
+/* ---- CV. recovered.md#R4 ------------------------------------------------- */
+
+.cvlist {
+  margin-top: var(--space-5);
+}
+
+.cvlisttitle {
+  margin: var(--space-5) 0 var(--space-3);
+  padding-bottom: var(--space-1);
+  border-bottom: 1px solid var(--c-accent-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: var(--fs-small);
+}
+
+.cvlistitem {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: var(--space-1) var(--space-4);
+  padding: var(--space-3) 0;
+}
+
+.timetag,
+.company,
+.position {
+  font-size: var(--fs-small);
+}
+
+.company {
+  color: var(--c-accent);
+}
+
+.break-after {
+  height: var(--space-4);
+}
+
+.print-button {
+  margin-top: var(--space-5);
+}
+
+.caption {
+  font-size: var(--fs-small);
+  color: color-mix(in srgb, var(--c-fg) 65%, transparent);
+  margin-bottom: var(--space-4);
+}
+
+/* ---- Facts widget. recovered.md#R7 --------------------------------------- */
+
+.fact {
+  font-size: var(--fs-large);
+  min-height: 3lh;
+}
+
+.facts-progress {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+}
+
+/* ---- Project body. projectPage.css port ---------------------------------- */
+
+.project-body {
+  max-width: var(--measure);
+}
+
+.project-body img {
+  max-width: 100%;
+  height: auto;
+}
+
+.project-body pre {
+  overflow-x: auto;
+  padding: var(--space-3);
+  background: var(--c-accent-muted);
+}
+
+/* ---- Responsive.
+ * The legacy site had exactly one breakpoint at 600px (gaps.md#G7). Kept, so
+ * the mobile layout stays comparable during parity checking.
+ * ------------------------------------------------------------------------- */
+
+@media screen and (max-width: 600px) {
+  main {
+    padding: var(--space-4) var(--space-3) var(--space-6);
+  }
+
+  .cvlistitem {
+    grid-template-columns: 1fr;
+  }
+
+  .double-button {
+    flex-wrap: wrap;
+  }
+}
+
+/* ---- Print. recovered.md#R4.4, gaps.md#G10 -------------------------------
+ * The legacy site had @page and @media print blocks; the CV is genuinely meant
+ * to be printed, so the print button is real functionality rather than
+ * decoration.
+ * ------------------------------------------------------------------------- */
+
+@page {
+  margin: 2cm;
+}
+
+@media print {
+  /* The background shader and every interactive affordance have no meaning on
+   * paper. The legacy print stylesheet suppressed them; so does this. */
+  #background,
+  .btn,
+  .backlink,
+  .print-button {
+    display: none !important;
+  }
+
+  main {
+    max-width: none;
+    padding: 0;
+  }
+
+  main.whitebox {
+    background: none;
+    border: 0;
+  }
+
+  /* Keep CV entries from splitting across pages. */
+  .cvlistitem {
+    break-inside: avoid;
+    padding: var(--space-2) 0;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: var(--fs-small);
+  }
+}
+
+/* ---- View transition opt-in. D4.6 ---------------------------------------
+ * Cross-document view transitions are Chromium and Safari 18.2+ only. Firefox
+ * does not implement them at all.
+ *
+ * Two independent fallbacks, in order:
+ *   1. Where the native API exists, these rules drive it.
+ *   2. Where it does not, Astro's <ClientRouter /> simulates transitions
+ *      (the page emits astro-view-transitions-fallback="animate").
+ *   3. Where JS is off entirely, plain navigation. A valid outcome, not a
+ *      failure.
+ *
+ * The reduced-motion block opts OUT of the transition entirely rather than
+ * making it fast, so a visitor who asked for less motion never gets an animated
+ * page change at all.
+ * ------------------------------------------------------------------------- */
+
+@view-transition {
+  navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}
+
+/* ---- View transition choreography. D4.6 ----------------------------------
+ * Shared-axis style rather than the default cross-fade: the outgoing page
+ * leaves on one axis, the incoming arrives on the other. Durations come from
+ * tokens so navigation feels like the same system as in-page motion.
+ * ------------------------------------------------------------------------- */
+
+@keyframes slide-out-left {
+  to {
+    opacity: 0;
+    transform: translateX(-2rem);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(2rem);
+  }
+}
+
+::view-transition-old(root) {
+  animation: 240ms var(--ease-in-out) both slide-out-left;
+}
+
+::view-transition-new(root) {
+  animation: var(--dur-transition) var(--ease-out) 60ms both slide-in-right;
+}
+
+/* Reduced motion: no axis movement, just a fast cross-fade. tokens.css has
+ * already collapsed the durations to 1ms, so these inherit it. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}

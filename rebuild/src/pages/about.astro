@@ -1,0 +1,33 @@
+---
+/*
+ * About. recovered.md#R5 (no), R7.
+ *
+ * recovered.md#R8.1 — this page uses the whitebox layout mode, as does /cv and
+ * the password gate. about.js:9.
+ *
+ * gaps.md#G5 — the legacy about.js queried `_rawBio` and no component ever read
+ * it. The live page rendered image, caption and the facts widget, and no prose.
+ * That is reproduced here rather than "fixed", because inventing a bio section
+ * would be a desired-zone change pretending to be parity. Recorded in
+ * desired.md#D4.8-adjacent open questions.
+ */
+import { getEntry } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+import Facts from "../components/Facts.astro";
+
+const factsEntry = await getEntry("facts", "wolf");
+const facts = factsEntry?.data.items ?? [];
+---
+
+<Layout title="about wolf" whitebox>
+  <a class="backlink" href="/">← BACK</a>
+
+  <h1>About me</h1>
+
+  <!-- recovered.md — the disclaimer caption, verbatim (about.js:19) -->
+  <p class="caption">
+    (DISCLAIMER: Usually my beard ain't this hobo, my hair ain't that nappy.)
+  </p>
+
+  <Facts facts={facts} />
+</Layout>

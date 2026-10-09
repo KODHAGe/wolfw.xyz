@@ -1,0 +1,19 @@
+---
+/*
+ * 404. recovered.md — verified live: /this-does-not-exist returns 404 and offers
+ * a link to the front page (404.js:11).
+ *
+ * Note the legacy 404 had no back link (recovered.md#R2.4), unlike every other
+ * subpage. Preserved rather than normalised.
+ */
+import Layout from "../layouts/Layout.astro";
+import Button from "../components/Button.astro";
+---
+
+<Layout title="404: Not found">
+  <h1>404 no good</h1>
+  <p>Sorry, this doesn't exist.</p>
+  <p>
+    <Button href="/" primary>to the front page</Button>
+  </p>
+</Layout>

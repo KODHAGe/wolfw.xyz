@@ -1,0 +1,73 @@
+---
+/*
+ * Layout.
+ *
+ * Preserves recovered.md#R8: the two layout modes (whitebox toggles a class on
+ * <main>, layout.js:8-18), the background as a sibling of main rather than a
+ * child (layout.js:13-14), the single typeface, and the SEO title template
+ * (seo.js:36).
+ *
+ * D4.6 — View Transitions. Cross-document support is Chromium and Safari 18.2+
+ * only; Firefox does not implement it at all. So this does NOT rely on the API.
+ * Astro's <ClientRouter /> simulates transitions where the native API is
+ * missing, and plain navigation remains a valid outcome everywhere.
+ */
+import { ClientRouter } from "astro:transitions";
+import Background from "../components/Background.astro";
+import "../styles/tokens.css";
+import "../styles/global.css";
+
+export interface Props {
+  title: string;
+  description?: string;
+  whitebox?: boolean;
+}
+
+const {
+  title,
+  description = "I am Wolf. I make (mainly) web happen - both beautiful and useful.",
+  whitebox = false,
+} = Astro.props;
+
+const siteTitle = "wolfw.xyz";
+const fullTitle = `${title} | ${siteTitle}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:creator" content="@KODHAGe" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icons/icon-192x192.png" />
+
+    {/*
+      D4.6 — the @view-transition opt-in lives in global.css, not here.
+      An inline <style> in an Astro component is run through scoped-CSS
+      processing, which silently drops the at-rule. It needs to be in a real
+      stylesheet to reach the browser.
+    */}
+  </head>
+
+  <body>
+    <Background />
+    <ClientRouter />
+
+    <div>
+      <main class:list={[whitebox && "whitebox"]}>
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>

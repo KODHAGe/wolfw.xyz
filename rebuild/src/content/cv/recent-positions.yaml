@@ -1,0 +1,98 @@
+# recovered.md#R4.2 — section 1 of 3
+# Extracted from cvList.js:9-70. The two entries marked hidden:true are the
+# pair that existed as a JSX comment in the legacy source (recovered.md#R4.3):
+# preserved as content, excluded from output.
+section: "Recent positions"
+order: 0
+items:
+  - dates: "2020 – present"
+    position: "Data analyst | Team lead"
+    company: "The State Treasury of Finland"
+    clients: "Clients: Government ministries of Finland"
+    keywords: ""
+    description: "Leading the data analytics team at the State Treasury in a role between practise and management."
+    bullets:
+      - "Proactively identifying and addressing potential cases for data analysis"
+      - "Leading visual analytics, data visualization and data product/ux design competencies"
+      - "Supporting in data engineering/analytics development related technical tasks"
+      - "Responsible for client communications with the government ministries"
+      - "Developing and designing custom visualizations in react/d3/highcharts and standard based dashboards in PowerBI"
+      - "Developing the iterative modes of work within the team (Scrum-inspired)"
+      - "Championing applied design thinking in client work (iterative define -> ideate -> prototype -> deliver -phases)"
+    hidden: false
+
+  - dates: "2017 – 2020"
+    position: "Designer ∨ Developer"
+    company: "Frantic"
+    clients: "Clients: SOK, Kemira, Pihlajalinna, Posti, VTV"
+    keywords: ""
+    description: "Working as a designer/developer in both consulting and project roles in a digital agency setting."
+    bullets:
+      - "UI Design of multiple projects in several fields, ranging from mobile apps to process management software"
+      - "UX/Interaction design through prototyping and an iterative process - primarily high fidelity interactive prototypes (UXPin, InVision, Sketch, Figma, Framer etc)"
+      - "UX/Product design research experience, designing surveys and interviews, developing prototypes, running workshops"
+      - "Developing web based apps in PHP/JavaScript, ranging from high-definition prototypes to production ready components (Wordpress, React, Vue.js, vanilla js)"
+      - "Responsible for client communication and project management in consultancy roles"
+      - "Developing my ability to learn and adapt very quickly into different roles, teams, requirements and sets of users"
+    hidden: false
+
+  - dates: "2015 – 2017"
+    position: "Development specialist (part-time)"
+    company: "STT"
+    clients: ""
+    keywords: ""
+    description: "Continued but separate contract working part-time during further university studies, with main responsibility over an internal analytics tool project and news robotics tests."
+    bullets:
+      - "End-to-end ownership of design and development for a unique news throughput analytics service from co-developed concept to finalized product prototype"
+      - "Iterative process of building prototypes and experimental designs in code, testing, gathering feedback and forming insights into new features"
+      - "Visual/User interface design in Adobe tools"
+      - "Building tools for explorative visual analysis with visualization tools like Google Charts, Highcharts, d3"
+      - "Collaboration with data providers, custom API-integrations"
+      - "Front-end development in JavaScript (Ember), back-end in heroku (node.js)"
+      - "Building prototypes of news robots for automatic text production"
+      - "Handover of final prototype to production, that would later go on to receive <a href=\"https://stt.fi/stt-tarkkailija-dni-rahoitus/\">Google Digital News Initiative funding (in Finnish)</a>"
+    hidden: false
+
+  - dates: "2014 – 2015"
+    position: "Digital service developer/designer"
+    company: "STT"
+    clients: "Clients: Iltalehti, KSML, Apu, Veikkaus"
+    keywords: ""
+    description: "Research, development and design of new visualization based tools and products for STT media service clients."
+    bullets:
+      - "Responsible for UX/UI and code implementation of data visualization tools"
+      - "Working in a small, agile R&D-type team, designing and developing experimental products"
+      - "Data visualization with tools like QGis, Mapbox, Leaflet, jQuery, custom javascript"
+    hidden: false
+
+  - dates: "2013 – 2014"
+    position: "Data journalist, interactive graphic designer"
+    company: "STT"
+    clients: ""
+    keywords: ""
+    description: "From internship to thesis project to full-time position. Pioneering projects of digital journalism and online data visualization as the first employee of the STT data newsdesk."
+    bullets:
+      - "Designing interactive news graphics with a focus on data visualization"
+      - "Working together with other journalists to identify interesting topics or points of view through data"
+      - "Synthesizing and visualizing complex topics to make them accessible to readers"
+    hidden: false
+
+  # recovered.md#R4.3 — present in the source as a commented-out JSX block
+  # (cvList.js:65-70). Carried as content, not rendered.
+  - dates: "2012 – 2012"
+    position: "Intern of everything"
+    company: "TWO"
+    clients: "Projects for: Nokia, Eevil Stöö, Disco Dislocated"
+    keywords: "concept design, photography, event production"
+    description: "Internship at the good people of creative agency TWO (RIP). Photography, concept development, event organizing, graphic & web design, coffee brewing, general entrepreneurship."
+    bullets: []
+    hidden: true
+
+  - dates: "2012 – present"
+    position: "Digital designer"
+    company: "GRH"
+    clients: ""
+    keywords: ""
+    description: "The digital part of a two person freelance design team, currently under the moniker of GRH – the latest in a line of freelance web design work & more experimental output since my late teens."
+    bullets: []
+    hidden: true

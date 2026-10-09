@@ -1,0 +1,13 @@
+---
+import ProjectList from "../components/ProjectList.astro";
+
+// recovered.md#R1.3 — work.js:25 filtered categories in ["Web", "Visualization"],
+// sorted by publishedAt descending. Both listings are now one component, so
+// they cannot drift the way the duplicated GraphQL queries did.
+---
+
+<ProjectList
+  categories={["Web", "Visualization"]}
+  title="projects"
+  heading="Projects: Work"
+/>

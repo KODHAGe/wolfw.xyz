@@ -1,0 +1,68 @@
+---
+/*
+ * Project listings. recovered.md#R1.3, R1.4.
+ *
+ * One type, two pages, partitioned by category. The legacy queries were
+ * byte-identical copies differing only in the filter (work.js:25 vs art.js:25),
+ * which is why roughly a third of requested fields were dead. Here both pages
+ * share one component and one query, differing only in a filter passed as a
+ * prop — so they cannot drift apart again.
+ */
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+
+export interface Props {
+  /** Which categories this page shows. */
+  categories: Array<"Web" | "Visualization" | "Experiment">;
+  title: string;
+  heading: string;
+}
+
+const { categories, title, heading } = Astro.props;
+
+// Sanity filtered server-side with elemMatch/in. Astro content collections filter
+// in memory at build time — same result, and it removes the duplicated query.
+const all = await getCollection("projects");
+const projects = all
+  .filter((p) => p.data.categories.some((c) => categories.includes(c)))
+  .filter((p) => !p.data.private) // D3.3 — never render private work
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+---
+
+<Layout title={title}>
+  <a class="backlink" href="/">← BACK</a>
+
+  <h1>{heading}</h1>
+
+  <div class="list">
+    {
+      projects.length === 0 && <p>No projects in this category yet.</p>
+    }
+
+    {
+      projects.map((project) => (
+        <a class="listlink" href={`/${project.data.slug}`}>
+          {project.data.mainImage && (
+            <img
+              src={project.data.mainImage.src}
+              alt=""
+              width="700"
+              height="400"
+              loading="lazy"
+            />
+          )}
+
+          <div class="listtitle">
+            {/* recovered.md#R1.4 — category prefix, and a lock when the title
+                contains "agency". The legacy isAgency() helper is reproduced
+                exactly, case-insensitive substring. */}
+            <span>
+              {project.data.title.toLowerCase().includes("agency") ? "🔒 " : ""}
+            </span>
+            {project.data.categories[0]}: {project.data.title} →{" "}
+          </div>
+        </a>
+      ))
+    }
+  </div>
+</Layout>

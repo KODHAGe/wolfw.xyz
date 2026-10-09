@@ -1,0 +1,20 @@
+# recovered.md#R4.2 — section 3 of 3. Extracted from cvList.js:86-93.
+# In the legacy source this was a single CvListItem with no attributes, whose
+# body was five prose paragraphs. Split into bullets here so the schema stays
+# uniform across sections; the prose is unchanged.
+section: "Other more/less relevant skills"
+order: 2
+items:
+  - dates: ""
+    position: ""
+    company: ""
+    clients: ""
+    keywords: ""
+    description: ""
+    bullets:
+      - "I am adept at several digital design tools, like Sketch, Figma &amp; Adobe Suite and always interested to add more of these into my skillset, taking pride in being quick to adapt and learn."
+      - "I am familiar with different design methodologies and very interested in the theory behind them. I particularly enjoy building prototypes, conducting user interviews, surveys, fieldwork and applying quantitative analytical skills to design and design skills to quantitative analysis."
+      - "I am a proficient front-end web developer, experienced in building software with javascript based tools such as React, Vue and Angular. When needed, diving into the back-end is not unfamiliar with applied experience in node.js and PHP."
+      - "I am fluent in Finnish, Swedish and English at a native level (both written and oral), with a Cambridge Professional English-certificate to vouch for the third one."
+      - "In my free time I enjoy making art in different mediums, taking (mediocre) photographs, traveling to learn about different cultures, reading both fact and fiction, and the freedom of bicycling, running or hiking."
+    hidden: false

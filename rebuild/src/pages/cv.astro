@@ -1,0 +1,91 @@
+---
+/*
+ * CV. recovered.md#R4.
+ *
+ * This page was the reason the content architecture is worth changing. The CV —
+ * the entire point of the site — lived in JSX (cvList.js), requiring a developer
+ * and a rebuild to amend. Sanity held the projects. desired.md#D1.1 moves both
+ * to files; here the CV entries come from a content collection, so the schema
+ * validates them.
+ *
+ * Gated. See PasswordGate for the honest statement of what that means: the
+ * gate controls rendering, not availability. The content is in the page payload.
+ */
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+import PasswordGate from "../components/PasswordGate.astro";
+
+// D3.2 — password from PUBLIC_CV_PASSWORD. The legacy site read
+// process.env.GATSBY_NO_SECRET while the deploy config defined
+// NOT_VERY_SECRET; the names never matched, so the theme received undefined
+// and the gate blocked everyone permanently. PasswordGate renders a visible
+// misconfiguration state when this is empty rather than silently blocking.
+const password = import.meta.env.PUBLIC_CV_PASSWORD ?? "";
+
+const sections = (await getCollection("cv")).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Layout title="curriculum vitae" whitebox>
+  <a class="backlink" href="/">← BACK</a>
+
+  <h1>CV</h1>
+
+  <PasswordGate password={password} />
+
+  {/*
+    The CV markup, rendered server-side into an inert template. The gate clones
+    it when the password checks out. This preserves the legacy behaviour exactly:
+    the content is in the payload either way, and the gate decides what renders.
+
+    If this ever needs to stop shipping the content, that is a server-side render
+    behind auth — a different architecture, and a desired.md decision.
+  */}
+  <template id="cv-template">
+    <div>
+      <!-- recovered.md#R4.1 — identity block, verbatim from cv.js:19-21 -->
+      <p>
+        <strong>Wolf Wikgren</strong><br />
+        designer, developer, data analyst<br />
+        interface, experience, data and visualization<br />
+        helsinki, finland
+      </p>
+
+      {
+        sections.map((section) => (
+          <div class="cvlist">
+            {/* recovered.md#R4.2 — three titled sections */}
+            <h2 class="cvlisttitle">{section.data.section}</h2>
+
+            {section.data.items.map((item) =>
+              /* recovered.md#R4.3 — the two hidden entries are preserved as
+                 content but excluded from output, exactly as the JSX comment
+                 did in the legacy site. */
+              item.hidden ? null : (
+                <div class="cvlistitem">
+                  <div class="timetag">{item.dates}</div>
+                  <div class="position">{item.position}</div>
+                  <div class="company">{item.company}</div>
+                  <div class="description">
+                    <p>{item.description}</p>
+                    {item.bullets.length > 0 && (
+                      <ul>
+                        {item.bullets.map((b) => (
+                          <li set:html={b} />
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  {item.clients && <div class="caption">{item.clients}</div>}
+                </div>
+              ),
+            )}
+          </div>
+        ))
+      }
+
+      <button class="btn btn--solid print-button" onclick="window.print()">
+        <span role="img" aria-label="print icon">🖨</span> Print
+      </button>
+    </div>
+  </template>
+</Layout>

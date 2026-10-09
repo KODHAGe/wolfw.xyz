@@ -1,0 +1,39 @@
+# recovered.md#R4.2 — section 2 of 3. Extracted from cvList.js:72-84.
+section: "Education"
+order: 1
+items:
+  - dates: "2015 - 2019"
+    position: "MA in New Media Design and Production"
+    company: "Aalto University School of Arts, Design and Architecture"
+    clients: ""
+    keywords: ""
+    description: "Graduated as Master of Arts from the Aalto Media Lab. Studies in a wide range of creative topics, with a focus on user interfaces, data visualization and design research."
+    bullets: []
+    hidden: false
+
+  - dates: "2013 – 2013"
+    position: "Erasmus exchange"
+    company: "Glasgow Caledonian University"
+    clients: ""
+    keywords: ""
+    description: "Exchange studies at the Graphic Design for Digital Media program on courses focusing on user-centered design tools and methods, user interface and user experience design."
+    bullets: []
+    hidden: false
+
+  - dates: "2011 - 2015"
+    position: "BEng. in Media Technology"
+    company: "Metropolia University of Applied Sciences"
+    clients: ""
+    keywords: ""
+    description: "Graduated with a Bachelor of Engineering degree in Media Technology, with a specialisation in digital media and content production. Heavy on practical web development, with a side of design methods, 3d-graphics and printing production."
+    bullets: []
+    hidden: false
+
+  - dates: "2008 - 2011"
+    position: "(uncompleted) B.Sci. in Computer Science"
+    company: "University of Helsinki"
+    clients: ""
+    keywords: ""
+    description: "Studies in computer science, mathematics and (most importantly) cognitive science and philosophy, that set me off a different path leading to the abandonment of the pursuit of this degree."
+    bullets: []
+    hidden: false
