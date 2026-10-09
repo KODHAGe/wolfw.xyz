@@ -70,21 +70,38 @@ Exit sequence: export the dataset, convert, verify project-for-project against
 
 ## D2 — Deployment
 
-### D2.1 Migrate off Gatsby 2
+### D2.1 Migrate off Gatsby 2 — **Astro**
 
-**Origin:** derived · **Decision:** open
+**Origin:** derived + owner · **Decision:** proposed
 
-Gatsby 2 is 2019-era, on React 16, with a build pipeline that is slow enough to
-consume meaningful free-tier build minutes. The repository has been frozen
-since **March 2022** — the live site is a redeployment of four-and-a-half-year-old
-code (see `gaps.md#G2`).
+Gatsby 2 is 2019-era, on React 16, with a build pipeline slow enough to consume
+meaningful free-tier build minutes. The repository has been frozen since
+**March 2022** — the live site is a redeployment of four-and-a-half-year-old code
+(see `gaps.md#G2`). Vercel serves it reliably and will keep doing so. The
+framework is the risk, not the host.
 
-Vercel serves it reliably and will keep doing so. The framework is the risk, not
-the host.
+Gatsby does three jobs here that a replacement must cover separately: file-based
+routing, a build-time data layer, and image optimisation.
 
-**Open question.** Gatsby is doing three distinct jobs here that a replacement
-must cover separately: file-based routing, the build-time data layer, and
-image optimisation. Only the first is easy.
+**Why Astro.** Islands architecture is the direct fit for D4's shape: static
+HTML by default, `client:*` directives opting individual components into JS.
+This site is ~95% conventional HTML with exactly two interactive elements — the
+facts widget (`R7`) and the password gate (`R5`). Both become islands;
+everything else ships zero JS.
+
+Astro's **content collections** are schema-validated, which answers two open
+items at once: they give the CV a proper home as structured data instead of JSX
+(D1.1), and they make the 285 unspec'd lines of CSS (`gaps.md#G4`) specifiable as
+tokens rather than a transcription chore.
+
+Astro also has built-in `prefers-reduced-motion` handling in its view
+transitions, which satisfies D4.4 without hand-rolling it.
+
+**Known limitation, accepted.** Astro's islands operate page-by-page, so shared
+state across routes and layout persistence during navigation are harder than in
+Next.js. For a portfolio with one interactive widget per page this is a non-issue.
+It would be a real problem for an application — recorded so the choice is not
+mismade if the site's scope grows.
 
 ### D2.2 Keep Vercel
 
@@ -170,53 +187,181 @@ the entry unless the content returns.
 
 ## D4 — Study 3: visual and interaction work
 
-### D4.1 Target: materially richer than current
+### D4.1 Target: **RESOLVED**
 
-**Origin:** owner · **Decision:** open
+**Origin:** owner, 2026-10-09 · **Decision:** resolved
 
-The site currently has effectively no animation beyond a randomly-parameterised
-SVG sine-wave background (`recovered.md#R6`). Not yet specified what "more
-advanced" means — this is the main open item in this document.
+The requirement is **interactive, GPU-accelerated, dreamy** animation. Owner
+enumeration, in priority order:
 
-### D4.2 CSS scroll-driven animations and View Transitions, first
+1. **Background** — first target, migrate to GPU
+2. **Buttons** — current hover/press animations improved
+3. **Page transitions** — "beautiful" between pages
+4. **Loading and project viewing** — "prettier"
+5. **Animated graphics replacing static images** — possible future work
 
-**Origin:** study · **Decision:** proposed
+**The finding that shapes everything below.** None of these is *stateful vector
+illustration*. All of it is shader-shaped work. Rive is a **vector graphics
+renderer** — bones, IK, mesh deformation, path interpolation. Its runtimes are
+`@rive-app/webgl` and WASM; Adobe retired Animate in Feb 2026 and Rive's own
+positioning is explicitly as the Animate replacement. Reaching for Rive to do
+shaders means going around it entirely.
 
-Cross-browser as of 2025–26, compositor-driven, zero JavaScript, and they live in
-the repository as CSS — diffable and agent-editable. Covers scroll-linked
-reveals, parallax, and cross-page transitions. Likely most of the requirement.
+So Rive is demoted from "candidate" to **escape hatch for a requirement that does
+not currently exist** (see D4.3).
 
-### D4.3 Animation assets stay text-based
+### D4.2 Four layers, one GPU tier
 
-**Origin:** study · **Decision:** proposed
+| Layer | Job | Tool | Artifact type |
+|---|---|---|---|
+| Page | structure, content, routing | Astro | `.astro` + Markdown |
+| Motion | transitions, reveals, parallax | CSS scroll-driven + View Transitions | CSS — in the repo |
+| GPU | shaders, procedural background | WebGL2 + GLSL | **GLSL — text, diffable** |
+| Vector motion | stateful 2D illustration | *only if D4.3 triggers* | asset, never spec |
 
-The constraint inherited from the migration work: artifacts must remain text and
-inspectable, or spec-as-source is lost.
+The GPU layer is text. That is what satisfies the constraint inherited from the
+migration work — artifacts must stay inspectable or spec-as-source is lost. GLSL
+qualifies; `.riv` does not.
 
-- **Lottie / dotLottie** — open format, `.lottie` ~80% smaller than raw JSON,
-  runtimes everywhere. Preferred for designer-authored vector animation.
-- **Rive** — `.riv` is proprietary binary, dual-file (editable project plus
-  compiled runtime), no open standard. Last resort. If used, it is an *asset*
-  referenced from the spec, never a spec artifact.
+### D4.3 Rive: escape hatch, not a candidate
 
-Animation parameters live in spec data; renderers stay replaceable.
+**Origin:** derived · **Decision:** escape hatch
 
-### D4.4 Reduced motion is a new obligation
+Admissible only if a requirement emerges that is genuinely *stateful vector
+motion* — an animated logo with real state transitions, a character responding
+to hover. None of D4.1's five items is that.
+
+If it is ever used, it is an **asset referenced from spec data, never a spec
+artifact** — which is what the constraint has always said. `.riv` is proprietary
+binary, dual-file (editable project plus compiled runtime), with no open
+standard, and would be an opaque blob in a repository whose premise is
+inspectable content.
+
+**Lottie/dotLottie** occupies the same niche with an open format and is the
+preferred fallback if that niche appears.
+
+### D4.4 The background is a layer-4 citizen already
 
 **Origin:** derived · **Decision:** proposed
 
-The current site has one media query at 600px and no motion handling
-(`recovered.md#G8`, `gaps.md#G7`). D4.1 adds animation, which means adding
-`prefers-reduced-motion` support. It is a requirement the legacy site does not
-meet, so it belongs in the desired zone rather than being treated as parity.
+`background.js` is 135 lines of JavaScript performing per-frame SVG DOM
+mutation — `getBBox()`, `createElementNS`, `appendChild` — to produce seven
+sine curves. That is a **CPU-bound software renderer emulating what one fragment
+shader does on the GPU**.
 
-### D4.5 Design tokens
+Migrating it is therefore not *adding* capability. It is replacing an imitation
+with the real thing, and it reduces the recovered background spec
+(`recovered.md#R6`) from a distribution table of random parameters to a shader
+whose visual output is exactly reproducible.
 
-**Origin:** study · **Decision:** open
+**In keeping with `R6`, specify it as behaviour with parameters, not as pixels:**
+frequency, amplitude, offset, grid spacing, dash pattern, and the per-element
+randomisation ranges from R6.1 become uniform values. The spec form survives the
+change of implementation; only the renderer changes.
 
-285 lines of CSS are currently unspec'd (`gaps.md#G4`), and D4 needs animation
-parameters to reference something. Extracting tokens serves both. Whether to do
-it now or carry the CSS across and re-derive later is undecided.
+### D4.5 Buttons: current state is CSS-only, target is GPU
+
+**Origin:** owner + derived · **Decision:** proposed
+
+`layout.css` already carries `.button:hover` and `.button:active` — plain CSS
+transitions. The improvement target is the *feel*: spring-based motion, a
+gooey/metaball merge where buttons sit close together, subtle displacement on
+approach.
+
+**These are the canonical shader effects** — gooey merging and magnetic pull are
+both well-established fragment-shader techniques. They are not vector-animation
+problems, which is the second reason Rive does not fit here.
+
+Implementation note: a gooey effect needs the moving elements rendered to a
+layer so neighbouring elements can merge. Decide early whether that layer is
+CSS/SVG (`filter: url(#gooey)` with `feGaussianBlur` + `feColorMatrix`, no JS)
+or a WebGL pass. **Start with the SVG filter** — it is declarative, needs no
+context, and degrades for free.
+
+### D4.6 Page transitions
+
+**Origin:** owner · **Decision:** proposed
+
+View Transitions API, cross-browser as of 2025–26, with Astro's `<ClientRouter />`
+providing fallback simulation for unsupported browsers and automatic
+`prefers-reduced-motion` handling. Free win.
+
+The "dreamy" ambition is where shader work may enter — a transition that distorts
+or blurs between pages rather than cross-fading. **Defer.** Native View
+Transitions cover the requirement adequately; a shader-based transition requires
+capturing and processing page imagery and is a large cost for an uncertain gain.
+Treat as a later experiment, not a commitment.
+
+### D4.7 Loading and project viewing
+
+**Origin:** owner · **Decision:** open
+
+Unspecified beyond "prettier". Two distinct problems:
+
+- **Loading** — a static site's loading states are navigation and progressive
+  enhancement, not data fetching. Worth deciding whether a transition is even
+  needed when pages are prerendered.
+- **Project viewing** — see D4.8.
+
+### D4.8 Animated graphics in place of static images
+
+**Origin:** owner · **Decision:** open, possible later
+
+Replacing project thumbnails and body images with animated graphics. Speculative
+— the corpus is 18 projects with existing raster assets, and this is expensive
+per item.
+
+**Note on the spec consequence.** If project images become animated, the content
+model changes shape: `mainImage` is currently a Sanity asset reference
+(`content-model.md`) and becomes a multi-variant field. That is a `D1` change as
+much as a `D4` one, and it is a reason to sequence this *after* the D1 content
+migration rather than alongside it.
+
+### D4.9 Reduced motion is a hard requirement
+
+**Origin:** derived · **Decision:** proposed
+
+Elevated from the earlier wording. The legacy site has one media query at 600px
+and no motion handling (`gaps.md#G7`). D4 adds continuous background animation,
+spring physics on buttons, and page transitions.
+
+For a visitor with vestibular sensitivity, an always-animating full-viewport
+shader is exactly the wrong thing to ship. Requirements:
+
+- `prefers-reduced-motion` honoured everywhere, including the shader — render a
+  **static** frame rather than simply a slower one
+- no infinite animation without an opt-out
+- Astro's built-in transition handling covers navigation; the GPU layer does not
+  get that for free and must implement it explicitly
+
+This belongs in the desired zone because the legacy site does not meet it. It is
+not parity.
+
+### D4.10 Design tokens
+
+**Origin:** study · **Decision:** proposed
+
+285 lines of CSS are unspec'd (`gaps.md#G4`), and every D4 effect needs
+parameters to reference — easing curves, durations, blur radii, colour ramps.
+Astro content collections give a natural home for them.
+
+Extract tokens *before* writing shader code. Without them, shader uniform values
+become magic numbers in a second, undocumented place — reproducing the exact
+problem `content-model.md` found in the Sanity queries.
+
+### D4.11 GPU context budget
+
+**Origin:** derived · **Decision:** proposed
+
+Browsers cap WebGL contexts per page (commonly 16; CanvasKit hits this in
+practice). A design with a background shader, button effects, per-project
+animations and transitions could plausibly exceed it — and the failure mode is
+a black canvas, not an exception.
+
+**Requirement:** one shared WebGL context for the whole page, with effects
+composited into it. Not one context per effect. This is the main architectural
+constraint on D4 and should be settled before implementation, not discovered
+through debugging.
 
 ---
 
@@ -242,14 +387,34 @@ in `recovered.md` marked **(defect)**; none should be silently replicated.
 
 Ordered by how much downstream work each unblocks.
 
-1. **D4.1 — what does "more advanced visuals" mean?** The largest undefined
-   item. Drives D4.2–D4.5 and most of Study 3.
-2. **D2.1 — which framework replaces Gatsby 2?** Needs to satisfy routing, a
-   build-time data layer, and image optimisation. Astro is the obvious candidate
-   for a content site with minimal interactivity; the background animation is the
-   feature most likely to argue against it.
-3. **D1.2 — where do body images live**, and how are responsive variants made?
-   Currently answered by Sanity's image CDN.
-4. **D3.3 — does the private-project guard ship now or later?** Not critical
+1. ~~**D4.1 — what does "more advanced visuals" mean?**~~ **RESOLVED 2026-10-09.**
+   Interactive GPU-accelerated work, background first, then buttons, page
+   transitions, loading and project viewing, later animated images.
+2. ~~**D2.1 — which framework replaces Gatsby 2?**~~ **RESOLVED: Astro**, with
+   content collections answering the D1.1 and G4 items at the same time.
+3. **D4.7 — what does "prettier loading and viewing" mean specifically?** The
+   last undefined visual item. Loading may be a non-problem on a prerendered
+   static site; project viewing needs a decision on whether card and detail-page
+   treatments differ.
+4. **D1.2 — where do body images live**, and how are responsive variants made?
+   Currently answered by Sanity's image CDN. Interacts with D4.8, since animated
+   project graphics change the shape of this field.
+5. **D3.3 — does the private-project guard ship now or later?** Not critical
    today, but the guard is far cheaper to add alongside the content migration
    than to retrofit.
+
+## Sequencing note
+
+**Extract design tokens (D4.10) before writing any shader code.** Every effect in
+D4 needs parameters to reference, and without tokens they become magic numbers
+in a second undocumented place — exactly the duplication
+`content-model.md` found in the Sanity queries, one layer up.
+
+**Sequence the background (D4.4) before buttons (D4.5)**, as the owner ranked
+them. It is also the lowest-risk: a single fullscreen quad establishes the shared
+WebGL context that D4.11 requires, so D4.5 is then an additive effect on
+infrastructure that is already proven rather than a parallel implementation.
+
+**Defer D4.8 (animated project graphics) until after the D1 content migration.**
+It changes the `mainImage` field shape, so doing it before D1.1 means
+specifying the shape twice.
