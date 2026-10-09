@@ -171,6 +171,23 @@ A print button calls `window.print()`. The emoji carries
 
 ## R5 — Password gate
 
+> **Intent, confirmed by the site owner 2026-10-09.** The CV is not sensitive
+> information. The gate is a **UX affordance** — "not every visitor needs to see
+> this" — not a confidentiality control. It is not a defect that the content
+> ships in a public JS bundle; that is the design working as intended.
+>
+> What this changes: R5 is a *mechanism to reproduce faithfully*, not a
+> *weakness to fix*. But the guarantee a rebuild can honestly claim is
+> "not rendered without a password", never "not readable".
+>
+> Note for the future (recorded in `desired.md`): if genuinely non-public
+> client work is ever added, **client names live in the content**, not just the
+> page — at which point UX-grade obscurity stops being sufficient and the
+> approach has to change. Content-side hiding (not publishing the document) is
+> the right first move, and it is enforceable — but only with a build-time
+> guard, because on a static build a mistakenly-published private document
+> ships silently.
+
 ### R5.1 Cookie-based, write-only
 
 Submitting the password writes a cookie and reloads. There is no read-back
@@ -213,7 +230,21 @@ else in the repo.
 - `gatsby-config.js:22` — `password: process.env.GATSBY_NO_SECRET`
 - `now.json:4` — `"NOT_VERY_SECRET": "@not_very_secret"`
 
-**Do not replicate.** Decide deliberately what protects `/cv`.
+**Not replicated.** The mechanism is intended; the broken env var name is not.
+A rebuild must have a working password, or the gate blocks everyone permanently
+— which defeats the UX purpose it exists to serve.
+
+### R5.7 The gate provides no confidentiality — by design
+
+The CV content ships in the page's public JavaScript bundle. Verified against
+the live deployment:
+
+- `live:/component---src-pages-cv-js-237d49fbf792f480e485.js` — 10,285 bytes
+- Contains `State Treasury of Finland` verbatim, no password or cookie required
+
+The gate decides what renders, not what is available. Confirmed intended — see
+the note at the head of R5. Recorded here so that no future rebuild claims a
+guarantee the original never made.
 
 ### R5.6 `/agency-work` is a stale protected path (defect)
 

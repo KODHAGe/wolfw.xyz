@@ -31,22 +31,24 @@ build.
 
 ---
 
-## G2 — Live build may not correspond to `master`
+## G2 — Live build may not correspond to `master` — **RESOLVED**
 
-**Unknown.** All `live:` citations were checked against <https://wolfw.xyz> on
-2026-10-08, but no commit SHA is exposed by the deployment. The live stylesheet
-bundle hash (`styles.16f5a2485ddb20f25f1e.css`, 4538 bytes) cannot be mapped
-back to a source commit without a build manifest.
+**Resolution (2026-10-09).** The live site and `master` agree.
 
-**Detected by.** No `sha`/`commit` metadata in the served HTML or
-`manifest.webmanifest`.
+- Last commit on `master`: `2022-03-23` ("slight cv updates")
+- Live deployment `last-modified`: `2026-10-03 07:58:59 GMT`
+- Served headers: `server: Vercel`, `x-vercel-cache: HIT`, `content-length: 10831`
+  for `/` — matching the local build
 
-**Cost to close.** Compare a distinguishing string from the current source
-against the served bundle, or ask for the deploy SHA.
+The 2026-10-03 date is a **redeployment of code last changed in March 2022**,
+not a divergence. The repository has been frozen for roughly four and a half
+years and the live site reflects exactly that source.
 
-**Rebuild must decide.** Whether "current behaviour" means the repo or the live
-site when they disagree. Throughout `recovered.md`, repo wins and divergence is
-flagged.
+**Consequence.** "Current behaviour" is now well-defined and stable, which is
+good for Study 1 — the recovered zone describes a system that has not moved.
+But it also means the site has had no maintenance in four years, so defects
+have had four years to accumulate unfixed. Expect more of them than the diff
+suggests.
 
 ---
 
@@ -108,17 +110,22 @@ renders image, caption, and the facts widget — and no prose.
 
 **Unknown.** `utils.js:14-17` defines `getQueryPassword`, parsing `?secret=` from
 the URL. Nothing in the repo calls it. Whether the installed theme plugin
-consumes it server-side — which would mean any protected page is reachable via a
-URL parameter — is unknown.
+consumes it — which would make any gated page reachable via a URL parameter —
+is unknown.
 
 **Detected by.** `grep -rl getQueryPassword src/` returns only its definition.
 
-**Cost to close.** Test `https://wolfw.xyz/cv?secret=<guess>` against the live
-site, or read the installed theme source.
+**Cost to close.** Read the installed theme source in `node_modules`, or test
+the live site with a `?secret=` value.
 
-**Rebuild must decide.** Whether URL-based access exists at all. This is a
-security question, not a cosmetic one, and it interacts with R5.5 (the
-configured password is `undefined`).
+**Severity: lowered.** Since the gate is a UX affordance and the content is
+public in the bundle regardless (R5.7), URL-parameter access is not a
+confidentiality hole. It *is* a UX question: does a shared link bypass the
+prompt for a legitimate recipient?
+
+**Rebuild must decide.** Whether link-based access exists. If it does, keep it
+deliberately; it is genuinely useful for sending someone straight to the CV.
+
 
 ---
 
