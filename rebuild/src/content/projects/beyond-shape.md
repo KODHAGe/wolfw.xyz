@@ -5,8 +5,10 @@ categories: ["Experiment"]
 publishedAt: 2020-01-01
 summary: "My thesis project for MA in New Media Production at Aalto University."
 hasVideo: false
+thumbnail: /images/thumbs/beyond-shape.png
+thumbnailWidth: 1000
+thumbnailHeight: 704
 private: false
-mainImage: /images/projects/beyond-shape-1.png
 images:
   - src: /images/projects/beyond-shape-1.png
     w: 3508
@@ -19,11 +21,13 @@ images:
     h: 1080
 ---
 
+My thesis project for MA in New Media Production at Aalto University.
+
 More content will follow, watch this space.
 
-Check out the print edition on Aaltodoc
+[Check out the print edition on Aaltodoc](https://aaltodoc.aalto.fi/handle/123456789/38070)
 
-Contribute to the data collection
+[Contribute to the data collection](https://shape-mapper.now.sh/)
 
 Process
 

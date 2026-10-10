@@ -25,12 +25,18 @@ const projects = defineCollection({
       categories: z.array(z.enum(["Web", "Visualization", "Experiment"])),
       publishedAt: z.coerce.date(),
       summary: z.string(),
-      // Images live in public/images/projects, downloaded from the Sanity CDN
-      // rather than hotlinked — D1.3 decommissions Sanity, and a hotlink would
-      // keep the dependency alive after the CMS is gone.
-      // Dimensions are carried alongside so pages can reserve space and avoid
-      // layout shift (CLS), which matters more than usual here because the
-      // background shader is already repainting.
+      // Listing thumbnail — `sanityProjectWolf.mainImage` as consumed by
+      // listItem.js:10. This is a DIFFERENT field from the body images below,
+      // and the first rebuild collapsed the two, which put the wrong picture on
+      // all 18 cards. Recovered from the live listing pages, matched by href.
+      thumbnail: z.string().optional(),
+      thumbnailWidth: z.number().optional(),
+      thumbnailHeight: z.number().optional(),
+      // Body images, from `projectBlock`. Downloaded from the Sanity CDN rather
+      // than hotlinked — D1.3 decommissions Sanity, and a hotlink would keep the
+      // dependency alive after the CMS is gone. Dimensions are carried alongside
+      // so pages can reserve space and avoid layout shift, which matters more
+      // than usual here because the background shader is already repainting.
       mainImage: z.string().optional(),
       images: z
         .array(

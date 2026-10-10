@@ -5,8 +5,10 @@ categories: ["Experiment"]
 publishedAt: 2020-01-01
 summary: "Inversions is an ongoing art/research project into design, technology and control."
 hasVideo: false
+thumbnail: /images/thumbs/inversion.jpg
+thumbnailWidth: 1000
+thumbnailHeight: 526
 private: false
-mainImage: /images/projects/inversion-1.jpg
 images:
   - src: /images/projects/inversion-1.jpg
     w: 4608
@@ -18,6 +20,8 @@ images:
     w: 3995
     h: 2999
 ---
+
+Inversions is an ongoing art/research project into design, technology and control.
 
 The internals of things tend to be more interesting than the surface. But its the surface that affects us, the part that we interact with, the things we recognize and form bonds with. Surfaces - of both hardware and software kinds - have a continuous low-key control of most things in our lives. Not in an ominous sense, necessarily. But in the sense that most everyday things we do is mediated by surfaces.
 

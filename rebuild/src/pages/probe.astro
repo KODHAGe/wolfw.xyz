@@ -1,133 +1,145 @@
 ---
+/*
+ * Shader probe. DEV ONLY — it imports /src/lib/background.ts directly, which is
+ * only served by `astro dev`, never by `astro preview`.
+ *
+ * Exists because the background bug was invisible to the build: TypeScript
+ * compiles, the page renders, the buttons work, and the canvas is simply blank.
+ * `npm run build` cannot catch a bad GLSL uniform or a wrong axis. This page
+ * reports what actually landed in the framebuffer.
+ */
 const title = "shader probe";
 ---
 <html><head><meta charset="utf-8"/><title>{title}</title></head>
 <body style="font: 12px ui-monospace, monospace; background:#111; color:#0f0">
-<canvas id="c" width="800" height="600"></canvas>
+<canvas id="c"></canvas>
 <pre id="out">running…</pre>
 <script type="module">
-window.addEventListener("error", (e) => {
-  document.getElementById("out").textContent += "\nERROR: " + (e.message || e) + " @ " + e.filename + ":" + e.lineno;
-});
-window.addEventListener("unhandledrejection", (e) => {
-  document.getElementById("out").textContent += "\nREJECT: " + (e.reason?.message || e.reason);
-});
+const out = document.getElementById("out");
+const log = (...a) => { out.textContent += "\n" + a.join(" "); };
+window.addEventListener("error", (e) => log("ERROR:", e.message, "@", e.filename + ":" + e.lineno));
+
 let SHADERS, ELEMENTS;
 try {
   ({ SHADERS, ELEMENTS } = await import("/src/lib/background.ts"));
-  document.getElementById("out").textContent += "\nmodule loaded, keys: " + Object.keys(await import("/src/lib/background.ts")).join(",");
+  log("module loaded");
 } catch (e) {
-  document.getElementById("out").textContent += "\nIMPORT FAILED: " + e.message;
+  log("IMPORT FAILED:", e.message);
+  log("(this page needs `astro dev`, not `astro preview`)");
+  throw e;
 }
 
-const out = document.getElementById("out");
-const log = (...a) => { out.textContent += "\n" + a.join(" "); };
-
+// Match the real sheet: the canvas is roughly viewport-width, inset 0.25rem.
+const CSS_W = 1436, CSS_H = 892;
 const canvas = document.getElementById("c");
 const gl = canvas.getContext("webgl2", { alpha: true, antialias: false, premultipliedAlpha: true, preserveDrawingBuffer: true });
 if (!gl) { log("FAIL: no webgl2"); } else {
+  canvas.width = CSS_W * 2; canvas.height = CSS_H * 2;
+  canvas.style.width = CSS_W + "px"; canvas.style.height = CSS_H + "px";
 
   const compile = (type, src) => {
     const sh = gl.createShader(type);
     gl.shaderSource(sh, src); gl.compileShader(sh);
-    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
-      throw new Error("compile: " + gl.getShaderInfoLog(sh));
-    }
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error("compile: " + gl.getShaderInfoLog(sh));
     return sh;
   };
 
-  let prog;
-  try {
-    prog = gl.createProgram();
-    gl.attachShader(prog, compile(gl.VERTEX_SHADER, SHADERS.vert));
-    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, SHADERS.frag));
-    gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error("link: " + gl.getProgramInfoLog(prog));
-    gl.useProgram(prog);
-    log("compile+link OK");
-  } catch (e) {
-    log("SHADER ERROR:", e.message);
-    throw e;
-  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, SHADERS.vert));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, SHADERS.frag));
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error("link: " + gl.getProgramInfoLog(prog));
+  gl.useProgram(prog);
+  log("compile+link OK");
 
-  // Uniform locations — the [0] question.
+  const loc = (n) => gl.getUniformLocation(prog, n);
   for (const n of ["u_resolution","u_time","u_pixelRatio","u_accent","u_alpha","u_reduced","u_p[0]","u_pos[0]"]) {
-    log("  loc", n.padEnd(14), "=>", String(gl.getUniformLocation(prog, n)));
+    log("  loc", n.padEnd(13), "=>", String(loc(n)));
   }
-  log("  loc u_p (no [0]) =>", String(gl.getUniformLocation(prog, "u_p")));
 
-  // Upload the real parameters.
-  const params = new Float32Array(56);
-  ELEMENTS.forEach((e, i) => {
-    const b = i*8;
-    params[b+0]=e.rotation; params[b+1]=e.width; params[b+2]=e.dash;
-    params[b+3]=e.freq; params[b+4]=e.amp; params[b+5]=e.grid;
-    params[b+6]=e.offset; params[b+7]=e.total;
-  });
+  // NINE fields per element, matching the shader's STRIDE.
+  const build = (elems) => {
+    const p = new Float32Array(63);
+    elems.forEach((e, i) => {
+      const b = i * 9;
+      p[b+0]=e.rotation; p[b+1]=e.width; p[b+2]=e.dash; p[b+3]=e.freq;
+      p[b+4]=e.amp; p[b+5]=e.gridDist; p[b+6]=e.offset; p[b+7]=e.grid; p[b+8]=e.total;
+    });
+    return p;
+  };
   const positions = new Float32Array(14);
-  ELEMENTS.forEach((e,i)=>{ positions[i*2]=e.posX; positions[i*2+1]=e.posY; });
+  ELEMENTS.forEach((e, i) => { positions[i*2] = e.posX; positions[i*2+1] = e.posY; });
 
-  gl.uniform1fv(gl.getUniformLocation(prog,"u_p[0]"), params);
-  gl.uniform1fv(gl.getUniformLocation(prog,"u_pos[0]"), positions);
-  gl.uniform2f(gl.getUniformLocation(prog,"u_resolution"), canvas.width, canvas.height);
-  gl.uniform1f(gl.getUniformLocation(prog,"u_pixelRatio"), 1);
-  gl.uniform3f(gl.getUniformLocation(prog,"u_accent"), 0.08, 0.08, 0.08);
-  gl.uniform1f(gl.getUniformLocation(prog,"u_alpha"), 1.0);
-  gl.uniform1f(gl.getUniformLocation(prog,"u_reduced"), 0);
-  gl.uniform1f(gl.getUniformLocation(prog,"u_time"), 0);
+  gl.uniform1fv(loc("u_p[0]"), build(ELEMENTS));
+  gl.uniform1fv(loc("u_pos[0]"), positions);
+  gl.uniform3f(loc("u_accent"), 0, 0, 0);
+  gl.uniform1f(loc("u_alpha"), 1.0);
+  gl.uniform1f(loc("u_reduced"), 0);
+  gl.uniform1f(loc("u_time"), 0);
+  gl.viewport(0, 0, canvas.width, canvas.height);
 
-  gl.viewport(0,0,canvas.width,canvas.height);
-  gl.clearColor(0,0,0,0);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.drawArrays(gl.TRIANGLES, 0, 3);
-
-  log("gl error after draw:", gl.getError(), "(0 = none)");
-
-  // Read the whole buffer and count non-transparent pixels.
   const buf = new Uint8Array(canvas.width * canvas.height * 4);
-  gl.readPixels(0, 0, canvas.width, canvas.height, gl.RGBA, gl.UNSIGNED_BYTE, buf);
 
-  let lit = 0, maxA = 0, maxRGB = 0;
-  const hits = [];
-  for (let i = 0; i < buf.length; i += 4) {
-    const a = buf[i+3];
-    if (a > 0) { lit++; if (hits.length < 6) hits.push([(i/4)%canvas.width, Math.floor((i/4)/canvas.width), buf[i], buf[i+1], buf[i+2], a]); }
-    if (a > maxA) maxA = a;
-    const m = Math.max(buf[i], buf[i+1], buf[i+2]);
-    if (m > maxRGB) maxRGB = m;
-  }
-  log("LIT PIXELS:", lit, "of", canvas.width*canvas.height,
-      "=", (100*lit/(canvas.width*canvas.height)).toFixed(2)+"%");
-  log("max alpha:", maxA, " max rgb:", maxRGB);
-  log("first hits [x,y,r,g,b,a]:", JSON.stringify(hits));
-  log("preserveDrawingBuffer was: false by default — buffer is cleared on composite");
-  // Sample a grid rather than trusting the first row.
-  const samples = [];
-  for (let y = 0; y < 600; y += 150) for (let x = 0; x < 800; x += 200) {
-    const i = (y*800+x)*4;
-    samples.push([x,y,buf[i],buf[i+1],buf[i+2],buf[i+3]]);
-  }
-  log("grid samples:", JSON.stringify(samples));
-  // --- BISECT: force a constant colour from the REAL vertex + trivial frag ---
-  {
-    const trivial = `#version 300 es
-precision highp float;
-out vec4 outColor;
-void main() { outColor = vec4(1.0, 0.0, 0.0, 1.0); }`;
-    const p2 = gl.createProgram();
-    gl.attachShader(p2, compile(gl.VERTEX_SHADER, SHADERS.vert));
-    gl.attachShader(p2, compile(gl.FRAGMENT_SHADER, trivial));
-    gl.linkProgram(p2);
-    log("trivial link:", gl.getProgramParameter(p2, gl.LINK_STATUS));
-    gl.useProgram(p2);
-    gl.viewport(0,0,canvas.width,canvas.height);
-    gl.clearColor(0,0,1,1); gl.clear(gl.COLOR_BUFFER_BIT);
+  function measure(dpr) {
+    gl.uniform2f(loc("u_resolution"), canvas.width, canvas.height);
+    gl.uniform1f(loc("u_pixelRatio"), dpr);
+    gl.clearColor(0,0,0,0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-    const t = new Uint8Array(4);
-    gl.readPixels(5,5,1,1,gl.RGBA,gl.UNSIGNED_BYTE,t);
-    log("BISECT trivial-frag readback:", Array.from(t), "expect 255,0,0,255");
+    gl.readPixels(0, 0, canvas.width, canvas.height, gl.RGBA, gl.UNSIGNED_BYTE, buf);
+    let lit = 0;
+    for (let i = 3; i < buf.length; i += 4) if (buf[i] > 0) lit++;
+    return (100 * lit / (canvas.width * canvas.height));
   }
 
+  // The page real devicePixelRatio is what production uses; compare it against 1
+  // to prove which one the field is drawn for.
+  const realDpr = window.devicePixelRatio || 1;
+  log("");
+  log("buffer", canvas.width + "x" + canvas.height, " devicePixelRatio:", realDpr);
+  log("LIT%  dpr=1:", measure(1).toFixed(3), " dpr=2:", measure(2).toFixed(3), " dpr=" + realDpr + ":", measure(realDpr).toFixed(3));
+
+  // Per-element coverage: zero every block except one.
+  log("");
+  log("per-element LIT% at dpr=" + realDpr + " (isolated):");
+  for (let i = 0; i < ELEMENTS.length; i++) {
+    gl.uniform1fv(loc("u_p[0]"), build([ELEMENTS[i]]));
+    const pct = measure(realDpr);
+    const e = ELEMENTS[i];
+    log("  el" + i,
+        "rot=" + String(e.rotation).padStart(4),
+        "w=" + String(e.width).padStart(2),
+        "dash=" + String(e.dash).padStart(3),
+        "freq=" + String(e.freq).padStart(3),
+        "amp=" + String(e.amp).padStart(2),
+        "gDist=" + String(e.gridDist).padStart(3),
+        "off=" + String(e.offset).padStart(3),
+        "gSize=" + String(e.grid).padStart(2),
+        "tot=" + String(e.total).padStart(3),
+        "-> " + pct.toFixed(3) + "%");
+  }
+
+  // Coverage map, coarse, for the real config.
+  gl.uniform1fv(loc("u_p[0]"), build(ELEMENTS));
+  measure(realDpr);
+  log("");
+  log("coverage map (16x9, '#' = lit):");
+  const COLS = 16, ROWS = 9;
+  for (let r = ROWS - 1; r >= 0; r--) {
+    let row = "  ";
+    for (let c = 0; c < COLS; c++) {
+      let n = 0, tot = 0;
+      const x0 = Math.floor(c * canvas.width / COLS), x1 = Math.floor((c+1) * canvas.width / COLS);
+      const y0 = Math.floor(r * canvas.height / ROWS), y1 = Math.floor((r+1) * canvas.height / ROWS);
+      for (let y = y0; y < y1; y += 4) for (let x = x0; x < x1; x += 4) {
+        tot++; if (buf[(y*canvas.width+x)*4+3] > 0) n++;
+      }
+      const f = n / tot;
+      row += f > 0.5 ? "#" : f > 0.15 ? "+" : f > 0.01 ? "." : " ";
+    }
+    log(row);
+  }
+  log("gl error:", gl.getError(), "(0 = none)");
 }
 </script>
 </body></html>

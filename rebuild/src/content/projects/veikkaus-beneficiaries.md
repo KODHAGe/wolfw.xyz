@@ -5,8 +5,10 @@ categories: ["Web", "Visualization"]
 publishedAt: 2020-01-01
 summary: "Every year, the national lottery company of Finland distributes millions of euros of their profits back into the economy in the form of culture, sports, youth a"
 hasVideo: true
+thumbnail: /images/thumbs/veikkaus-beneficiaries.png
+thumbnailWidth: 1000
+thumbnailHeight: 702
 private: false
-mainImage: /images/projects/veikkaus-beneficiaries-1.png
 images:
   - src: /images/projects/veikkaus-beneficiaries-1.png
     w: 1912
@@ -18,5 +20,7 @@ images:
     w: 644
     h: 540
 ---
+
+Every year, the national lottery company of Finland distributes millions of euros of their profits back into the economy in the form of culture, sports, youth and science funding. While the recipients of these grants have been made public in prior years, we worked with Veikkaus to develop a tool in which this distribution could be observed in a more transparent fashion – this application being the end result of that process.
 
 **Tech:** jQuery, TaffyDB, Leaflet.js

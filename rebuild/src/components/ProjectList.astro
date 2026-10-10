@@ -41,16 +41,15 @@ const projects = all
 
     {
       projects.map((project) => {
-        const imgs = project.data.images ?? [];
-        const main = project.data.mainImage ? imgs[0] : null;
+        const { thumbnail, thumbnailWidth: w, thumbnailHeight: h } = project.data;
         return (
           <a class="listlink" href={`/${project.data.slug}`}>
-            {main && (
+            {thumbnail && (
               <img
-                src={main.src}
+                src={thumbnail}
                 alt=""
-                width={main.w}
-                height={main.h}
+                width={w}
+                height={h}
                 loading="lazy"
                 decoding="async"
               />

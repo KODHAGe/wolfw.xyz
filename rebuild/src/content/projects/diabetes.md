@@ -3,10 +3,12 @@ title: "Diabetes"
 slug: "diabetes"
 categories: ["Web", "Visualization"]
 publishedAt: 2020-01-01
-summary: "A common type of map-based visualization designed, developed and published as a part of the news production of the finnish news agency"
+summary: "A common type of map-based visualization designed, developed and published as a part of the news production of the finnish news agency [STT](http://stt.fi/). Th"
 hasVideo: true
+thumbnail: /images/thumbs/diabetes.png
+thumbnailWidth: 1000
+thumbnailHeight: 678
 private: false
-mainImage: /images/projects/diabetes-1.png
 images:
   - src: /images/projects/diabetes-1.png
     w: 1106
@@ -16,9 +18,7 @@ images:
     h: 1350
 ---
 
-STT
-
-. This is only one example of a design that saw frequent use with multiple variations and themes.
+A common type of map-based visualization designed, developed and published as a part of the news production of the finnish news agency [STT](http://stt.fi/). This is only one example of a design that saw frequent use with multiple variations and themes.
 
 Working together with a writing journalist, the incidence of diabetes in Finland was explored. The process included collecting data from different official sources and combining these to create the base dataset for the story.
 

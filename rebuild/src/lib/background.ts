@@ -24,9 +24,23 @@
 // The legacy table, for comparison:
 //   rotation  width  dasharray  frequency  amplitude  gridDistance  offset
 //   gridSize  totalWidth
-// Values are the CENTRES of the legacy random ranges. Legacy randomised each
-// within [0.5v, 1.5v] per load via getRandomIntAround; here we keep the same
-// range but make it explicit and, optionally, seeded.
+// The legacy randomised EVERY one of these within [0.5v, 1.5v] on each load via
+// getRandomIntAround (background.js:121-125), so there is no single correct
+// value for any of them - R6.1 specifies a distribution, not a constant.
+//
+// The values below are therefore ONE SAMPLE from each range, chosen to keep all
+// seven elements on the sheet. They are NOT recovered constants and should not be
+// read as the original numbers. Two consequences worth stating plainly:
+//
+//   - The rebuild is deterministic where the original was not. That is a
+//     deliberate trade (spec/gaps.md), not a fidelity gain.
+//   - The range is the contract. Changing these numbers within their ranges is
+//     reproducing the original behaviour, not deviating from it.
+//
+// posX/posY are the bases from background.js:12-18, negated on y by the shader to
+// match the SVG's downward axis. Element 4's base of -550/+450 puts it just off
+// the top of a 900px viewport, so it is drawn from inside the range at -430/+250.
+const POSITION_NOTE = true;
 // ---------------------------------------------------------------------------
 
 const ELEMENTS = [
@@ -35,7 +49,7 @@ const ELEMENTS = [
   { rotation: -10,  width: 1,  dash: 100, freq: 10,  amp: 15, gridDist: 10,  offset: 12,  grid: 10, total: 200, posX: -200, posY: 100 },
   { rotation: 20,   width: 1,  dash: 100, freq: 2,   amp: 15, gridDist: 10,  offset: 200, grid: 7,  total: 240, posX: -400, posY: 250 },
   { rotation: 30,   width: 2,  dash: 80,  freq: 20,  amp: 60, gridDist: 100, offset: 12,  grid: 7,  total: 200, posX: 300,  posY: -150 },
-  { rotation: -180, width: 8,  dash: 10,  freq: 120, amp: 20, gridDist: 0,   offset: 7,   grid: 2,  total: 240, posX: -550, posY: 450 },
+  { rotation: -180, width: 8,  dash: 10,  freq: 120, amp: 20, gridDist: 0,   offset: 7,   grid: 2,  total: 240, posX: -430, posY: 250 },
   { rotation: -130, width: 2,  dash: 10,  freq: 20,  amp: 10, gridDist: 0,   offset: 7,   grid: 10, total: 180, posX: 550,  posY: -250 },
   { rotation: -45,  width: 1,  dash: 10,  freq: 10,  amp: 20, gridDist: 10,  offset: 1,   grid: 6,  total: 200, posX: 0,    posY: 0 },
 ];
@@ -77,102 +91,160 @@ out vec4 outColor;
 
 const int N = 7;
 
-// rotation, width, dash, freq, amp, grid, offset, totalWidth  (x8 = 56)
-uniform float u_p[56];
+// Nine fields per element, in elementProps[] order (background.js:37-119).
+// NINE, not eight: gridDistance and gridSize are separate properties and
+// collapsing them into one slot was a bug - the rows of each grid drew on top of
+// each other instead of fanning out.
+//
+//   rotation  width  dasharray  frequency  amplitude
+//   gridDistance  offset  gridSize  totalWidth
+const int STRIDE = 9;
+uniform float u_p[63];   // N * STRIDE
 
 // position jitter, in px relative to viewport centre (x2 = 14)
 uniform float u_pos[14];
+
+// Device-pixel ratio, as a FUNCTION. strokeAt() needs it for the antialiasing
+// feather and main() needs it to convert to CSS pixels, so it cannot be a local.
+// It also cannot be a global initialiser: GLSL requires global initialisers to be
+// constant expressions, and a uniform is not one. Assigning a uniform to a global
+// is a compile error ("global variable initializers must be constant
+// expressions"), which fails silently in production — the build passes, the page
+// loads, the canvas is simply blank. Hence a function.
+float dpr() { return max(u_pixelRatio, 1.0); }
 
 // Small-integer hash. The large-multiple sin() trick loses precision badly at
 // the magnitudes this loop reaches, which produced visible banding.
 float hash(float n) { return fract(n * 0.1031 + 0.1031); }
 
-// Distance to one sine stroke, in pixels.
+// One sine stroke, in pixels.
+//
+// Transcribed from createPath() (backgroundElement.js:47):
+//   for (x = 0; x <= totalWidth; x++) {
+//     angle = (x / frequency) * PI * 2
+//     y     = top + sin(angle) * (amplitude / 2)
+//     path.push((x === 0 ? 'M' : 'L') + (x + offset) + ',' + y)
+//   }
+//
+// and its call site (backgroundElement.js:54):
+//   createPath(frequency, amplitude, gridDistance * i, offset * i, totalWidth)
+//
+// So for grid row i the curve is centred on top and shifted right by shift.
+// top is what fans the rows apart; without it every row overdraws the last.
 float strokeAt(vec2 q, float freq, float amp, float top, float shift,
                float total, float halfWidth) {
-  // Bounds. The legacy stopped at totalWidth (backgroundElement.js:49).
+  // Undo the horizontal shift BEFORE bounds-checking: the legacy loop samples x
+  // from 0..totalWidth and only adds offset when it emits the point.
+  float x = q.x - shift;
+
+  // Bounds. The legacy loop stopped at totalWidth (backgroundElement.js:49).
   //
   // CRITICAL: this returns 0, NOT a large sentinel. The caller uses the return
   // value directly as line intensity, so returning 1e4 here made every
-  // out-of-range pixel contribute 1e4 to the max() — which saturated the whole
+  // out-of-range pixel contribute 1e4 to the max() - which saturated the whole
   // canvas opaque and read as "the shader draws nothing" (or as a black sheet,
-  // once it was placed over the white one). This was the actual bug behind
-  // six failed screenshot cycles.
-  if (q.x < 0.0 || q.x > total) return 0.0;
+  // once it sat on the white one).
+  if (x < 0.0 || x > total) return 0.0;
 
-  float angle = (q.x / freq) * 6.28318530718;
+  float angle = (x / freq) * 6.28318530718;
   float y = top + sin(angle) * (amp * 0.5);
   float d = abs(q.y - y);
 
-  // 1px antialiasing.
-  return 1.0 - smoothstep(halfWidth, halfWidth + 1.0, d);
+  // 1px antialiasing. halfWidth is HALF the legacy strokeWidth, so a
+  // strokeWidth of 1 stays a hairline - exactly as it is in the SVG.
+  return 1.0 - smoothstep(halfWidth, halfWidth + 1.0 / dpr(), d);
 }
 
 void main() {
-  vec2 p = gl_FragCoord.xy;              // pixels, origin bottom-left
-  vec2 res = u_resolution;
+  // CSS pixels, not device pixels. The legacy built every number in CSS px -
+  // strokeWidth, frequency, amplitude, gridDistance, totalWidth, the position
+  // offsets - so gl_FragCoord must be divided by the pixel ratio or the whole
+  // field renders at half scale on any HiDPI screen.
+  vec2 p = gl_FragCoord.xy / dpr();
+  vec2 res = u_resolution / dpr();
   vec2 center = res * 0.5;
-  vec2 uv = p / res;
 
   float acc = 0.0;
   float t = u_reduced > 0.5 ? 0.0 : u_time;
 
   for (int i = 0; i < N; i++) {
-    float b = float(i) * 8.0;
+    // Element i's nine parameters start at i * STRIDE.
+    //
+    // This was u_p[i + int(b + k)], which for i=1 read index 9 - one field into
+    // element 1 - so from the second element onward every parameter was shifted
+    // and the field was drawn from the wrong numbers entirely.
+    int b = i * STRIDE;
 
-    float rotation = radians(u_p[i + int(b + 0.0)]);
-    float width    = u_p[i + int(b + 1.0)];
-    float dash     = u_p[i + int(b + 2.0)];
-    float freq     = max(u_p[i + int(b + 3.0)], 1.0);
-    float amp      = u_p[i + int(b + 4.0)];
-    float grid     = u_p[i + int(b + 5.0)];
-    float offs     = u_p[i + int(b + 6.0)];
-    float total    = u_p[i + int(b + 7.0)];
+    float rotation = u_p[b + 0];
+    float width    = u_p[b + 1];
+    float dash     = u_p[b + 2];
+    float freq     = max(u_p[b + 3], 1.0);
+    float amp      = u_p[b + 4];
+    float gridDist = u_p[b + 5];
+    float offs     = u_p[b + 6];
+    float gridSize = u_p[b + 7];
+    float total    = u_p[b + 8];
 
-    // Slow drift, in pixels. Legacy rotated by a random amount per load; this
+    // Slow drift. The legacy rotated by a random amount once per load; this
     // breathes gently instead (background.js:38 rotation came from
     // getRandomIntAround).
-    float spin = rotation + t * 0.05 * (hash(float(i) + 1.7) - 0.5);
+    float spin = radians(rotation) + t * 0.05 * (hash(float(i) + 1.7) - 0.5);
 
-    // Position: legacy randomised around viewport centre per load
-    // (background.js:12-18). Scaled to the viewport so it lands proportionally.
-    vec2 pos = center + u_pos[i * 2] * (res.y / 1400.0);
-    pos.y += u_pos[i * 2 + 1] * (res.y / 1400.0);
+    // Position, in RAW PIXELS from viewport centre.
+    //
+    // background.js:12-18 puts each element at
+    //   [innerWidth/2 +/- getRandomIntAround(baseX),
+    //    innerHeight/2 +/- getRandomIntAround(baseY)]
+    // with no scaling and no clamping - element 6 sits exactly on the centre. An
+    // earlier version scaled these by a viewport fraction and clamped to the
+    // canvas, which pulled the field inward and made it lopsided. The legacy
+    // numbers are already in pixels, so they are used as written.
+    // Negated on y: the legacy frame is top-left origin with y increasing
+    // downward (background.js:12-18 builds [innerWidth/2 + dx, innerHeight/2 + dy]
+    // straight into an SVG transform), while gl_FragCoord.y increases upward.
+    // Without this the entire field is mirrored vertically.
+    vec2 pos = center + vec2(u_pos[i * 2], -u_pos[i * 2 + 1]);
 
-    // Into the curve's local frame, about its own origin.
+    // Into the curve's local frame, rotated about its own origin.
     float c = cos(-spin), s = sin(-spin);
     vec2 q = p - pos;
     q = vec2(q.x * c - q.y * s, q.x * s + q.y * c);
 
-    int n = int(clamp(grid, 1.0, 10.0));
+    int n = int(clamp(gridSize, 1.0, 10.0));
 
     for (int g = 0; g < 10; g++) {
       if (g >= n) break;
       float gi = float(g);
 
-      // Legacy: createPath(freq, amp, gridDistance*i, offset*i, totalWidth)
-      // so gridDistance offsets vertically and offset shifts horizontally.
-      vec2 gg = q - vec2(offs * gi, 0.0);
+      float line = strokeAt(
+        q,
+        freq,
+        amp,
+        gridDist * gi,     // top   - the vertical fan
+        offs * gi,         // shift - the horizontal stair
+        total,
+        max(width * 0.5, 0.5)
+      );
 
-      float line = strokeAt(gg, freq, amp, 0.0, 0.0, total * 1.25, max(width * 0.5, 0.6));
-
-      // Dash pattern along the curve, stroke-dasharray semantics.
+      // stroke-dasharray, phased along the path so it is measured from the start
+      // of the curve rather than from the element origin.
       float period = max(dash, 4.0);
-      float m = mod(gg.x + t * 20.0 * (hash(float(i) + 3.0) - 0.5), period);
+      float m = mod(q.x - offs * gi + t * 20.0 * (hash(float(i) + 3.0) - 0.5), period);
       line *= smoothstep(0.0, 1.0, period * 0.45 - m + period * 0.45);
-
-      // Frame the content. The legacy had no falloff at all; this is new, and
-      // it is what makes the field readable behind a CV rather than fighting it.
-      float edge = 1.0 - smoothstep(0.30, 1.10, length(uv - 0.5) * 1.8);
-      // Protect the reading column. Softened from 0.72 — the first pass
-      // suppressed so much of the field that only the corners survived.
-      float textZone = smoothstep(0.0, 0.52, uv.x) * (1.0 - smoothstep(0.55, 0.92, uv.y));
-      line *= edge * (1.0 - 0.72 * textZone);
 
       acc = max(acc, line);
     }
   }
 
+  // Full opacity, pure ink.
+  //
+  // There is deliberately NO radial falloff and NO text-protection zone here.
+  // Both existed in an earlier pass as readability "improvements" and both are
+  // inventions: the legacy drew the field at full opacity straight over the page
+  // heading and the intro copy, which is why the live site shows scribbles
+  // crossing "wolfw.xyz". A rebuild that quietly protects the text is not the
+  // same site - improvements belong in desired.md, not smuggled into recovered
+  // behaviour.
   outColor = vec4(u_accent * acc, clamp(acc, 0.0, 1.0) * u_alpha);
 }`;
 
@@ -273,7 +345,11 @@ export function mountBackground(canvas: HTMLCanvasElement): () => void {
     .trim();
   const rgb = hexToRgb(fieldColor);
   gl.uniform3f(gl.getUniformLocation(program, "u_accent"), rgb[0], rgb[1], rgb[2]);
-  gl.uniform1f(gl.getUniformLocation(program, "u_alpha"), 0.5);
+  // Full opacity. The legacy set no opacity on the paths (backgroundElement.js:38-43
+  // sets only strokeDasharray, strokeWidth and strokeLinecap), so the field drew at
+  // 100% black. An earlier pass used 0.5 to keep it "from fighting the text"; that was
+  // an invention, and it is what made the field look like a grey smudge instead of ink.
+  gl.uniform1f(gl.getUniformLocation(program, "u_alpha"), 1.0);
   gl.uniform1f(gl.getUniformLocation(program, "u_reduced"), reduced);
 
   const uRes = gl.getUniformLocation(program, "u_resolution");

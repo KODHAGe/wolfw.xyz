@@ -5,8 +5,10 @@ categories: ["Web", "Visualization"]
 publishedAt: 2020-01-01
 summary: "This application was developed for STT news agency as a part of my final thesis to Metropolia University of Applied Sciences."
 hasVideo: true
+thumbnail: /images/thumbs/lukiovertailu-high-school-comparison.png
+thumbnailWidth: 1000
+thumbnailHeight: 702
 private: false
-mainImage: /images/projects/lukiovertailu-high-school-comparison-1.png
 images:
   - src: /images/projects/lukiovertailu-high-school-comparison-1.png
     w: 1390
@@ -19,10 +21,12 @@ images:
     h: 1034
 ---
 
+This application was developed for STT news agency as a part of my final thesis to Metropolia University of Applied Sciences.
+
 The project included all aspects of the application development process, from developing the back end in node.js, data processing and visualization to designing and implementing the front-end. More thorough documentation of this process can be found in my thesis paper.
 
 **Tech:** MongoDB, node.js, jQuery
 
-Link
+[Link](http://lukiovertailu.herokuapp.com/)
 
-Paper on Theseus
+[Paper on Theseus](http://theseus.fi/handle/10024/86669)

@@ -40,6 +40,15 @@
         "summary": {
           "type": "string"
         },
+        "thumbnail": {
+          "type": "string"
+        },
+        "thumbnailWidth": {
+          "type": "number"
+        },
+        "thumbnailHeight": {
+          "type": "number"
+        },
         "mainImage": {
           "type": "string"
         },

@@ -257,6 +257,41 @@ Configured in `pagePaths` but present in neither the repo nor the live site.
 
 ## R6 — Background
 
+> **Corrected 2026-10-10.** The original version of this section missed two
+> things, now recorded as **R6.0** (the purple-page/white-sheet construction)
+> and **R6.4** (the 5-second dash animation). It documented the *randomisation*
+> in fine detail and omitted the design. Worth recording how: the animation
+> lives in a CSS module, not in the JSX, and the whole of R6 was derived by
+> reading `background.js`. Reading only the component that owns the behaviour is
+> how a visible, load-bearing requirement stays invisible.
+>
+> Both additions are verified twice — against the legacy source **and** against
+> the CSS the live site actually serves, since a requirement that only exists in
+> the repo is a requirement that may already have been dropped in production.
+
+### R6.0 The page is purple with a white sheet floating on it
+
+The site's whole visual identity, and the inverse of how it reads at a glance.
+
+```css
+html { background-color: #bc89ff; }                    /* the PAGE is purple */
+.background {                                          /* a white SHEET floats on it */
+  height: calc(100% - 0.5rem);
+  width:  calc(100% - 0.5rem);
+  position: fixed; bottom: 0; left: 0;
+  margin:  0.25rem;
+  z-index: 0;
+  background-color: white;
+}
+```
+
+The `.25rem` inset on all four sides is what makes the purple read as a
+*border around a sheet* rather than as the page colour. Content sits on the
+sheet at `z-index:1` (`main`).
+
+- `src/components/background.module.css:1-10`
+- `live:styles.16f5a2485ddb20f25f1e.css` — both rules present verbatim
+
 ### R6.1 Full-viewport SVG sine-wave field, randomised per load
 
 Seven `<g>` groups, each containing `gridSize` `<path>` elements. Each path is a
@@ -296,6 +331,58 @@ actual contract:
 `Layout` renders `<Background>` as a sibling of `<main>`, on all pages.
 
 - `layout.js:13-14`
+
+### R6.4 The field animates — a 5-second dash sweep
+
+**The most visible motion in the site, and it lives in a CSS module.**
+
+```css
+.element { animation: dash 5s ease-in-out forwards; }
+@keyframes dash { from { stroke-dashoffset: 0 } to { stroke-dashoffset: 100 } }
+```
+
+- `src/components/backgroundElement.module.css:3` — the `animation` shorthand
+- `src/components/backgroundElement.module.css:7-14` — the keyframes
+- `src/components/backgroundElement.js:24` — `g.setAttribute('class', style.element)`,
+  so the animation is applied to **every** `<g>` group, not to the svg root
+- `live:styles.16f5a2485ddb20f25f1e.css` — ships in production:
+  `.backgroundElement-module--element--3zQvP{animation:…dash 5s ease-in-out forwards}`
+
+Each group sweeps its dash pattern once over five seconds on load and settles
+there — `forwards` fill mode means the end state is held. The randomisation in
+R6.1 is an independent, second source of variation; two different mechanisms
+produce variation in the same element.
+
+Note for D4: `stroke-dashoffset` is an SVG-attribute animation with no WebGL
+equivalent, so the shader port has to reimplement the sweep rather than inherit
+it. `--dur-dash-sweep: 5s` exists for that reason.
+
+### R6.5 The field is NOT subordinate to the content — it draws over the text
+
+Checked against the live site, 2026-10-10. Worth stating because it is the first
+thing anyone would "fix", and fixing it is a departure from the original.
+
+- Paths are stroked at **full opacity**, pure black. No `opacity` attribute is set
+  anywhere in `backgroundElement.js`.
+- The field draws **over** the page heading and the intro copy. On the live home
+  page the scribbles cross `wolfw.xyz` and the description text directly.
+- There is **no radial falloff, no vignette, no reduced-alpha zone** and no
+  text-protection mask.
+- Only the buttons are opaque enough to occlude it, because
+  `.button { background-color:#fff }` — that is a side effect of the buttons
+  being solid, not a rule about the background.
+
+An intermediate rebuild added a falloff and a text-protection zone "to keep the
+field from fighting the text". Both were inventions, and both made it a different
+site. The original is a brutalist composition in which the writing is drawn on top
+of the drawing, not protected from it. If a future pass wants a legible field,
+that is a **desired** change and belongs in `desired.md` — not a quiet
+correction to recovered behaviour.
+
+- `live:/` captured 2026-10-10 (screenshot, `live-original-home`)
+- `src/components/backgroundElement.js:38-43` — only `strokeDasharray`,
+  `strokeWidth` and `strokeLinecap` are set
+- `src/components/layout.css:1-10` — `a { color:#000 }`, no background rule
 
 ---
 
