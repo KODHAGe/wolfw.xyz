@@ -43,6 +43,30 @@
         "mainImage": {
           "type": "string"
         },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "src": {
+                "type": "string"
+              },
+              "w": {
+                "type": "number"
+              },
+              "h": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "src",
+              "w",
+              "h"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
         "private": {
           "type": "boolean",
           "default": false

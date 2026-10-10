@@ -28,6 +28,62 @@ frame at mount, and produces **no console errors and no visible output**.
 | Accumulation | Fixed. `col +=` and `acc +=` across up to 70 strokes saturated the buffer. Now `acc = max(acc, line)`. |
 | rAF not firing | Ruled out. A frame is now drawn immediately at mount, not deferred to the first `requestAnimationFrame`. |
 
+## Probe harness — built and working
+
+`rebuild/src/pages/probe.astro` (dev server only, port 4322) imports the real
+shader via `SHADERS` / `ELEMENTS` exports and reports numbers. It is the tool
+this agent should use first.
+
+```sh
+cd rebuild && npx astro dev --port 4322   # then open /probe
+```
+
+## Narrowed state (2026-10-10) — fault is in the field math only
+
+Established by measurement, not inference:
+
+| Test | Result |
+|---|---|
+| WebGL2 context | **works** — ANGLE, Apple M1 Pro |
+| `readPixels` round trip | **works** — clear-to-green returned `0,255,0,255` |
+| Shader compile + link | **works** |
+| Uniform locations | **all resolve**, including `u_p[0]` and `u_pos[0]` |
+| `gl.getError()` after draw | **0** |
+| Trivial fragment shader | **renders correctly** — `255,0,0,255` |
+| Real fragment, `outColor = vec4(uv, 0.5, 1.0)` | **renders correctly** — clean gradient |
+
+So the pipeline is sound and **the real fragment shader executes**. The defect
+is confined to the field computation in `main()`.
+
+## The actual anomaly
+
+With the real `outColor = vec4(u_accent * acc, clamp(acc, 0.0, 1.0) * u_alpha)`
+and `u_accent` set to `0.08`, the buffer reads back **255,255,255,255 on 100% of
+pixels**.
+
+`acc` is `max()` over products of `smoothstep` terms, each bounded to [0,1], so
+`acc <= 1` and RGB should be at most `0.08` (≈20). Reaching 255 requires either
+`acc` far above 1 — impossible by construction — or a **NaN**, which clamps to
+1.0 in the write. NaN is the leading hypothesis.
+
+NaN sources to check in `strokeAt` and `main`, in order of likelihood:
+
+1. `mod(gg.x + t * 20.0 * ..., period)` with a large or zero `period`
+2. `smoothstep(a, b, x)` where `a == b` or `a > b` — divides by zero
+3. `sin(angle)` with `angle` driven very large by `q.x / freq` where `freq` is
+   near its clamp floor of 1.0
+
+Isolate by replacing the final write with individual terms:
+`outColor = vec4(vec3(strokeAt(...)), 1.0)`, then `vec3(dashMask)`, then
+`vec3(edge)`, and read back after each. Each is bounded, so the first one that
+returns 255 is the culprit.
+
+## Note
+
+`u_pixelRatio` resolves to null — it is optimised out because the rewritten
+pixel-space shader no longer uses it. Harmless, but remove the uniform rather
+than leaving a dead declaration.
+
 ## Where it stands
 
 After those fixes the shader runs cleanly and draws nothing. Two remaining

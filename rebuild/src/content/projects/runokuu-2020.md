@@ -6,6 +6,14 @@ publishedAt: 2020-01-01
 summary: "A collaborative with project with"
 hasVideo: false
 private: false
+mainImage: /images/projects/runokuu-2020-1.png
+images:
+  - src: /images/projects/runokuu-2020-1.png
+    w: 640
+    h: 454
+  - src: /images/projects/runokuu-2020-2.png
+    w: 364
+    h: 640
 ---
 
 Karkkikammo

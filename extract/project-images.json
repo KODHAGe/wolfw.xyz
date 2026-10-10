@@ -1,0 +1,280 @@
+{
+  "approval-rates": [
+    {
+      "src": "/images/projects/approval-rates-1.png",
+      "w": 958,
+      "h": 962,
+      "bytes": 69638
+    },
+    {
+      "src": "/images/projects/approval-rates-2.png",
+      "w": 1368,
+      "h": 1268,
+      "bytes": 34000
+    },
+    {
+      "src": "/images/projects/approval-rates-3.png",
+      "w": 1374,
+      "h": 1334,
+      "bytes": 41603
+    }
+  ],
+  "beyond-shape": [
+    {
+      "src": "/images/projects/beyond-shape-1.png",
+      "w": 3508,
+      "h": 2480,
+      "bytes": 36932
+    },
+    {
+      "src": "/images/projects/beyond-shape-2.png",
+      "w": 2560,
+      "h": 1440,
+      "bytes": 14734
+    },
+    {
+      "src": "/images/projects/beyond-shape-3.png",
+      "w": 1920,
+      "h": 1080,
+      "bytes": 21032
+    }
+  ],
+  "brb-email": [
+    {
+      "src": "/images/projects/brb-email-1.png",
+      "w": 1218,
+      "h": 1750,
+      "bytes": 204884
+    },
+    {
+      "src": "/images/projects/brb-email-2.png",
+      "w": 2180,
+      "h": 1706,
+      "bytes": 64618
+    }
+  ],
+  "conversions": [
+    {
+      "src": "/images/projects/conversions-1.jpg",
+      "w": 14044,
+      "h": 9934,
+      "bytes": 26044
+    },
+    {
+      "src": "/images/projects/conversions-2.jpg",
+      "w": 4000,
+      "h": 2829,
+      "bytes": 23185
+    }
+  ],
+  "diabetes": [
+    {
+      "src": "/images/projects/diabetes-1.png",
+      "w": 1106,
+      "h": 1206,
+      "bytes": 219557
+    },
+    {
+      "src": "/images/projects/diabetes-2.png",
+      "w": 1316,
+      "h": 1350,
+      "bytes": 39611
+    }
+  ],
+  "digitaalinenkirjallisuus-fi": [
+    {
+      "src": "/images/projects/digitaalinenkirjallisuus-fi-1.png",
+      "w": 1948,
+      "h": 1356,
+      "bytes": 8540
+    }
+  ],
+  "election-day-results": [
+    {
+      "src": "/images/projects/election-day-results-1.png",
+      "w": 938,
+      "h": 874,
+      "bytes": 117924
+    },
+    {
+      "src": "/images/projects/election-day-results-2.png",
+      "w": 880,
+      "h": 548,
+      "bytes": 54723
+    }
+  ],
+  "i-can-t-let-you-do-that-human": [
+    {
+      "src": "/images/projects/i-can-t-let-you-do-that-human-1.png",
+      "w": 1974,
+      "h": 1422,
+      "bytes": 62756
+    },
+    {
+      "src": "/images/projects/i-can-t-let-you-do-that-human-2.png",
+      "w": 1594,
+      "h": 682,
+      "bytes": 40534
+    },
+    {
+      "src": "/images/projects/i-can-t-let-you-do-that-human-3.png",
+      "w": 1786,
+      "h": 1450,
+      "bytes": 99183
+    }
+  ],
+  "instru-mental": [
+    {
+      "src": "/images/projects/instru-mental-1.png",
+      "w": 2456,
+      "h": 1402,
+      "bytes": 60943
+    },
+    {
+      "src": "/images/projects/instru-mental-2.png",
+      "w": 1478,
+      "h": 1278,
+      "bytes": 199088
+    },
+    {
+      "src": "/images/projects/instru-mental-3.png",
+      "w": 1930,
+      "h": 1286,
+      "bytes": 115969
+    }
+  ],
+  "inversion": [
+    {
+      "src": "/images/projects/inversion-1.jpg",
+      "w": 4608,
+      "h": 3464,
+      "bytes": 18789
+    },
+    {
+      "src": "/images/projects/inversion-2.jpg",
+      "w": 4064,
+      "h": 2988,
+      "bytes": 19513
+    },
+    {
+      "src": "/images/projects/inversion-3.jpg",
+      "w": 3995,
+      "h": 2999,
+      "bytes": 14418
+    }
+  ],
+  "kaekriaeinen": [
+    {
+      "src": "/images/projects/kaekriaeinen-1.png",
+      "w": 2366,
+      "h": 1468,
+      "bytes": 39796
+    },
+    {
+      "src": "/images/projects/kaekriaeinen-2.png",
+      "w": 1190,
+      "h": 1194,
+      "bytes": 228411
+    },
+    {
+      "src": "/images/projects/kaekriaeinen-3.png",
+      "w": 2322,
+      "h": 1370,
+      "bytes": 68247
+    }
+  ],
+  "lukiovertailu-high-school-comparison": [
+    {
+      "src": "/images/projects/lukiovertailu-high-school-comparison-1.png",
+      "w": 1390,
+      "h": 1318,
+      "bytes": 84784
+    },
+    {
+      "src": "/images/projects/lukiovertailu-high-school-comparison-2.png",
+      "w": 1214,
+      "h": 1260,
+      "bytes": 29185
+    },
+    {
+      "src": "/images/projects/lukiovertailu-high-school-comparison-3.png",
+      "w": 1070,
+      "h": 1034,
+      "bytes": 552722
+    }
+  ],
+  "runokuu-2020": [
+    {
+      "src": "/images/projects/runokuu-2020-1.png",
+      "w": 640,
+      "h": 454,
+      "bytes": 300819
+    },
+    {
+      "src": "/images/projects/runokuu-2020-2.png",
+      "w": 364,
+      "h": 640,
+      "bytes": 424435
+    }
+  ],
+  "stt-tarkkailija": [
+    {
+      "src": "/images/projects/stt-tarkkailija-1.png",
+      "w": 1964,
+      "h": 1386,
+      "bytes": 18534
+    },
+    {
+      "src": "/images/projects/stt-tarkkailija-2.png",
+      "w": 1872,
+      "h": 1218,
+      "bytes": 13216
+    },
+    {
+      "src": "/images/projects/stt-tarkkailija-3.png",
+      "w": 1004,
+      "h": 1408,
+      "bytes": 52015
+    }
+  ],
+  "veikkaus-beneficiaries": [
+    {
+      "src": "/images/projects/veikkaus-beneficiaries-1.png",
+      "w": 1912,
+      "h": 1416,
+      "bytes": 34158
+    },
+    {
+      "src": "/images/projects/veikkaus-beneficiaries-2.png",
+      "w": 880,
+      "h": 1146,
+      "bytes": 146907
+    },
+    {
+      "src": "/images/projects/veikkaus-beneficiaries-3.png",
+      "w": 644,
+      "h": 540,
+      "bytes": 132921
+    }
+  ],
+  "visualizing-government": [
+    {
+      "src": "/images/projects/visualizing-government-1.svg",
+      "w": 900,
+      "h": 1179,
+      "bytes": 974508
+    },
+    {
+      "src": "/images/projects/visualizing-government-2.png",
+      "w": 2880,
+      "h": 1770,
+      "bytes": 96192
+    },
+    {
+      "src": "/images/projects/visualizing-government-3.png",
+      "w": 2880,
+      "h": 2048,
+      "bytes": 98225
+    }
+  ]
+}

@@ -6,6 +6,17 @@ publishedAt: 2020-01-01
 summary: "Käkriäinen is a magazine by students at the University of Helsinki students of Finnish Literature. It contains literary ciritiques, interviews and original cont"
 hasVideo: false
 private: false
+mainImage: /images/projects/kaekriaeinen-1.png
+images:
+  - src: /images/projects/kaekriaeinen-1.png
+    w: 2366
+    h: 1468
+  - src: /images/projects/kaekriaeinen-2.png
+    w: 1190
+    h: 1194
+  - src: /images/projects/kaekriaeinen-3.png
+    w: 2322
+    h: 1370
 ---
 
 With

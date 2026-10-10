@@ -25,7 +25,22 @@ const projects = defineCollection({
       categories: z.array(z.enum(["Web", "Visualization", "Experiment"])),
       publishedAt: z.coerce.date(),
       summary: z.string(),
-      mainImage: image().optional(),
+      // Images live in public/images/projects, downloaded from the Sanity CDN
+      // rather than hotlinked — D1.3 decommissions Sanity, and a hotlink would
+      // keep the dependency alive after the CMS is gone.
+      // Dimensions are carried alongside so pages can reserve space and avoid
+      // layout shift (CLS), which matters more than usual here because the
+      // background shader is already repainting.
+      mainImage: z.string().optional(),
+      images: z
+        .array(
+          z.object({
+            src: z.string(),
+            w: z.number(),
+            h: z.number(),
+          }),
+        )
+        .default([]),
       // D3.3 — build guard. If a private project is ever published, the build
       // fails. Content-side hiding only works with this check.
       private: z.boolean().default(false),

@@ -40,29 +40,34 @@ const projects = all
     }
 
     {
-      projects.map((project) => (
-        <a class="listlink" href={`/${project.data.slug}`}>
-          {project.data.mainImage && (
-            <img
-              src={project.data.mainImage.src}
-              alt=""
-              width="700"
-              height="400"
-              loading="lazy"
-            />
-          )}
+      projects.map((project) => {
+        const imgs = project.data.images ?? [];
+        const main = project.data.mainImage ? imgs[0] : null;
+        return (
+          <a class="listlink" href={`/${project.data.slug}`}>
+            {main && (
+              <img
+                src={main.src}
+                alt=""
+                width={main.w}
+                height={main.h}
+                loading="lazy"
+                decoding="async"
+              />
+            )}
 
-          <div class="listtitle">
-            {/* recovered.md#R1.4 — category prefix, and a lock when the title
-                contains "agency". The legacy isAgency() helper is reproduced
-                exactly, case-insensitive substring. */}
-            <span>
-              {project.data.title.toLowerCase().includes("agency") ? "🔒 " : ""}
-            </span>
-            {project.data.categories[0]}: {project.data.title} →{" "}
-          </div>
-        </a>
-      ))
+            <div class="listtitle">
+              {/* recovered.md#R1.4 — category prefix, and a lock when the title
+                  contains "agency". The legacy isAgency() helper is reproduced
+                  exactly, case-insensitive substring. */}
+              <span>
+                {project.data.title.toLowerCase().includes("agency") ? "🔒 " : ""}
+              </span>
+              {project.data.categories[0]}: {project.data.title} →{" "}
+            </div>
+          </a>
+        );
+      })
     }
   </div>
 </Layout>

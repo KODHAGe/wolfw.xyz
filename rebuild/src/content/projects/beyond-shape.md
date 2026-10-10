@@ -6,6 +6,17 @@ publishedAt: 2020-01-01
 summary: "My thesis project for MA in New Media Production at Aalto University."
 hasVideo: false
 private: false
+mainImage: /images/projects/beyond-shape-1.png
+images:
+  - src: /images/projects/beyond-shape-1.png
+    w: 3508
+    h: 2480
+  - src: /images/projects/beyond-shape-2.png
+    w: 2560
+    h: 1440
+  - src: /images/projects/beyond-shape-3.png
+    w: 1920
+    h: 1080
 ---
 
 More content will follow, watch this space.

@@ -342,3 +342,9 @@ function hexToRgb(hex: string): [number, number, number] {
   const v = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16);
   return [((v >> 16) & 255) / 255, ((v >> 8) & 255) / 255, (v & 255) / 255];
 }
+
+// Exported for the probe (see src/pages/probe.astro and .opencode/agent/gpu-debugger.md).
+// The shader strings are otherwise module-private, which makes them impossible
+// to test without rendering the whole page.
+export const SHADERS = { vert: VERT, frag: FRAG };
+export { ELEMENTS };

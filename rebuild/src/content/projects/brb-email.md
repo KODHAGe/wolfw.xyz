@@ -6,6 +6,14 @@ publishedAt: 2020-01-01
 summary: "A custom photo/microblog for an around-the-world journey, created in collaboration with"
 hasVideo: false
 private: false
+mainImage: /images/projects/brb-email-1.png
+images:
+  - src: /images/projects/brb-email-1.png
+    w: 1218
+    h: 1750
+  - src: /images/projects/brb-email-2.png
+    w: 2180
+    h: 1706
 ---
 
 karkkikammo

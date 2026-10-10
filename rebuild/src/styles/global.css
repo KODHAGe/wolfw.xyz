@@ -121,16 +121,45 @@ main.whitebox {
   color: inherit;
 }
 
+/* Legacy rendered list thumbnails as fluid images at max width 700
+   (work.js:46, art.js:46). Reserved 2:1 box so the grid does not jump as
+   images decode — recovered.md#R3/R1.4. */
 .listlink img {
-  border: 1px solid var(--c-accent-muted);
-  max-width: 100%;
+  display: block;
+  width: 100%;
+  max-width: 34rem;
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
   height: auto;
+  border: 1px solid var(--c-accent-muted);
+  background: var(--c-accent-muted);
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.listlink:hover img,
+.listlink:focus-visible img {
+  opacity: 0.82;
 }
 
 .listtitle {
   margin-top: var(--space-2);
   font-size: var(--fs-small);
   letter-spacing: 0.02em;
+}
+
+.project-images {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: var(--space-5) 0;
+}
+
+.project-images img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--c-accent-muted);
+  background: var(--c-accent-muted);
 }
 
 /* ---- CV. recovered.md#R4 ------------------------------------------------- */

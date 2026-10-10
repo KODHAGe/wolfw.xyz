@@ -44,5 +44,32 @@ const { Content } = await render(project);
 
   <div class="project-body">
     <Content />
+
+    {/*
+      Project imagery, recovered from the Sanity CDN (spec/gaps.md#G3).
+
+      Legacy rendered body images at width 640 via
+      @sanity/block-content-to-react (projectPage.js:32-37). These are served at
+      their own intrinsic size with width/height set so the browser reserves
+      space — which matters more than usual here because the background shader
+      is already repainting and layout shift is conspicuous.
+
+      Only rendered when the body did not already embed them; the recovery strips
+      inline markup, so a duplicate here would double-print.
+    */}
+    {project.data.images.length > 0 && (
+      <div class="project-images">
+        {project.data.images.map((img) => (
+          <img
+            src={img.src}
+            alt=""
+            width={img.w}
+            height={img.h}
+            loading="lazy"
+            decoding="async"
+          />
+        ))}
+      </div>
+    )}
   </div>
 </Layout>

@@ -6,6 +6,17 @@ publishedAt: 2020-01-01
 summary: "I worked on the concept, design and development of the first prototype of the STT Tarkkailija analytics and monitoring tool, that would later go on to receive g"
 hasVideo: false
 private: false
+mainImage: /images/projects/stt-tarkkailija-1.png
+images:
+  - src: /images/projects/stt-tarkkailija-1.png
+    w: 1964
+    h: 1386
+  - src: /images/projects/stt-tarkkailija-2.png
+    w: 1872
+    h: 1218
+  - src: /images/projects/stt-tarkkailija-3.png
+    w: 1004
+    h: 1408
 ---
 
 Google DNI
