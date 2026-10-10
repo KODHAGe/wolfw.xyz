@@ -2,52 +2,47 @@
 /*
  * Home. recovered.md#R3.
  *
- * All content hardcoded in index.js — no query, no CMS. Preserved as-is: the
- * copy is the copy.
+ * All content hardcoded in index.js — no query, no CMS. Copy is the copy.
  *
- * Buttons are where D4.5 first shows. The legacy site had plain CSS hover and
- * active transitions with no motion system behind them; here they reference
- * tokens, and the primary pair carries the gooey layer.
+ * Structure follows the legacy layout exactly: a .double-button row for work
+ * and art, then full-width block buttons for about and cv, then the two
+ * external profiles, then the text link.
  */
 import Layout from "../layouts/Layout.astro";
 import Button from "../components/Button.astro";
 ---
 
 <Layout title="home">
-  <h1 class="site-title">wolfw.xyz</h1>
+  <h1>wolfw.xyz</h1>
 
   <div class="description">
     Hi, I'm Wolf W<br />
     I make web happen - both beautiful and useful.
   </div>
 
-  <div class="main">
-    <div class="double-button">
-      <Button href="/work" primary>work</Button>
-      <Button href="/art" primary>art</Button>
-    </div>
-
-    <Button href="/about">about</Button>
-    <Button href="/cv" locked>cv</Button>
-
-    <Button
-      href="https://github.com/KODHAGe"
-      variant="ghost"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      github
-    </Button>
-
-    <Button
-      href="https://www.linkedin.com/in/wwwolf/"
-      variant="ghost"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      linkedin
-    </Button>
-
-    <Button href="mailto:wolf@grh.fi" variant="text">get in touch</Button>
+  <div class="double-button">
+    <Button href="/work" block>work</Button>
+    <Button href="/art" block>art</Button>
   </div>
+
+  <Button href="/about">about</Button>
+  <Button href="/cv" locked>cv</Button>
+
+  <Button
+    href="https://github.com/KODHAGe"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    github
+  </Button>
+
+  <Button
+    href="https://www.linkedin.com/in/wwwolf/"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    linkedin
+  </Button>
+
+  <a class="textlink" href="mailto:wolf@grh.fi">get in touch</a>
 </Layout>

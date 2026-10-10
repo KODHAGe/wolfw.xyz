@@ -43,7 +43,14 @@ float hash(float n) { return fract(n * 0.1031 + 0.1031); }
 float strokeAt(vec2 q, float freq, float amp, float top, float shift,
                float total, float halfWidth) {
   // Bounds. The legacy stopped at totalWidth (backgroundElement.js:49).
-  if (q.x < 0.0 || q.x > total) return 1e4;
+  //
+  // CRITICAL: this returns 0, NOT a large sentinel. The caller uses the return
+  // value directly as line intensity, so returning 1e4 here made every
+  // out-of-range pixel contribute 1e4 to the max() — which saturated the whole
+  // canvas opaque and read as "the shader draws nothing" (or as a black sheet,
+  // once it was placed over the white one). This was the actual bug behind
+  // six failed screenshot cycles.
+  if (q.x < 0.0 || q.x > total) return 0.0;
 
   float angle = (q.x / freq) * 6.28318530718;
   float y = top + sin(angle) * (amp * 0.5);
@@ -99,7 +106,7 @@ void main() {
       // so gridDistance offsets vertically and offset shifts horizontally.
       vec2 gg = q - vec2(offs * gi, 0.0);
 
-      float line = strokeAt(gg, freq, amp, 0.0, 0.0, total * 2.2, max(width * 0.75, 1.2));
+      float line = strokeAt(gg, freq, amp, 0.0, 0.0, total * 1.25, max(width * 0.5, 0.6));
 
       // Dash pattern along the curve, stroke-dasharray semantics.
       float period = max(dash, 4.0);
@@ -108,15 +115,15 @@ void main() {
 
       // Frame the content. The legacy had no falloff at all; this is new, and
       // it is what makes the field readable behind a CV rather than fighting it.
-      float edge = 1.0 - smoothstep(0.55, 1.45, length(uv - 0.5) * 1.7);
+      float edge = 1.0 - smoothstep(0.30, 1.10, length(uv - 0.5) * 1.8);
       // Protect the reading column. Softened from 0.72 — the first pass
       // suppressed so much of the field that only the corners survived.
-      float textZone = smoothstep(0.0, 0.40, uv.x) * (1.0 - smoothstep(0.62, 0.98, uv.y));
-      line *= edge * (1.0 - 0.35 * textZone);
+      float textZone = smoothstep(0.0, 0.52, uv.x) * (1.0 - smoothstep(0.55, 0.92, uv.y));
+      line *= edge * (1.0 - 0.72 * textZone);
 
       acc = max(acc, line);
     }
   }
 
   outColor = vec4(u_accent * acc, clamp(acc, 0.0, 1.0) * u_alpha);
-}`;function _(o,t,a){const n=o.createShader(t);if(o.shaderSource(n,a),o.compileShader(n),!o.getShaderParameter(n,o.COMPILE_STATUS))throw new Error(o.getShaderInfoLog(n)??"shader compile failed");return n}function S(o){const t=o.getContext("webgl2",{alpha:!0,antialias:!1,premultipliedAlpha:!0,powerPreference:"low-power"});if(!t)return o.dataset.fallback="true",()=>{};let a;try{if(a=t.createProgram(),t.attachShader(a,_(t,t.VERTEX_SHADER,k)),t.attachShader(a,_(t,t.FRAGMENT_SHADER,L)),t.linkProgram(a),!t.getProgramParameter(a,t.LINK_STATUS))throw new Error(t.getProgramInfoLog(a)??"link failed")}catch(e){return console.warn("[background] shader setup failed, falling back",e),o.dataset.fallback="true",()=>{}}t.useProgram(a);const n=window.matchMedia("(prefers-reduced-motion: reduce)");let l=n.matches?1:0;n.addEventListener("change",e=>{l=e.matches?1:0,l&&(h=0)});const g=e=>{const r=t.getUniformLocation(a,e);return r===null&&console.warn(`[background] uniform ${e} not found`),r},s=new Float32Array(56);v.forEach((e,r)=>{const i=r*8;s[i+0]=e.rotation,s[i+1]=e.width,s[i+2]=e.dash,s[i+3]=e.freq,s[i+4]=e.amp,s[i+5]=e.grid,s[i+6]=e.offset,s[i+7]=e.total}),t.uniform1fv(g("u_p[0]"),s);const c=new Float32Array(14);v.forEach((e,r)=>{c[r*2]=e.posX,c[r*2+1]=e.posY}),t.uniform1fv(g("u_pos[0]"),c);const x=getComputedStyle(document.documentElement).getPropertyValue("--c-field").trim(),u=A(x);t.uniform3f(t.getUniformLocation(a,"u_accent"),u[0],u[1],u[2]),t.uniform1f(t.getUniformLocation(a,"u_alpha"),.85),t.uniform1f(t.getUniformLocation(a,"u_reduced"),l);const q=t.getUniformLocation(a,"u_resolution"),w=t.getUniformLocation(a,"u_time"),E=t.getUniformLocation(a,"u_pixelRatio");let f=0,h=performance.now(),d=!0;function m(){const e=Math.min(window.devicePixelRatio||1,2),r=Math.floor(o.clientWidth*e),i=Math.floor(o.clientHeight*e);(o.width!==r||o.height!==i)&&(o.width=r,o.height=i,t.viewport(0,0,r,i),t.uniform2f(q,r,i),t.uniform1f(E,e))}function p(e){d&&(m(),t.uniform1f(w,(e-h)/1e3),t.drawArrays(t.TRIANGLES,0,3),f=requestAnimationFrame(p))}m(),t.uniform1f(w,0),t.drawArrays(t.TRIANGLES,0,3),l||(f=requestAnimationFrame(p)),document.addEventListener("visibilitychange",()=>{document.hidden?(d=!1,cancelAnimationFrame(f)):!l&&d===!1&&(d=!0,h=performance.now()-1e3,f=requestAnimationFrame(p))});const b=new ResizeObserver(m);return b.observe(o),()=>{d=!1,cancelAnimationFrame(f),b.disconnect(),t.getExtension("WEBGL_lose_context")?.loseContext()}}function A(o){const t=o.replace("#",""),a=parseInt(t.length===3?t.split("").map(n=>n+n).join(""):t,16);return[(a>>16&255)/255,(a>>8&255)/255,(a&255)/255]}const y=document.getElementById("background");if(y instanceof HTMLCanvasElement){const o=S(y);document.addEventListener("astro:before-swap",o,{once:!0})}
+}`;function y(o,t,a){const n=o.createShader(t);if(o.shaderSource(n,a),o.compileShader(n),!o.getShaderParameter(n,o.COMPILE_STATUS))throw new Error(o.getShaderInfoLog(n)??"shader compile failed");return n}function A(o){const t=o.getContext("webgl2",{alpha:!0,antialias:!1,premultipliedAlpha:!0,powerPreference:"low-power"});if(!t)return o.dataset.fallback="true",()=>{};let a;try{if(a=t.createProgram(),t.attachShader(a,y(t,t.VERTEX_SHADER,k)),t.attachShader(a,y(t,t.FRAGMENT_SHADER,L)),t.linkProgram(a),!t.getProgramParameter(a,t.LINK_STATUS))throw new Error(t.getProgramInfoLog(a)??"link failed")}catch(e){return console.warn("[background] shader setup failed, falling back",e),o.dataset.fallback="true",()=>{}}t.useProgram(a);const n=window.matchMedia("(prefers-reduced-motion: reduce)");let l=n.matches?1:0;n.addEventListener("change",e=>{l=e.matches?1:0,l&&(u=0)});const g=e=>{const r=t.getUniformLocation(a,e);return r===null&&console.warn(`[background] uniform ${e} not found`),r},s=new Float32Array(56);v.forEach((e,r)=>{const i=r*8;s[i+0]=e.rotation,s[i+1]=e.width,s[i+2]=e.dash,s[i+3]=e.freq,s[i+4]=e.amp,s[i+5]=e.grid,s[i+6]=e.offset,s[i+7]=e.total}),t.uniform1fv(g("u_p[0]"),s);const c=new Float32Array(14);v.forEach((e,r)=>{c[r*2]=e.posX,c[r*2+1]=e.posY}),t.uniform1fv(g("u_pos[0]"),c);const x=getComputedStyle(document.documentElement).getPropertyValue("--c-field").trim(),h=S(x);t.uniform3f(t.getUniformLocation(a,"u_accent"),h[0],h[1],h[2]),t.uniform1f(t.getUniformLocation(a,"u_alpha"),.5),t.uniform1f(t.getUniformLocation(a,"u_reduced"),l);const q=t.getUniformLocation(a,"u_resolution"),w=t.getUniformLocation(a,"u_time"),E=t.getUniformLocation(a,"u_pixelRatio");let f=0,u=performance.now(),d=!0;function m(){const e=Math.min(window.devicePixelRatio||1,2),r=Math.floor(o.clientWidth*e),i=Math.floor(o.clientHeight*e);(o.width!==r||o.height!==i)&&(o.width=r,o.height=i,t.viewport(0,0,r,i),t.uniform2f(q,r,i),t.uniform1f(E,e))}function p(e){d&&(m(),t.uniform1f(w,(e-u)/1e3),t.drawArrays(t.TRIANGLES,0,3),f=requestAnimationFrame(p))}m(),t.uniform1f(w,0),t.drawArrays(t.TRIANGLES,0,3),l||(f=requestAnimationFrame(p)),document.addEventListener("visibilitychange",()=>{document.hidden?(d=!1,cancelAnimationFrame(f)):!l&&d===!1&&(d=!0,u=performance.now()-1e3,f=requestAnimationFrame(p))});const b=new ResizeObserver(m);return b.observe(o),()=>{d=!1,cancelAnimationFrame(f),b.disconnect(),t.getExtension("WEBGL_lose_context")?.loseContext()}}function S(o){const t=o.replace("#",""),a=parseInt(t.length===3?t.split("").map(n=>n+n).join(""):t,16);return[(a>>16&255)/255,(a>>8&255)/255,(a&255)/255]}const _=document.getElementById("background");if(_ instanceof HTMLCanvasElement){const o=A(_);document.addEventListener("astro:before-swap",o,{once:!0})}

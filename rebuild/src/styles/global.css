@@ -1,318 +1,407 @@
 /*
  * Global styles.
  *
- * Ported from the legacy layout.css (142 lines, unspec'd in the spec —
- * gaps.md#G4). Selector names and structure are preserved from the recovered
- * zone so parity checking against behavior.feature stays meaningful.
+ * Transcribed from the legacy site's own served CSS:
+ *   https://wolfw.xyz/styles.16f5a2485ddb20f25f1e.css  (fetched 2026-10-10)
+ * plus the CSS modules in the legacy repository.
+ *
+ * Rule: where the legacy has a value, use it. Where it does not, say so in a
+ * comment rather than inventing one. The first rebuild invented a whole design
+ * and the divergence was invisible until it was compared against the original.
  */
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+/* ---- Page: purple, with a white sheet floating inset ---------------------- */
 
 html {
-  -webkit-text-size-adjust: 100%;
+  background-color: var(--c-page);
 }
 
 body {
-  margin: 0;
-  min-height: 100vh;
   font-family: var(--font-mono);
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
-  color: var(--c-fg);
+  margin-top: 1rem; /* legacy body { margin-top:1rem } */
+  color: var(--c-ink);
+  /* Legacy sets no background on body; the purple comes from html. */
   background: transparent;
-  /* Legacy had no scroll-driven behaviour. D4.2 adds it: reduced-motion is
-     already neutralised in tokens.css. */
-  scroll-behavior: smooth;
+  min-height: 100vh;
+}
+
+a {
+  color: #000; /* legacy a { color:#000 } */
+  text-decoration: underline; /* legacy .textlink,a { text-decoration:underline } */
+}
+
+/* legacy main { margin:auto; max-width:640px; text-align:center; padding:2rem;
+                 position:relative; z-index:1 }
+   text-align:center is the load-bearing part — without it every element hugs
+   the left edge, which is what "everything flows from the left" meant. */
+main {
+  margin: auto;
+  max-width: var(--measure-main);
+  text-align: center;
+  padding: var(--pad-main);
+  position: relative;
+  z-index: 1;
+}
+
+main p a {
+  color: #000;
+  text-decoration: underline;
 }
 
 h1,
 h2,
 h3 {
-  line-height: var(--lh-tight);
   font-weight: 400;
-  margin: 0 0 var(--space-4);
-}
-
-h1 {
-  font-size: var(--fs-title);
 }
 
 p {
-  max-width: var(--measure);
-  margin: 0 0 var(--space-3);
+  margin: 0 0 var(--space-2);
 }
 
-a {
-  color: var(--c-fg);
+/* ---- Buttons --------------------------------------------------------------
+ * The original button is a FULL-WIDTH BLOCK with a hard black offset shadow
+ * that compresses on hover and collapses on press. That shadow transition IS
+ * the legacy animation and it is reproduced exactly. The earlier rebuild used
+ * small centred pills, which was simply a different design.
+ * -------------------------------------------------------------------------- */
+
+.button {
+  border: 1px solid #000;
+  display: block;
+  padding: var(--pad-item);
+  margin-top: var(--space-2);
+  box-shadow: 4px 4px #000;
+  background-color: #fff;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  /* legacy: transition box-shadow .5s */
+  transition: box-shadow 0.5s;
 }
 
-a:focus-visible {
-  outline: 2px solid var(--c-accent-bright);
+.button:hover {
+  cursor: pointer;
+  box-shadow: 2px 2px #000;
+  transition: box-shadow 0.5s;
+}
+
+.button:active {
+  box-shadow: 0 0 #000;
+  transition: box-shadow 0.25s;
+}
+
+.button:focus-visible {
+  outline: 2px solid #000;
   outline-offset: 3px;
 }
 
-/* ---- Layout modes. recovered.md#R8.1 -------------------------------------- */
-
-main {
-  max-width: 60rem;
-  margin: 0 auto;
-  padding: var(--space-6) var(--space-4) var(--space-7);
+a.button {
+  text-decoration: none;
 }
 
-/* The alternate mode used by /about, /cv and the password gate. */
-main.whitebox {
-  background: var(--c-whitebox-bg);
-  border: 1px solid var(--c-accent-muted);
-}
-
-/* ---- Home page. recovered.md#R3 ------------------------------------------ */
-
-.site-title {
-  margin-bottom: var(--space-4);
-}
-
-.description {
-  font-size: var(--fs-large);
-  margin-bottom: var(--space-5);
-}
-
-.main {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-}
-
+/* legacy .doubleButton { display:flex; justify-content:space-between } and
+ * .doubleButton .button { width:calc(50% - 3rem); align-self:flex-start } */
 .double-button {
   display: flex;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
+  justify-content: space-between;
 }
 
-/* ---- Back link. recovered.md#R2.4 --------------------------------------- */
+.double-button .button {
+  width: calc(50% - 3rem);
+  align-self: flex-start;
+}
+
+/* legacy .textlink { margin-top:2rem; display:inline-block } */
+.textlink {
+  margin-top: var(--space-3);
+  display: inline-block;
+}
+
+/* legacy .description { margin-bottom:2rem } */
+.description {
+  margin-bottom: var(--space-3);
+}
+
+/* ---- Back link ------------------------------------------------------------
+ * legacy .backlink { position:fixed; left:2rem; color:#000; text-decoration:none }
+ * It is fixed to the viewport, NOT in flow. The rebuild put it in flow, which
+ * pushed every heading down by a line.
+ * -------------------------------------------------------------------------- */
 
 .backlink {
-  display: inline-block;
-  margin-bottom: var(--space-4);
+  color: #000;
   text-decoration: none;
-  transition: transform var(--dur-quick) var(--ease-out);
+  position: fixed;
+  left: 2rem;
 }
 
 .backlink:hover {
-  transform: translateX(-4px);
+  text-decoration: underline;
 }
 
-/* ---- Project lists ------------------------------------------------------- */
+/* ---- Layout modes ---------------------------------------------------------
+ * legacy .whitebox { background:#fff }
+ * -------------------------------------------------------------------------- */
+
+main.whitebox {
+  background: #fff;
+}
+
+/* ---- Project listings ------------------------------------------------------
+ * legacy .listlink { padding:1rem; max-width:640px; display:block;
+ *                     text-decoration:none }
+ *       img         { position:relative; width:100% }
+ *       .listtitle  { color:black; text-decoration:none; margin-bottom:2rem;
+ *                     display:inline-block; background-color:white;
+ *                     padding:.5rem; margin-top:-3rem }
+ *
+ * The title is a white BADGE overlapping the image (margin-top:-3rem), not
+ * text beneath it. The rebuild put it underneath.
+ * -------------------------------------------------------------------------- */
 
 .list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  margin-top: var(--space-5);
+  margin-top: var(--space-2);
 }
 
 .listlink {
+  padding: var(--pad-item);
+  max-width: var(--measure-text);
   display: block;
   text-decoration: none;
   color: inherit;
 }
 
-/* Legacy rendered list thumbnails as fluid images at max width 700
-   (work.js:46, art.js:46). Reserved 2:1 box so the grid does not jump as
-   images decode — recovered.md#R3/R1.4. */
 .listlink img {
+  position: relative;
   display: block;
   width: 100%;
-  max-width: 34rem;
-  aspect-ratio: 2 / 1;
-  object-fit: cover;
+  /* Intrinsic aspect preserved; no forced crop. The legacy reserved nothing
+     and shifted as images decoded, but that is a defect not a feature — the
+     width/height attributes in frontmatter now prevent it. */
   height: auto;
-  border: 1px solid var(--c-accent-muted);
-  background: var(--c-accent-muted);
-  transition: opacity var(--dur-base) var(--ease-out);
-}
-
-.listlink:hover img,
-.listlink:focus-visible img {
-  opacity: 0.82;
 }
 
 .listtitle {
-  margin-top: var(--space-2);
-  font-size: var(--fs-small);
-  letter-spacing: 0.02em;
+  color: #000;
+  text-decoration: none;
+  margin-bottom: var(--space-3);
+  display: inline-block;
+  background-color: #fff;
+  padding: var(--space-1);
+  margin-top: -3rem;
+  position: relative;
 }
 
-.project-images {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  margin: var(--space-5) 0;
+/* ---- Project detail --------------------------------------------------------
+ * legacy .projectBlock { text-align:left; padding:1rem; background-color:#fff }
+ *       .projectBlock figure { margin:0 0 2rem;
+ *         box-shadow:5px 5px 10px #f5f5f5, -5px -5px 10px #fafafa }
+ *       .projectVideo { margin:1rem; width:calc(100% - 2rem)!important;
+ *                       max-width:640px!important }
+ * Note text-align:left — the detail page is the exception to centred main.
+ * -------------------------------------------------------------------------- */
+
+.project-block {
+  text-align: left;
+  padding: var(--pad-item);
+  background-color: #fff;
 }
 
-.project-images img {
+.project-block figure {
+  margin: 0 0 var(--space-3);
+  box-shadow: 5px 5px 10px #f5f5f5, -5px -5px 10px #fafafa;
+}
+
+.project-block img {
   display: block;
   width: 100%;
   height: auto;
-  border: 1px solid var(--c-accent-muted);
-  background: var(--c-accent-muted);
+  margin: 0 0 var(--space-3);
 }
 
-/* ---- CV. recovered.md#R4 ------------------------------------------------- */
+.project-video {
+  margin: var(--space-2);
+  width: calc(100% - 2rem) !important;
+  max-width: var(--measure-video) !important;
+}
+
+/* ---- CV --------------------------------------------------------------------
+ * legacy .cvlistitem { margin-top:2.5rem; text-align:left }
+ *       .timetag { font-weight:bold; margin-bottom:.5rem }
+ *       .position { font-weight:bold; margin-bottom:1rem }
+ *       .description { margin-bottom:1rem }
+ *       .clients { margin-bottom:.5rem; font-style:italic }
+ *       .keywords { font-weight:bold }
+ *       .cvListTitle { margin-top:4rem; font-size:1.5rem }
+ * The CV is left-aligned even though main is centred. That asymmetry is
+ * deliberate in the original.
+ * -------------------------------------------------------------------------- */
 
 .cvlist {
-  margin-top: var(--space-5);
+  text-align: left;
 }
 
 .cvlisttitle {
-  margin: var(--space-5) 0 var(--space-3);
-  padding-bottom: var(--space-1);
-  border-bottom: 1px solid var(--c-accent-muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-size: var(--fs-small);
+  margin-top: var(--space-5);
+  font-size: var(--fs-cv-title);
+  text-align: left;
 }
 
 .cvlistitem {
-  display: grid;
-  grid-template-columns: 9rem 1fr;
-  gap: var(--space-1) var(--space-4);
-  padding: var(--space-3) 0;
+  margin-top: var(--space-4);
+  text-align: left;
 }
 
-.timetag,
-.company,
+.timetag {
+  font-weight: bold;
+  margin-bottom: var(--space-1);
+}
+
 .position {
-  font-size: var(--fs-small);
+  font-weight: bold;
+  margin-bottom: var(--space-2);
 }
 
-.company {
-  color: var(--c-accent);
+.description {
+  margin-bottom: var(--space-2);
+  text-align: left;
+}
+
+.clients {
+  margin-bottom: var(--space-1);
+  font-style: italic;
+}
+
+.keywords {
+  font-weight: bold;
 }
 
 .break-after {
-  height: var(--space-4);
+  height: var(--space-3);
 }
 
-.print-button {
-  margin-top: var(--space-5);
-}
-
-.caption {
-  font-size: var(--fs-small);
-  color: color-mix(in srgb, var(--c-fg) 65%, transparent);
-  margin-bottom: var(--space-4);
-}
-
-/* ---- Facts widget. recovered.md#R7 --------------------------------------- */
+/* ---- Facts ----------------------------------------------------------------
+ * legacy .fact { height:3rem; font-weight:700; font-size:1.2rem;
+ *                 margin-bottom:3rem }
+ * -------------------------------------------------------------------------- */
 
 .fact {
-  font-size: var(--fs-large);
-  min-height: 3lh;
+  height: 3rem;
+  font-weight: bold;
+  font-size: var(--fs-fact);
+  margin-bottom: var(--space-5);
 }
 
 .facts-progress {
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.05em;
 }
 
-/* ---- Project body. projectPage.css port ---------------------------------- */
+/* ---- Misc ---------------------------------------------------------------- */
 
-.project-body {
-  max-width: var(--measure);
+.caption {
+  font-size: var(--fs-caption);
+  margin-top: var(--space-1);
 }
 
-.project-body img {
-  max-width: 100%;
-  height: auto;
+.print-button {
+  margin-top: var(--space-3);
+  font-family: var(--font-mono);
 }
 
-.project-body pre {
-  overflow-x: auto;
-  padding: var(--space-3);
-  background: var(--c-accent-muted);
+.gate-links {
+  margin-top: var(--space-2);
 }
 
-/* ---- Responsive.
- * The legacy site had exactly one breakpoint at 600px (gaps.md#G7). Kept, so
- * the mobile layout stays comparable during parity checking.
- * ------------------------------------------------------------------------- */
-
+/* legacy @media screen and (max-width:600px) — the only breakpoint the original
+ * had (spec/gaps.md#G7). Kept at the same value so mobile parity is checkable. */
 @media screen and (max-width: 600px) {
   main {
-    padding: var(--space-4) var(--space-3) var(--space-6);
+    padding: var(--space-3);
   }
 
-  .cvlistitem {
-    grid-template-columns: 1fr;
+  .backlink {
+    position: static;
+    display: inline-block;
+    margin-bottom: var(--space-2);
   }
 
   .double-button {
     flex-wrap: wrap;
   }
+
+  .double-button .button {
+    width: 100%;
+  }
+
+  .project-video {
+    margin: 0 0 var(--space-2);
+    width: 100% !important;
+  }
 }
 
-/* ---- Print. recovered.md#R4.4, gaps.md#G10 -------------------------------
- * The legacy site had @page and @media print blocks; the CV is genuinely meant
- * to be printed, so the print button is real functionality rather than
- * decoration.
- * ------------------------------------------------------------------------- */
+/* ---- Print ----------------------------------------------------------------
+ * Transcribed from the legacy @media print block. Every rule here exists in
+ * the original; the rebuild previously invented its own.
+ * -------------------------------------------------------------------------- */
 
 @page {
-  margin: 2cm;
+  margin: 0; /* legacy @page { margin:0 } */
 }
 
 @media print {
-  /* The background shader and every interactive affordance have no meaning on
-   * paper. The legacy print stylesheet suppressed them; so does this. */
+  body {
+    font-size: var(--fs-print) !important;
+  }
+
+  /* The field, buttons and back link have no meaning on paper. */
   #background,
-  .btn,
+  .button,
   .backlink,
   .print-button {
     display: none !important;
+    height: 0 !important;
   }
 
-  main {
-    max-width: none;
-    padding: 0;
+  footer,
+  header {
+    position: fixed !important;
   }
 
-  main.whitebox {
-    background: none;
-    border: 0;
+  header {
+    top: 0 !important;
   }
 
-  /* Keep CV entries from splitting across pages. */
+  .whitebox {
+    width: var(--measure-print-whitebox) !important;
+  }
+
+  a {
+    color: #000 !important;
+    text-decoration: none !important;
+  }
+
+  /* legacy .break-after { page-break-after:always!important } — the CV breaks
+   * between sections, not between every entry. */
+  .break-after {
+    page-break-after: always !important;
+  }
+
   .cvlistitem {
+    margin-top: 1.5rem !important;
     break-inside: avoid;
-    padding: var(--space-2) 0;
-  }
-
-  a[href^="http"]::after {
-    content: " (" attr(href) ")";
-    font-size: var(--fs-small);
   }
 }
 
-/* ---- View transition opt-in. D4.6 ---------------------------------------
- * Cross-document view transitions are Chromium and Safari 18.2+ only. Firefox
- * does not implement them at all.
+/* ---- View transition opt-in (D4.6) ----------------------------------------
+ * Cross-document view transitions are Chromium and Safari 18.2+ only; Firefox
+ * does not implement them. Two independent fallbacks: where the native API
+ * exists these rules drive it; where it does not, Astro's <ClientRouter />
+ * simulates it; with JS off, plain navigation. All are valid outcomes.
  *
- * Two independent fallbacks, in order:
- *   1. Where the native API exists, these rules drive it.
- *   2. Where it does not, Astro's <ClientRouter /> simulates transitions
- *      (the page emits astro-view-transitions-fallback="animate").
- *   3. Where JS is off entirely, plain navigation. A valid outcome, not a
- *      failure.
- *
- * The reduced-motion block opts OUT of the transition entirely rather than
- * making it fast, so a visitor who asked for less motion never gets an animated
- * page change at all.
- * ------------------------------------------------------------------------- */
+ * Reduced motion opts OUT at the at-rule level rather than making it fast.
+ * -------------------------------------------------------------------------- */
 
 @view-transition {
   navigation: auto;
@@ -324,20 +413,14 @@ main.whitebox {
   }
 }
 
-/* ---- View transition choreography. D4.6 ----------------------------------
- * Shared-axis style rather than the default cross-fade: the outgoing page
- * leaves on one axis, the incoming arrives on the other. Durations come from
- * tokens so navigation feels like the same system as in-page motion.
- * ------------------------------------------------------------------------- */
-
-@keyframes slide-out-left {
+@keyframes vt-out-left {
   to {
     opacity: 0;
     transform: translateX(-2rem);
   }
 }
 
-@keyframes slide-in-right {
+@keyframes vt-in-right {
   from {
     opacity: 0;
     transform: translateX(2rem);
@@ -345,15 +428,13 @@ main.whitebox {
 }
 
 ::view-transition-old(root) {
-  animation: 240ms var(--ease-in-out) both slide-out-left;
+  animation: 240ms var(--ease-in-out) both vt-out-left;
 }
 
 ::view-transition-new(root) {
-  animation: var(--dur-transition) var(--ease-out) 60ms both slide-in-right;
+  animation: var(--dur-transition) var(--ease-out) 60ms both vt-in-right;
 }
 
-/* Reduced motion: no axis movement, just a fast cross-fade. tokens.css has
- * already collapsed the durations to 1ms, so these inherit it. */
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root),
   ::view-transition-new(root) {

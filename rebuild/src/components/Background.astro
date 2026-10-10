@@ -1,58 +1,56 @@
 ---
 /*
- * Background — the one island that owns a WebGL context.
+ * Background.
  *
- * D4.4 / D4.11. Mounts the shader, and is deliberately the only thing on the
- * page that touches WebGL. Button effects composite into this context later
- * rather than opening their own — browsers cap contexts per page (commonly 16)
- * and the failure mode of exceeding it is a black canvas, not an exception.
+ * The legacy construction, which the first rebuild got wrong: the PAGE is
+ * purple (#bc89ff) and a WHITE SHEET floats inset from the viewport edges by
+ * .25rem, so the purple reads as a border around it.
  *
- * Mounts eagerly rather than on visibility. This is a backdrop, not content: it
- * needs to be up before anyone notices it missing, and gating it on visibility
- * would defeat the point.
+ *   legacy background.module.css:
+ *     .background { height:calc(100% - .5rem); width:calc(100% - .5rem);
+ *                   position:fixed; bottom:0; left:0; margin:.25rem;
+ *                   background-color:white; z-index:0 }
+ *
+ * The sheet is CSS, not shader — it is a solid rect, there is no reason for the
+ * GPU to own it. The shader draws the sine field ON the sheet.
  */
 import "../styles/tokens.css";
 ---
 
-<canvas
-  id="background"
-  class="background-canvas"
-  aria-hidden="true"
-></canvas>
+<div class="sheet" aria-hidden="true">
+  <canvas id="background" class="background-canvas"></canvas>
+</div>
 
 <style>
-  /* The fallback. If WebGL2 is unavailable, mountBackground sets
-     data-fallback and this gradient is the entire visual. Never a black box. */
-  .background-canvas[data-fallback="true"] {
-    background:
-      radial-gradient(
-        ellipse 80% 60% at 50% 40%,
-        color-mix(in srgb, var(--c-accent) 22%, transparent),
-        transparent 70%
-      ),
-      radial-gradient(
-        ellipse 60% 50% at 20% 80%,
-        color-mix(in srgb, var(--c-accent-dim) 16%, transparent),
-        transparent 70%
-      ),
-      var(--c-bg);
+  /* The white sheet. Purple shows through the .25rem inset on all four sides. */
+  .sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: calc(100% - 0.5rem);
+    height: calc(100% - 0.5rem);
+    margin: 0.25rem;
+    background-color: var(--c-sheet);
+    z-index: 0;
+    pointer-events: none;
   }
 
   .background-canvas {
-    position: fixed;
-    inset: 0;
+    display: block;
     width: 100%;
     height: 100%;
-    /* Legacy drew the field as an SVG sibling of <main> (layout.js:13-14),
-       so it sat behind content and took no pointer events. Preserved. */
-    z-index: 0;
-    pointer-events: none;
-    display: block;
   }
 
-  /* Everything else stacks above it. */
-  :global(body > *:not(#background)) {
-    position: relative;
+  /* WebGL unavailable: a static field-ish gradient, never a black box. */
+  .background-canvas[data-fallback="true"] {
+    background: radial-gradient(
+      ellipse 70% 55% at 50% 45%,
+      rgba(0, 0, 0, 0.05),
+      transparent 70%
+    );
+  }
+
+  :global(main) {
     z-index: 1;
   }
 </style>
@@ -63,9 +61,9 @@ import "../styles/tokens.css";
   const canvas = document.getElementById("background");
   if (canvas instanceof HTMLCanvasElement) {
     const dispose = mountBackground(canvas);
-    // Astro's client router swaps the document body on navigation; without this
-    // the old canvas leaks a live WebGL context per page view, which is exactly
-    // how D4.11's budget gets blown.
+    // Astro's client router swaps the document on navigation; without this the
+    // old canvas leaks a live WebGL context per page view, which is exactly how
+    // D4.11's budget gets blown.
     document.addEventListener("astro:before-swap", dispose, { once: true });
   }
 </script>

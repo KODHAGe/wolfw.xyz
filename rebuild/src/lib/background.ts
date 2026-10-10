@@ -91,7 +91,14 @@ float hash(float n) { return fract(n * 0.1031 + 0.1031); }
 float strokeAt(vec2 q, float freq, float amp, float top, float shift,
                float total, float halfWidth) {
   // Bounds. The legacy stopped at totalWidth (backgroundElement.js:49).
-  if (q.x < 0.0 || q.x > total) return 1e4;
+  //
+  // CRITICAL: this returns 0, NOT a large sentinel. The caller uses the return
+  // value directly as line intensity, so returning 1e4 here made every
+  // out-of-range pixel contribute 1e4 to the max() — which saturated the whole
+  // canvas opaque and read as "the shader draws nothing" (or as a black sheet,
+  // once it was placed over the white one). This was the actual bug behind
+  // six failed screenshot cycles.
+  if (q.x < 0.0 || q.x > total) return 0.0;
 
   float angle = (q.x / freq) * 6.28318530718;
   float y = top + sin(angle) * (amp * 0.5);
@@ -147,7 +154,7 @@ void main() {
       // so gridDistance offsets vertically and offset shifts horizontally.
       vec2 gg = q - vec2(offs * gi, 0.0);
 
-      float line = strokeAt(gg, freq, amp, 0.0, 0.0, total * 2.2, max(width * 0.75, 1.2));
+      float line = strokeAt(gg, freq, amp, 0.0, 0.0, total * 1.25, max(width * 0.5, 0.6));
 
       // Dash pattern along the curve, stroke-dasharray semantics.
       float period = max(dash, 4.0);
@@ -156,11 +163,11 @@ void main() {
 
       // Frame the content. The legacy had no falloff at all; this is new, and
       // it is what makes the field readable behind a CV rather than fighting it.
-      float edge = 1.0 - smoothstep(0.55, 1.45, length(uv - 0.5) * 1.7);
+      float edge = 1.0 - smoothstep(0.30, 1.10, length(uv - 0.5) * 1.8);
       // Protect the reading column. Softened from 0.72 — the first pass
       // suppressed so much of the field that only the corners survived.
-      float textZone = smoothstep(0.0, 0.40, uv.x) * (1.0 - smoothstep(0.62, 0.98, uv.y));
-      line *= edge * (1.0 - 0.35 * textZone);
+      float textZone = smoothstep(0.0, 0.52, uv.x) * (1.0 - smoothstep(0.55, 0.92, uv.y));
+      line *= edge * (1.0 - 0.72 * textZone);
 
       acc = max(acc, line);
     }
@@ -266,7 +273,7 @@ export function mountBackground(canvas: HTMLCanvasElement): () => void {
     .trim();
   const rgb = hexToRgb(fieldColor);
   gl.uniform3f(gl.getUniformLocation(program, "u_accent"), rgb[0], rgb[1], rgb[2]);
-  gl.uniform1f(gl.getUniformLocation(program, "u_alpha"), 0.85);
+  gl.uniform1f(gl.getUniformLocation(program, "u_alpha"), 0.5);
   gl.uniform1f(gl.getUniformLocation(program, "u_reduced"), reduced);
 
   const uRes = gl.getUniformLocation(program, "u_resolution");
