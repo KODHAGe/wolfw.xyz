@@ -58,12 +58,38 @@ import "../styles/tokens.css";
 <script>
   import { mountBackground } from "../lib/background";
 
-  const canvas = document.getElementById("background");
-  if (canvas instanceof HTMLCanvasElement) {
-    const dispose = mountBackground(canvas);
-    // Astro's client router swaps the document on navigation; without this the
-    // old canvas leaks a live WebGL context per page view, which is exactly how
-    // D4.11's budget gets blown.
-    document.addEventListener("astro:before-swap", dispose, { once: true });
+  let dispose: (() => void) | null = null;
+  let mounted: HTMLCanvasElement | null = null;
+
+  function mount() {
+    const canvas = document.getElementById("background");
+    if (!(canvas instanceof HTMLCanvasElement)) return;
+    if (canvas === mounted) return; // same page view — already mounted
+    mounted = canvas;
+    dispose?.();
+    dispose = mountBackground(canvas);
   }
+
+  mount();
+
+  /*
+   * ClientRouter swaps the body on navigation but never re-executes this module:
+   * it is an external ES module, which the browser deduplicates by module map.
+   * The canvas on the new page therefore stayed uninitialised and the field was
+   * blank on every page after the first (design/frontend-architecture.md#A2).
+   * astro:page-load fires after each swap and once on first load — the canvas
+   * guard above makes that double-fire harmless.
+   */
+  document.addEventListener("astro:page-load", mount);
+
+  /*
+   * Swap: release the outgoing canvas's WebGL context before it leaves the DOM,
+   * so a live context is never leaked per navigation. This is how D4.11's
+   * "one shared context per page" stays true across a session.
+   */
+  document.addEventListener("astro:before-swap", () => {
+    dispose?.();
+    dispose = null;
+    mounted = null;
+  });
 </script>

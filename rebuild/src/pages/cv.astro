@@ -11,8 +11,10 @@
  * Gated. See PasswordGate for the honest statement of what that means: the
  * gate controls rendering, not availability. The content is in the page payload.
  */
-import { getCollection } from "astro:content";
+import { getCollection, getEntry } from "astro:content";
 import Layout from "../layouts/Layout.astro";
+import BackLink from "../components/BackLink.astro";
+import Button from "../components/Button.astro";
 import PasswordGate from "../components/PasswordGate.astro";
 
 // D3.2 — password from PUBLIC_CV_PASSWORD. The legacy site read
@@ -23,10 +25,14 @@ import PasswordGate from "../components/PasswordGate.astro";
 const password = import.meta.env.PUBLIC_CV_PASSWORD ?? "";
 
 const sections = (await getCollection("cv")).sort((a, b) => a.data.order - b.data.order);
+
+// D1.1 / frontend-architecture.md §5.3: the identity block is content, not JSX.
+// Verbatim recovered values (recovered.md#R4.1) live in cv-identity/identity.json.
+const identity = await getEntry("identity", "identity");
 ---
 
 <Layout title="curriculum vitae" whitebox>
-  <a class="backlink" href="/">← BACK</a>
+  <BackLink />
 
   <h1>CV</h1>
 
@@ -42,19 +48,20 @@ const sections = (await getCollection("cv")).sort((a, b) => a.data.order - b.dat
   */}
   <template id="cv-template">
     <div>
-      <!-- recovered.md#R4.1 — identity block, verbatim from cv.js:19-21 -->
+      {/* recovered.md#R4.1 — identity block, verbatim from cv.js:19-21 — now
+          read from content rather than hardcoded JSX (D1.1). */}
       <p>
-        <strong>Wolf Wikgren</strong><br />
-        designer, developer, data analyst<br />
-        interface, experience, data and visualization<br />
-        helsinki, finland
+        <strong>{identity?.data.name}</strong><br />
+        {identity?.data.roles}<br />
+        {identity?.data.focus}<br />
+        {identity?.data.location}
       </p>
 
       {
         sections.map((section) => (
           <div class="cvlist">
             {/* recovered.md#R4.2 — three titled sections */}
-            <h2 class="cvlisttitle">{section.data.section}</h2>
+            <h2 class="cvlisttitle" tabindex="-1">{section.data.section}</h2>
 
             {section.data.items.map((item) =>
               /* recovered.md#R4.3 — the two hidden entries are preserved as
@@ -83,9 +90,9 @@ const sections = (await getCollection("cv")).sort((a, b) => a.data.order - b.dat
         ))
       }
 
-      <button class="btn btn--solid print-button" onclick="window.print()">
+      <Button type="button" class="print-button" onclick="window.print()">
         <span role="img" aria-label="print icon">🖨</span> Print
-      </button>
+      </Button>
     </div>
   </template>
 </Layout>

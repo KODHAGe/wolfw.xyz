@@ -1,0 +1,42 @@
+---
+/*
+ * BackLink. recovered.md#R2.4 — every subpage renders `← BACK`; the home page
+ * does not; the 404 has no back link (404.js has none, R2.4).
+ *
+ * The legacy link called preventDefault() then window.history.back(), with
+ * href="/" as the no-JS fallback (src/pages/projectPage.js:12-17). The rebuild
+ * had four byte-identical plain <a href="/"> copies, so "back" went home
+ * instead of back — a parity regression hiding inside a styling decision
+ * (design/frontend-architecture.md §1.4). This component restores the legacy
+ * behaviour and removes the duplication.
+ *
+ * Styling lives in global.css (.backlink) because it is position-fixed to the
+ * viewport and therefore targets something outside the component tree
+ * (frontend-architecture.md §2.2 rule 2).
+ */
+---
+
+<a class="backlink" href="/" data-back>← BACK</a>
+
+<script>
+  // Bound on first load and re-bound after every ClientRouter swap (the
+  // swapped-in anchor is a new node with no listener yet). The dataset flag
+  // keeps a node from being bound twice.
+  function bind() {
+    document.querySelectorAll<HTMLAnchorElement>("a[data-back]").forEach((el) => {
+      if (el.dataset.ready === "true") return;
+      el.dataset.ready = "true";
+      el.addEventListener("click", (e) => {
+        // A direct landing has no history in this tab, so the href="/"
+        // fallback stands and no-JS visitors always get the fallback.
+        if (window.history.length > 1) {
+          e.preventDefault();
+          window.history.back();
+        }
+      });
+    });
+  }
+
+  bind();
+  document.addEventListener("astro:page-load", bind);
+</script>

@@ -13,6 +13,7 @@
  */
 import { getEntry } from "astro:content";
 import Layout from "../layouts/Layout.astro";
+import BackLink from "../components/BackLink.astro";
 import Facts from "../components/Facts.astro";
 
 const factsEntry = await getEntry("facts", "wolf");
@@ -20,7 +21,7 @@ const facts = factsEntry?.data.items ?? [];
 ---
 
 <Layout title="about wolf" whitebox>
-  <a class="backlink" href="/">← BACK</a>
+  <BackLink />
 
   <h1>About me</h1>
 

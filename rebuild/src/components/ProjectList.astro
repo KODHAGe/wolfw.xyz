@@ -10,6 +10,7 @@
  */
 import { getCollection } from "astro:content";
 import Layout from "../layouts/Layout.astro";
+import BackLink from "../components/BackLink.astro";
 
 export interface Props {
   /** Which categories this page shows. */
@@ -30,7 +31,7 @@ const projects = all
 ---
 
 <Layout title={title}>
-  <a class="backlink" href="/">← BACK</a>
+  <BackLink />
 
   <h1>{heading}</h1>
 
@@ -41,7 +42,8 @@ const projects = all
 
     {
       projects.map((project) => {
-        const { thumbnail, thumbnailWidth: w, thumbnailHeight: h } = project.data;
+        const { thumbnail, thumbnailWidth: w, thumbnailHeight: h, titleLang, title } =
+          project.data;
         return (
           <a class="listlink" href={`/${project.data.slug}`}>
             {thumbnail && (
@@ -62,7 +64,23 @@ const projects = all
               <span>
                 {project.data.title.toLowerCase().includes("agency") ? "🔒 " : ""}
               </span>
-              {project.data.categories[0]}: {project.data.title} →{" "}
+              {/* typography.md §2.4 — mark the Finnish run of a title. A whole
+                  Finnish title gets one span; a "Ilmastonmuuttajat – Climate
+                  changers" title marks only the Finnish half. */}
+              {project.data.categories[0]}:{" "}
+              {titleLang === "fi" ? (
+                title.includes(" – ") ? (
+                  <>
+                    <span lang="fi">{title.split(" – ")[0]}</span>
+                    {` – ${title.split(" – ")[1]}`}
+                  </>
+                ) : (
+                  <span lang="fi">{title}</span>
+                )
+              ) : (
+                title
+              )}{" "}
+              →
             </div>
           </a>
         );

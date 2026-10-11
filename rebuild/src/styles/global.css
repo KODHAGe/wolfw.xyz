@@ -23,6 +23,10 @@ body {
   /* Legacy sets no background on body; the purple comes from html. */
   background: transparent;
   min-height: 100vh;
+  /* Typography paper §2.3: the legacy set no line-height anywhere, inheriting
+     `normal` = 1.2. 1.6 for prose is the paper's recommendation; headings and
+     labels keep the tighter values. */
+  line-height: var(--lh-body);
 }
 
 a {
@@ -34,6 +38,22 @@ a {
                  position:relative; z-index:1 }
    text-align:center is the load-bearing part — without it every element hugs
    the left edge, which is what "everything flows from the left" meant. */
+/* ---- Content plate (design/visual-effects.md §1) ---------------------------
+ * R6.5/recovered: the field drew at full opacity over the text, with no
+ * protection zone, and the original is a brutalist composition. But the
+ * owner's brief for this pass is "improve readability", and R6.5 itself says
+ * the legible version is a DESIRED change — so this is a deliberate, recorded
+ * departure, not a quiet parity correction.
+ *
+ * The field stays full-bleed and full-alpha: it is simply excluded from the
+ * column by a frosted plate. Measured bound (visual-effects.md §1): 82 % white
+ * composite over a black stroke has relative luminance ≈ 0.64, so worst-case
+ * text contrast under the plate is 13.8:1 — above AAA — while the strokes
+ * remain present at 18 % through the frost. `main` is already z-index: 1 over
+ * the sheet (global.css:37-43), so the plate costs one compositor blur on a
+ * 640px column and zero GPU.
+ * -------------------------------------------------------------------------- */
+
 main {
   margin: auto;
   max-width: var(--measure-main);
@@ -41,6 +61,21 @@ main {
   padding: var(--pad-main);
   position: relative;
   z-index: 1;
+  /* The plate. Generalises what main.whitebox has always done (below). */
+  background: color-mix(in srgb, var(--c-sheet) 82%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+@supports not (backdrop-filter: blur(6px)) {
+  main {
+    background: color-mix(in srgb, var(--c-sheet) 94%, transparent);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  main {
+    background: var(--c-sheet);
+  }
 }
 
 main p a {
@@ -52,6 +87,13 @@ h1,
 h2,
 h3 {
   font-weight: 400;
+}
+
+/* Typography paper §2.10: named display sizes. The legacy h1 was the UA
+   default (2em = 32px); this is that value made explicit and fluid-capable. */
+h1 {
+  font-size: var(--fs-h1);
+  line-height: var(--lh-tight);
 }
 
 p {
@@ -173,6 +215,19 @@ main.whitebox {
   color: inherit;
 }
 
+/* ---- Focus ---------------------------------------------------------------
+ * .button was the only interactive element with an explicit focus rule; every
+ * other one (back link, listing cards, text link, password input) relied on the
+ * UA default, which is visible in Chrome but unconstrained by the design
+ * (audit finding #11). One rule, the same values .button always used.
+ * -------------------------------------------------------------------------- */
+
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--c-ink);
+  outline-offset: 3px;
+}
+
 .listlink img {
   position: relative;
   display: block;
@@ -192,6 +247,15 @@ main.whitebox {
   padding: var(--space-1);
   margin-top: -3rem;
   position: relative;
+  /* Typography paper §2.4: card titles can be long unbreakable mono strings
+     ("Web: digitaalinenkirjallisuus.fi →" is 34 characters). `break-word`
+     alone does not stop an inline-block sizing past its container; `max-width`
+     is what makes the wrap actually happen (measured: 324px > 320px viewport
+     with break-word alone). Falls back to `break-word` where max-width is
+     unsupported — harmless, because the text still overflows visibly rather
+     than being clipped. */
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
 
 /* ---- Project detail --------------------------------------------------------
@@ -288,9 +352,13 @@ main.whitebox {
  * -------------------------------------------------------------------------- */
 
 .fact {
-  height: 3rem;
+  /* Was `height: 3rem` — a fixed box on a text element. At a narrow column the
+     longest fact wraps to five lines and overflowed the 48px box by up to 67px,
+     overlapping the button below it (typography paper defect T1). */
+  min-height: 3rem;
   font-weight: bold;
   font-size: var(--fs-fact);
+  line-height: var(--lh-body);
   margin-bottom: var(--space-5);
 }
 
@@ -315,10 +383,17 @@ main.whitebox {
 }
 
 /* legacy @media screen and (max-width:600px) — the only breakpoint the original
- * had (spec/gaps.md#G7). Kept at the same value so mobile parity is checkable. */
+ * had (spec/gaps.md#G7). Kept at the same value so mobile parity is checkable.
+ * Typography paper §2.5: the additions are the paper's small-screen set — the
+ * only fix that works for all 37 facts at all widths is min-height, and a
+ * fluid h1 keeps long mono titles from forcing per-character wrapping. */
 @media screen and (max-width: 600px) {
   main {
     padding: var(--space-3);
+  }
+
+  h1 {
+    font-size: var(--fs-h1-fluid);
   }
 
   .backlink {
@@ -338,6 +413,14 @@ main.whitebox {
   .project-video {
     margin: 0 0 var(--space-2);
     width: 100% !important;
+  }
+}
+
+/* Typography paper §2.5: below 400px, step main's padding down so a 320px
+   viewport keeps a 32-character column instead of 26. */
+@media screen and (max-width: 400px) {
+  main {
+    padding: var(--pad-main-compact);
   }
 }
 
@@ -391,6 +474,38 @@ main.whitebox {
   .cvlistitem {
     margin-top: 1.5rem !important;
     break-inside: avoid;
+  }
+}
+
+/* ---- Owned by the transition layer: forced-colors + prefers-contrast --------
+ * The canvas draws its pixels; forced-colors cannot recolour them, so the
+ * field must be removed rather than remapped (it is decorative and aria-hidden
+ * already, Background.astro:20). This is the only rule that touches #background
+ * from global CSS: the element sits outside the component tree's cascade
+ * (frontend-architecture.md #2.2 rule 2).
+ * -------------------------------------------------------------------------- */
+
+@media (forced-colors: active) {
+  .sheet,
+  #background {
+    display: none !important;
+  }
+}
+
+/* prefers-contrast: more — the field-over-text interference (audit finding #5)
+ * is precisely what a high-contrast preference is asking to avoid; the CSS
+ * fallback gradient is a light field-shaped trace, not a full homage. */
+@media (prefers-contrast: more) {
+  #background {
+    display: none !important;
+  }
+
+  .sheet {
+    background: radial-gradient(
+      ellipse 70% 55% at 50% 45%,
+      rgba(0, 0, 0, 0.05),
+      transparent 70%
+    );
   }
 }
 

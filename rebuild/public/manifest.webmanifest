@@ -3,6 +3,7 @@
   "short_name": "wolfw.xyz",
   "start_url": "/",
   "background_color": "#663399",
+  "//": "theme_color is #663399, not the page purple #bc89ff — this is the recovered legacy value (spec/recovered.md#R8.4), not an oversight. Changing it is a desired-zone decision (design/frontend-architecture.md §5.4), not a fix.",
   "theme_color": "#663399",
   "display": "minimal-ui",
   "icons": [

@@ -14,6 +14,7 @@
  */
 import { ClientRouter } from "astro:transitions";
 import Background from "../components/Background.astro";
+import "../styles/fonts.css";
 import "../styles/tokens.css";
 import "../styles/global.css";
 
@@ -51,6 +52,19 @@ const fullTitle = `${title} | ${siteTitle}`;
 
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icons/icon-192x192.png" />
+    {/*
+      fonts.css#A1 fix: the brand face is now declared, so it must also be
+      fetched early enough to paint with the first frame — otherwise the swap
+      reflow shows up as CLS (design/accessibility-performance.md Part 2.4).
+      Preloading the small woff2 is what keeps the measured CLS at 0.
+    */}
+    <link
+      rel="preload"
+      href="/fonts/Necto-Mono.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
 
     {/*
       D4.6 — the @view-transition opt-in lives in global.css, not here.

@@ -11,6 +11,7 @@
  */
 import { getCollection, render } from "astro:content";
 import Layout from "../layouts/Layout.astro";
+import BackLink from "../components/BackLink.astro";
 
 export async function getStaticPaths() {
   const projects = await getCollection("projects", ({ data }) => !data.private);
@@ -25,11 +26,25 @@ const { Content } = await render(project);
 ---
 
 <Layout title={project.data.title}>
-  <a class="backlink" href="/">← BACK</a>
+  <BackLink />
 
-  <h1>{project.data.title}</h1>
+  {/* typography.md §2.4 — the whole h1 is Finnish when titleLang says so; for a
+      bilingual title only the Finnish half is marked. */}
+  <h1 lang={project.data.titleLang}>
+    {project.data.titleLang === "fi" && project.data.title.includes(" – ") ? (
+      <>
+        <span lang="fi">{project.data.title.split(" – ")[0]}</span>
+        {` – ${project.data.title.split(" – ")[1]}`}
+      </>
+    ) : (
+      project.data.title
+    )}
+  </h1>
 
-  <p class="listtitle">
+  {/* Detail-page meta. NOT `.listtitle`: that is the listing badge, whose
+      -3rem overlap is tuned to an image and pulled the meta line 48px up under
+      the h1 (design/frontend-architecture.md#A5, typography paper defect B). */}
+  <p class="project-meta">
     {project.data.categories.join(", ")} ·{" "}
     {project.data.publishedAt.toISOString().slice(0, 10)}
   </p>
@@ -73,3 +88,13 @@ const { Content } = await render(project);
     )}
   </div>
 </Layout>
+
+<style>
+  /* Scoped to this page on purpose — the class cannot leak into the listing,
+     which is the whole of frontend-architecture.md#A5. */
+  .project-meta {
+    text-align: left;
+    color: var(--c-ink);
+    margin: 0 0 var(--space-3);
+  }
+</style>

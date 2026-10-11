@@ -1,6 +1,7 @@
 ---
 title: "Lukiovertailu – High school comparison"
 slug: "lukiovertailu-high-school-comparison"
+titleLang: "fi"
 categories: ["Web", "Visualization"]
 publishedAt: 2020-01-01
 summary: "This application was developed for STT news agency as a part of my final thesis to Metropolia University of Applied Sciences."

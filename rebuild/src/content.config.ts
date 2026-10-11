@@ -20,6 +20,10 @@ const projects = defineCollection({
     z.object({
       title: z.string(),
       slug: z.string(),
+      // typography.md §2.4 / accessibility-performance.md finding #3: the
+      // corpus is bilingual, so a title's language is data, not an assumption.
+      // Emitted as a lang attribute on the h1 and on the listing card.
+      titleLang: z.enum(["en", "fi"]).optional(),
       // recovered.md#R1.3 — work and art are the same type, partitioned by
       // category. Kept as an array because the legacy filters could both match.
       categories: z.array(z.enum(["Web", "Visualization", "Experiment"])),
@@ -94,4 +98,20 @@ const facts = defineCollection({
   }),
 });
 
-export const collections = { projects, cv, facts };
+/**
+ * CV identity block. frontend-architecture.md §5.3: cv.js:19-21 hardcoded the
+ * name, roles, focus areas and location in JSX — the exact pattern D1.1 was
+ * written to remove, carried forward. The values below are verbatim recovered
+ * content (recovered.md#R4.1), not new copy.
+ */
+const identity = defineCollection({
+  loader: glob({ pattern: "*.json", base: "./src/content/cv-identity" }),
+  schema: z.object({
+    name: z.string(),
+    roles: z.string(),
+    focus: z.string(),
+    location: z.string(),
+  }),
+});
+
+export const collections = { projects, cv, facts, identity };

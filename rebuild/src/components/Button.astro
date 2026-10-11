@@ -5,39 +5,48 @@
  * D4.5, but parity first.
  *
  * The legacy button is a full-width block with a hard black offset shadow that
- * compresses on hover and collapses on press. That box-shadow transition IS the
- * original animation — layout.css had `.button`, `.button:hover` and
+ * compresses on hover and collapses on press. That box-shadow transition IS
+ * the legacy animation — layout.css had `.button`, `.button:hover` and
  * `.button:active` with `transition: box-shadow .5s`. It is reproduced exactly
  * in global.css and inherited here rather than re-invented.
  *
- * The gooey layer is the D4 improvement, and it is strictly additive:
+ * The component is the single styled interactive primitive: the gate submit,
+ * the facts advance button and the CV print button all render through it, so
+ * the site has one button style instead of one style plus three unstyled
+ * elements (design/accessibility-performance.md finding #14,
+ * frontend-architecture.md#A3).
  *
- * Research finding — the gooey merge is feGaussianBlur followed by a
- * feColorMatrix that multiplies alpha by 19 and subtracts 9, slamming soft edges
- * back to hard ones only where blurred shapes overlap enough to fuse. That alpha
- * trick is NOT implemented in Safari or Firefox. So it cannot be the mechanism
- * the layout depends on; it is decoration on top of a button that already works.
- *
- * Also: the label stays in plain HTML, never inside the filtered SVG. Running
- * text through a goo filter turns it to mush.
+ * Prop discipline (frontend-architecture.md §3.1): no prop without a call
+ * site, no prop whose whole effect is a class with no rule. The dead `block`
+ * and `goo` props were removed on that basis; `goo` returns when D4.5 has a
+ * real implementation and a feature test that renders and measures rather
+ * than one that sniffs an interface.
  */
 export interface Props {
+  /** Renders <a> instead of <button>, and sets href. */
   href?: string;
-  /** The goo blob. Reserved for the D4 layer; off by default. */
-  goo?: boolean;
+  /** Opens href in a new tab with the safety attributes pre-applied. */
+  external?: boolean;
   /** Renders the lock glyph, as index.js:24 and cv.js:24 do. */
   locked?: boolean;
-  /** Full-width blocks inside a .double-button pair split the row. */
-  block?: boolean;
+  /** Button type; defaults to "button" so a stray submit cannot happen. */
+  type?: "button" | "submit";
+  /** Hidden state, used by the facts widget's exhaustion swap. */
+  hidden?: boolean;
+  /** Inline handler, used by the CV print affordance (recovered.md#R4.4). */
+  onclick?: string;
   class?: string;
-  [key: string]: unknown;
+  /** Data attributes pass through to the DOM element (used for widget hooks). */
+  [key: `data-${string}`]: string | undefined;
 }
 
 const {
   href,
-  goo = false,
+  external = false,
   locked = false,
-  block = false,
+  type = "button",
+  hidden = false,
+  onclick,
   class: className = "",
   ...rest
 } = Astro.props;
@@ -45,29 +54,16 @@ const {
 const Tag = href ? "a" : "button";
 ---
 
-<Tag class:list={["button", { "button--block": block }, className]} href={href} {...rest}>
-  {
-    goo && (
-      <svg class="button__goo" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-        <defs>
-          <filter id="goo">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b" />
-            <feColorMatrix
-              in="b"
-              mode="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
-            />
-          </filter>
-        </defs>
-        <g class="button__goo-body" filter="url(#goo)">
-          <rect class="button__goo-pill" x="12" y="34" width="76" height="32" rx="16" />
-          <circle class="button__goo-dot button__goo-dot--a" cx="50" cy="50" r="9" />
-          <circle class="button__goo-dot button__goo-dot--b" cx="50" cy="50" r="6" />
-        </g>
-      </svg>
-    )
-  }
-
+<Tag
+  class:list={["button", className]}
+  href={href}
+  type={href ? undefined : type}
+  hidden={hidden}
+  onclick={onclick}
+  target={external ? "_blank" : undefined}
+  rel={external ? "noopener noreferrer" : undefined}
+  {...rest}
+>
   <span class="button__label">
     <slot />
     {
@@ -81,65 +77,9 @@ const Tag = href ? "a" : "button";
 </Tag>
 
 <style>
-  /* Position for the goo layer only. No visual change when it is absent. */
-  .button {
-    position: relative;
-    isolation: isolate;
-  }
-
-  .button__goo {
-    position: absolute;
-    inset: -25%;
-    width: 150%;
-    height: 150%;
-    overflow: visible;
-    pointer-events: none;
-    z-index: -1;
-    fill: #000;
-    opacity: 0;
-    transition: opacity var(--dur-base) var(--ease-out);
-  }
-
-  .button:hover .button__goo,
-  .button:focus-visible .button__goo {
-    opacity: 0.35;
-  }
-
-  .button__goo-dot {
-    transform-origin: center;
-    transition: transform var(--dur-slow) var(--ease-out);
-  }
-
-  .button:hover .button__goo-dot--a {
-    transform: translate(22px, -12px);
-  }
-
-  .button:hover .button__goo-dot--b {
-    transform: translate(-20px, 10px);
-  }
-
   .button__label {
-    position: relative;
-    z-index: 1;
     display: inline-flex;
     align-items: center;
     gap: 0.35em;
-  }
-</style>
-
-<script>
-  // Feature-detect the gooey alpha threshold once. Safari and Firefox render a
-  // blurred blob with no hard edges and no merging, so showing one would be
-  // worse than showing none — the base button carries the interaction either way.
-  if (typeof SVGFilterElement !== "undefined") {
-    document.documentElement.dataset.gooey = "supported";
-  } else {
-    document.documentElement.dataset.gooey = "unsupported";
-  }
-</script>
-
-<style is:global>
-  html[data-gooey="unsupported"] .button__goo {
-    display: none;
   }
 </style>

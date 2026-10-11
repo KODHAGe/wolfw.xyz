@@ -23,6 +23,8 @@ export interface Props {
 }
 
 const { facts } = Astro.props;
+
+import Button from "./Button.astro";
 ---
 
 <div class="facts" data-facts={JSON.stringify(facts)}>
@@ -34,12 +36,8 @@ const { facts } = Astro.props;
   <p class="fact" data-fact aria-live="polite">{facts[0]}</p>
 
   <p>
-    <button class="btn btn--solid" type="button" data-advance>
-      get to know better
-    </button>
-    <a class="btn btn--solid" href="mailto:wolf@grh.fi" data-done hidden>
-      send me some some facts
-    </a>
+    <Button type="button" data-advance>get to know better</Button>
+    <Button href="mailto:wolf@grh.fi" data-done hidden>send me some some facts</Button>
   </p>
 
   <p class="facts-progress" data-progress aria-hidden="true"></p>

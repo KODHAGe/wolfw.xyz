@@ -1,0 +1,153 @@
+---
+/*
+ * Shader probe. DEV ONLY — it imports /src/lib/background.ts directly, which is
+ * only served by `astro dev`, never by `astro build`.
+ *
+ * Lives OUTSIDE src/pages on purpose: as a page it was compiled into every
+ * production build (design/accessibility-performance.md finding #10), where its
+ * dev-only import 404s. To use it, copy it into src/pages for the session:
+ *
+ *   cp rebuild/tools/probe.astro rebuild/src/pages/probe.astro
+ *   cd rebuild && npx astro dev --port 4322   # then open /probe
+ *   rm rebuild/src/pages/probe.astro         # before committing
+ *
+ * Exists because the background bug was invisible to the build: TypeScript
+ * compiles, the page renders, the buttons work, and the canvas is simply blank.
+ * `npm run build` cannot catch a bad GLSL uniform or a wrong axis. This page
+ * reports what actually landed in the framebuffer.
+ */
+const title = "shader probe";
+---
+<html><head><meta charset="utf-8"/><title>{title}</title></head>
+<body style="font: 12px ui-monospace, monospace; background:#111; color:#0f0">
+<canvas id="c"></canvas>
+<pre id="out">running…</pre>
+<script type="module">
+const out = document.getElementById("out");
+const log = (...a) => { out.textContent += "\n" + a.join(" "); };
+window.addEventListener("error", (e) => log("ERROR:", e.message, "@", e.filename + ":" + e.lineno));
+
+let SHADERS, ELEMENTS;
+try {
+  ({ SHADERS, ELEMENTS } = await import("/src/lib/background.ts"));
+  log("module loaded");
+} catch (e) {
+  log("IMPORT FAILED:", e.message);
+  log("(this page needs `astro dev`, not `astro preview`)");
+  throw e;
+}
+
+// Match the real sheet: the canvas is roughly viewport-width, inset 0.25rem.
+const CSS_W = 1436, CSS_H = 892;
+const canvas = document.getElementById("c");
+const gl = canvas.getContext("webgl2", { alpha: true, antialias: false, premultipliedAlpha: true, preserveDrawingBuffer: true });
+if (!gl) { log("FAIL: no webgl2"); } else {
+  canvas.width = CSS_W * 2; canvas.height = CSS_H * 2;
+  canvas.style.width = CSS_W + "px"; canvas.style.height = CSS_H + "px";
+
+  const compile = (type, src) => {
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, src); gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error("compile: " + gl.getShaderInfoLog(sh));
+    return sh;
+  };
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, SHADERS.vert));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, SHADERS.frag));
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error("link: " + gl.getProgramInfoLog(prog));
+  gl.useProgram(prog);
+  log("compile+link OK");
+
+  const loc = (n) => gl.getUniformLocation(prog, n);
+  for (const n of ["u_resolution","u_time","u_pixelRatio","u_accent","u_alpha","u_reduced","u_p[0]","u_pos[0]"]) {
+    log("  loc", n.padEnd(13), "=>", String(loc(n)));
+  }
+
+  // NINE fields per element, matching the shader's STRIDE.
+  const build = (elems) => {
+    const p = new Float32Array(63);
+    elems.forEach((e, i) => {
+      const b = i * 9;
+      p[b+0]=e.rotation; p[b+1]=e.width; p[b+2]=e.dash; p[b+3]=e.freq;
+      p[b+4]=e.amp; p[b+5]=e.gridDist; p[b+6]=e.offset; p[b+7]=e.grid; p[b+8]=e.total;
+    });
+    return p;
+  };
+  const positions = new Float32Array(14);
+  ELEMENTS.forEach((e, i) => { positions[i*2] = e.posX; positions[i*2+1] = e.posY; });
+
+  gl.uniform1fv(loc("u_p[0]"), build(ELEMENTS));
+  gl.uniform1fv(loc("u_pos[0]"), positions);
+  gl.uniform3f(loc("u_accent"), 0, 0, 0);
+  gl.uniform1f(loc("u_alpha"), 1.0);
+  gl.uniform1f(loc("u_reduced"), 0);
+  gl.uniform1f(loc("u_time"), 0);
+  gl.viewport(0, 0, canvas.width, canvas.height);
+
+  const buf = new Uint8Array(canvas.width * canvas.height * 4);
+
+  function measure(dpr) {
+    gl.uniform2f(loc("u_resolution"), canvas.width, canvas.height);
+    gl.uniform1f(loc("u_pixelRatio"), dpr);
+    gl.clearColor(0,0,0,0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.readPixels(0, 0, canvas.width, canvas.height, gl.RGBA, gl.UNSIGNED_BYTE, buf);
+    let lit = 0;
+    for (let i = 3; i < buf.length; i += 4) if (buf[i] > 0) lit++;
+    return (100 * lit / (canvas.width * canvas.height));
+  }
+
+  // The page real devicePixelRatio is what production uses; compare it against 1
+  // to prove which one the field is drawn for.
+  const realDpr = window.devicePixelRatio || 1;
+  log("");
+  log("buffer", canvas.width + "x" + canvas.height, " devicePixelRatio:", realDpr);
+  log("LIT%  dpr=1:", measure(1).toFixed(3), " dpr=2:", measure(2).toFixed(3), " dpr=" + realDpr + ":", measure(realDpr).toFixed(3));
+
+  // Per-element coverage: zero every block except one.
+  log("");
+  log("per-element LIT% at dpr=" + realDpr + " (isolated):");
+  for (let i = 0; i < ELEMENTS.length; i++) {
+    gl.uniform1fv(loc("u_p[0]"), build([ELEMENTS[i]]));
+    const pct = measure(realDpr);
+    const e = ELEMENTS[i];
+    log("  el" + i,
+        "rot=" + String(e.rotation).padStart(4),
+        "w=" + String(e.width).padStart(2),
+        "dash=" + String(e.dash).padStart(3),
+        "freq=" + String(e.freq).padStart(3),
+        "amp=" + String(e.amp).padStart(2),
+        "gDist=" + String(e.gridDist).padStart(3),
+        "off=" + String(e.offset).padStart(3),
+        "gSize=" + String(e.grid).padStart(2),
+        "tot=" + String(e.total).padStart(3),
+        "-> " + pct.toFixed(3) + "%");
+  }
+
+  // Coverage map, coarse, for the real config.
+  gl.uniform1fv(loc("u_p[0]"), build(ELEMENTS));
+  measure(realDpr);
+  log("");
+  log("coverage map (16x9, '#' = lit):");
+  const COLS = 16, ROWS = 9;
+  for (let r = ROWS - 1; r >= 0; r--) {
+    let row = "  ";
+    for (let c = 0; c < COLS; c++) {
+      let n = 0, tot = 0;
+      const x0 = Math.floor(c * canvas.width / COLS), x1 = Math.floor((c+1) * canvas.width / COLS);
+      const y0 = Math.floor(r * canvas.height / ROWS), y1 = Math.floor((r+1) * canvas.height / ROWS);
+      for (let y = y0; y < y1; y += 4) for (let x = x0; x < x1; x += 4) {
+        tot++; if (buf[(y*canvas.width+x)*4+3] > 0) n++;
+      }
+      const f = n / tot;
+      row += f > 0.5 ? "#" : f > 0.15 ? "+" : f > 0.01 ? "." : " ";
+    }
+    log(row);
+  }
+  log("gl error:", gl.getError(), "(0 = none)");
+}
+</script>
+</body></html>

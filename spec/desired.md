@@ -317,6 +317,35 @@ model changes shape: `mainImage` is currently a Sanity asset reference
 much as a `D4` one, and it is a reason to sequence this *after* the D1 content
 migration rather than alongside it.
 
+### D4.12 Readability over R6.5 — the content plate (2026-10-11)
+
+**Origin:** owner ("Improve readability") + `design/visual-effects.md` §1 · **Decision:** accepted, shipped
+
+R6.5 (`recovered.md#R6.5`) records that the legacy field draws at full opacity
+over the heading and intro copy with no protection zone, and explicitly says a
+legible version "is a desired change and belongs in `desired.md` — not a quiet
+correction to recovered behaviour". This is that entry.
+
+**The change.** The field stays full-bleed, full-alpha and untouched outside
+the content column. The column (`main`) gains a frosted plate: 82 % white
+composite + `backdrop-filter: blur(6px)`, opaque white under
+`prefers-reduced-transparency`. Shader, alpha and dash behaviour are unchanged
+(`u_alpha` is still 1.0) — the exclusion is a compositing decision in CSS, not a
+change to the generative layer.
+
+**Why a plate and not a shader mask.** DOM rects → shader uniforms would need
+re-measuring on resize and on every client-router swap, and would put
+legibility logic in GLSL where it cannot be tuned. The plate is one background
+value on an element that already sits at z-index 1.
+
+**Measured bound** (`design/audit/audit.mjs` B6, composited screenshot):
+worst-case text contrast under the plate ≥ 13 : 1 with the field beneath it,
+because the 82 % white composite over a black stroke has relative luminance
+≈ 0.64. AA requires 4.5:1, AAA 7:1.
+
+**Cost.** Zero GPU: no new context, no shader change, one compositor blur on a
+640 px column.
+
 ### D4.9 Reduced motion is a hard requirement
 
 **Origin:** derived · **Decision:** proposed

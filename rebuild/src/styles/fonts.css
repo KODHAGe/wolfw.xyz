@@ -1,0 +1,19 @@
+/*
+ * Brand typeface.
+ *
+ * The legacy site declared this in src/fonts/fonts.css:1-7 and imported it from
+ * its layout (src/components/layout.js:9). The rebuild shipped the files but
+ * dropped the declaration, so every page rendered in generic sans — the single
+ * largest silent regression in the port, and the reason nothing typographic
+ * could be reviewed (design/frontend-architecture.md#A1).
+ *
+ * Values are recovered, not chosen: the legacy declared the same two files.
+ */
+@font-face {
+  font-family: "Necto Mono";
+  src: url("/fonts/Necto-Mono.woff2") format("woff2"),
+    url("/fonts/Necto-Mono.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

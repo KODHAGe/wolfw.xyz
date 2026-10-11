@@ -1,6 +1,7 @@
 ---
 title: "Käkriäinen"
 slug: "kaekriaeinen"
+titleLang: "fi"
 categories: ["Web", "Visualization"]
 publishedAt: 2020-01-01
 summary: "Käkriäinen is a magazine by students at the University of Helsinki students of Finnish Literature. It contains literary ciritiques, interviews and original cont"

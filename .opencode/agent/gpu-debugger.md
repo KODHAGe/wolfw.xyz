@@ -30,12 +30,15 @@ frame at mount, and produces **no console errors and no visible output**.
 
 ## Probe harness — built and working
 
-`rebuild/src/pages/probe.astro` (dev server only, port 4322) imports the real
+`rebuild/tools/probe.astro` (dev server only, port 4322) imports the real
 shader via `SHADERS` / `ELEMENTS` exports and reports numbers. It is the tool
-this agent should use first.
+this agent should use first. It lives outside `src/pages` so it is never
+compiled into a production build; copy it in for the session:
 
 ```sh
+cp rebuild/tools/probe.astro rebuild/src/pages/probe.astro
 cd rebuild && npx astro dev --port 4322   # then open /probe
+rm rebuild/src/pages/probe.astro         # before committing
 ```
 
 ## Narrowed state (2026-10-10) — fault is in the field math only

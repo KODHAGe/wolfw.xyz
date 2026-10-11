@@ -40,13 +40,32 @@
    * deliberate, not an accident. Both preserved.
    * ---------------------------------------------------------------------- */
 
-  --font-mono: "Necto Mono", sans-serif;
+  /* The fallback stack is deliberately MONOSPACE, not sans-serif: Necto Mono's
+     advance is 610/1000 em for every glyph, which is within ~1.5% of the
+     monospace fallbacks, so a swap reflow is metric-no-op (measured CLS
+     0.0000 after the change; the sans fallback produced CLS 0.1048 on project
+     pages). The previous value (`"Necto Mono", sans-serif`) made every swap
+     reflow. */
+  --font-mono: "Necto Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas,
+    monospace;
 
   --fs-body: 1rem;        /* screen: browser default, per legacy */
   --fs-print: 12px;       /* print only, per legacy @media print */
   --fs-caption: 0.8rem;   /* legacy .caption { font-size:.8rem } */
   --fs-fact: 1.2rem;      /* legacy .fact { font-size:1.2rem } */
   --fs-cv-title: 1.5rem;  /* legacy .cvListTitle { font-size:1.5rem } */
+
+  /* Display sizes (typography.md §2.10). --fs-h1: 2.074rem reproduces the
+     legacy UA default (32px) at the 16px baseline; the fluid variant is the
+     narrow-column floor, because a 33px mono h1 on a 311px column forces
+     roughly 18 characters per line. */
+  --fs-h1: 2.074rem;
+  --fs-h1-fluid: clamp(1.728rem, 1.2rem + 2.6vw, 2.074rem);
+
+  /* Leading (typography.md §2.10). The legacy set none anywhere, so every
+     element inherited `normal` = 1.2 — measured at 19.2px for 16px text. */
+  --lh-tight: 1.15;
+  --lh-body: 1.6;
 
   /* ---- Measure ------------------------------------------------------------
    * Legacy: `main { max-width:640px; padding:2rem }`. Not 60rem. This is the
@@ -61,6 +80,7 @@
   --measure-print-whitebox: 500px; /* legacy @media print .whitebox { width:500px!important } */
 
   --pad-main: 2rem;        /* legacy main { padding:2rem } */
+  --pad-main-compact: 1.25rem; /* typography paper §2.5: 320px viewport column */
   --pad-item: 1rem;        /* legacy .listlink / .button / .projectBlock { padding:1rem } */
 
   --sheet-inset: 0.25rem; /* legacy .background { margin:.25rem } */
