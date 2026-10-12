@@ -93,6 +93,14 @@ main {
   padding: var(--pad-main);
   position: relative;
   z-index: 1;
+  /* frontend-architecture.md §1.2: components respond to the COLUMN, only the
+     shell responds to the viewport. The column's width is
+     min(640px, 100vw - 2*padding), so two viewports of 1440px and 2560px have an
+     identical column and must have identical component behaviour — which a
+     viewport media query cannot express without modelling the centring
+     arithmetic. Baseline: Chrome 105, Firefox 110, Safari 16. */
+  container-type: inline-size;
+  container-name: column;
   /* The plate. Generalises what main.whitebox has always done (below). */
   background: color-mix(in srgb, var(--c-sheet) 82%, transparent);
   backdrop-filter: blur(6px);
@@ -205,15 +213,18 @@ a.button {
 }
 
 /* legacy .doubleButton { display:flex; justify-content:space-between } and
- * .doubleButton .button { width:calc(50% - 3rem); align-self:flex-start } */
+ * .doubleButton .button { width:calc(50% - 3rem); align-self:flex-start }
+ *
+ * That width arithmetic is the legacy's own, and it has the defect the
+ * architecture paper names (frontend-architecture.md §1.4): a 3rem baked into a
+ * width calculation rather than expressed as a gap, so at 640px it resolved to
+ * two 272px buttons with a 96px hole between them, and the "stack below" rule
+ * needed a breakpoint to undo. `auto-fit` + `minmax` gives side-by-side above
+ * 16rem and stacked below it, with no breakpoint at all. */
 .double-button {
-  display: flex;
-  justify-content: space-between;
-}
-
-.double-button .button {
-  width: calc(50% - 3rem);
-  align-self: flex-start;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--space-2);
 }
 
 /* legacy .textlink { margin-top:2rem; display:inline-block } */
@@ -551,13 +562,8 @@ a {
     margin-bottom: var(--space-1);
   }
 
-  .double-button {
-    flex-wrap: wrap;
-  }
-
-  .double-button .button {
-    width: 100%;
-  }
+  /* The button pair is a grid now; `auto-fit` handles the stack, so the
+     flex-wrap/width pair this used to need is gone (see .double-button). */
 
   .project-video {
     margin: 0 0 var(--space-2);
@@ -570,6 +576,56 @@ a {
 @media screen and (max-width: 400px) {
   main {
     padding: var(--pad-main-compact);
+  }
+}
+
+/* ---- Media measure (frontend-architecture.md §1.4) -----------------------
+ * Eighteen of this site's pages are image-led, and capping their images at the
+ * prose measure is the largest responsive mistake in the port: a 1000px
+ * thumbnail displayed at 640px on a 2560px display.
+ *
+ * The first attempt here used the common "break out with negative margins"
+ * trick and it does not work in this layout: the image lives inside
+ * .project-block, and any breakout is clamped by its container. The paper's own
+ * answer is better — "the media slot breaks out; the COLUMN does not grow" —
+ * so above the gallery tier the PLATE (which is main's background) widens to
+ * the media measure, prose keeps its own measure inside it, and both keep the
+ * same left edge. That left edge is the grid relation §2.3 asks for.
+ * -------------------------------------------------------------------------- */
+
+.project-block,
+.cvlist {
+  max-width: var(--measure-media);
+  margin-inline: auto;
+}
+
+/* Prose keeps its own measure inside the media slot. `p` already carries it
+ * globally; lists and section headings did not. */
+.project-block :where(ul, ol, blockquote),
+.cvlist :where(ul, ol, blockquote, h2, h3) {
+  max-width: var(--measure-text);
+}
+
+@media screen and (min-width: 1200px) {
+  /* The plate becomes the media frame; +2*padding because max-width is the
+   * content box and the padding is outside it. */
+  main {
+    max-width: calc(var(--measure-media) + 2 * var(--pad-main));
+  }
+}
+
+/* Compact tier, expressed against the COLUMN rather than the viewport
+ * (§1.2/§1.3): inside a narrow column the listing badge's 48px overlap is most
+ * of a short image's height. */
+@container column (width < 32rem) {
+  .listtitle {
+    margin-top: -1.5rem;
+  }
+
+  .fact {
+    /* Already min-height; at the compact tier even that is slack. */
+    min-height: 0;
+    margin-bottom: var(--space-4);
   }
 }
 

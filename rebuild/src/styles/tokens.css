@@ -97,7 +97,15 @@
    * reads as left-weighted even with correct centring.
    * ---------------------------------------------------------------------- */
 
-  --measure-main: 640px;   /* the column, and the media maximum */
+  --measure-main: 640px;   /* the column, and the prose ceiling */
+  /* Media, per frontend-architecture.md §1.4: "images are no longer the
+     constraint" above the gallery tier (>=1200px), where the column has stopped
+     growing but the viewport has not. Below it, media is the legacy 640px.
+     The number above 1200px is a design choice — the paper specifies that it
+     steps up, not by how much — 880px is 1.375x the column, wide enough for
+     the 1000px-wide legacy thumbnails to read and narrow enough that a single
+     image still governs the fold on a 1440px screen. */
+  --measure-media: 640px;
   /* typography.md §2.3: prose is measured in `em`, not `ch`. In a proportional
      face `ch` is the advance of the digit "0" (~0.6em) while average lowercase
      is ~0.5em, so `ch` over-counts by ~20% and silently produces a 75+
@@ -152,6 +160,15 @@
    * on both surfaces. */
   --focus-ring: 2px solid var(--c-ink);
   --focus-offset: 2px;
+}
+
+/* Gallery tier: the column is capped at 640px, so media is free to be wider
+   (frontend-architecture.md §1.3). The only viewport-scoped rule in the layout
+   layer; everything inside the column is a container query. */
+@media screen and (min-width: 1200px) {
+  :root {
+    --measure-media: 880px;
+  }
 }
 
 /* ---- Reduced motion --------------------------------------------------------
