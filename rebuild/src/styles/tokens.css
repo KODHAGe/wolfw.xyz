@@ -22,7 +22,8 @@
   --c-sheet: #ffffff;    /* the white sheet everything sits on */
   --c-ink: #000000;
 
-  --c-ink-soft: rgba(0, 0, 0, 0.6);
+  --c-ink-soft: #3a3a3a; /* typography.md §2.7 — 11.4:1 on the sheet (AAA) but
+     4.05:1 on the purple page, so SHEET-ONLY. Replaces rgba(0,0,0,0.6). */
   --c-sheet-shadow: rgba(0, 0, 0, 1);
 
   /* The button shadow is pure black, not a tinted accent. */
@@ -40,32 +41,54 @@
    * deliberate, not an accident. Both preserved.
    * ---------------------------------------------------------------------- */
 
-  /* The fallback stack is deliberately MONOSPACE, not sans-serif: Necto Mono's
-     advance is 610/1000 em for every glyph, which is within ~1.5% of the
-     monospace fallbacks, so a swap reflow is metric-no-op (measured CLS
-     0.0000 after the change; the sans fallback produced CLS 0.1048 on project
-     pages). The previous value (`"Necto Mono", sans-serif`) made every swap
-     reflow. */
-  --font-mono: "Necto Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas,
+  /* Display + interface: the identity face (typography.md §2.1). The fallback
+     stack is deliberately MONOSPACE, not sans: Necto Mono's advance is
+     610/1000 em for every glyph, within ~1.5% of the monospace fallbacks, so a
+     swap reflow is a metric no-op (measured CLS 0.0000; the old sans fallback
+     produced CLS 0.1048 on project pages). */
+  --font-display: "Necto Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas,
     monospace;
+  /* --font-mono is the legacy name for the same face; kept so the recovered
+     selectors keep resolving, and it is what tokens.css:37 documented. */
+  --font-mono: var(--font-display);
 
-  --fs-body: 1rem;        /* screen: browser default, per legacy */
-  --fs-print: 12px;       /* print only, per legacy @media print */
-  --fs-caption: 0.8rem;   /* legacy .caption { font-size:.8rem } */
-  --fs-fact: 1.2rem;      /* legacy .fact { font-size:1.2rem } */
-  --fs-cv-title: 1.5rem;  /* legacy .cvListTitle { font-size:1.5rem } */
+  /* Prose only. typography.md §2.1 pairs a proportional text face with the mono
+     display face; §2.1's own recommendation is to put the SYSTEM stack behind
+     the webfont as the degradation path, which is what ships here pending the
+     owner's decision on a self-hosted text face (IBM Plex Sans, ~30-45KB). When
+     that binary lands, this line is the only change needed: drop the family in
+     front and everything downstream follows. */
+  --font-text: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
 
-  /* Display sizes (typography.md §2.10). --fs-h1: 2.074rem reproduces the
-     legacy UA default (32px) at the 16px baseline; the fluid variant is the
-     narrow-column floor, because a 33px mono h1 on a 311px column forces
-     roughly 18 characters per line. */
-  --fs-h1: 2.074rem;
+  /* Glyphs Necto Mono does not carry (typography.md §2.1, defect T7): ∨ U+2228,
+     and the 🔒 / 🖨 emoji. */
+  --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+  --font-symbol: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Math", sans-serif;
+
+  /* ---- Scale — ratio 1.2 (minor third) from 16px (typography.md §2.2) ------ */
+  --fs-caption: 0.833rem;  /* 13.3px — meta, captions, clients. Screen floor. */
+  --fs-body: 1rem;         /* 16.0px — prose, buttons, card titles */
+  --fs-lead: 1.2rem;       /* 19.2px — decks, the fact revealer (legacy 1.2rem) */
+  --fs-h3: 1.44rem;        /* 23.0px — CV entry position, card heading */
+  --fs-h2: 1.728rem;       /* 27.6px — section titles (legacy .cvListTitle 1.5rem) */
+  --fs-h1: 2.074rem;       /* 33.2px — page titles (legacy h1: UA 2em = 32px) */
+  --fs-display: 2.488rem;  /* 39.8px — home wordmark only */
+
+  /* Fluid display sizes; the floor is one scale step down (typography.md §2.5). */
   --fs-h1-fluid: clamp(1.728rem, 1.2rem + 2.6vw, 2.074rem);
+  --fs-display-fluid: clamp(2.074rem, 1.4rem + 3.4vw, 2.488rem);
 
-  /* Leading (typography.md §2.10). The legacy set none anywhere, so every
-     element inherited `normal` = 1.2 — measured at 19.2px for 16px text. */
-  --lh-tight: 1.15;
-  --lh-body: 1.6;
+  --fs-print: 12px;        /* print only, per legacy @media print */
+
+  /* ---- Leading (typography.md §2.3) ---------------------------------------
+   * The legacy set no line-height anywhere, so every element inherited
+   * `normal` = 1.2 (measured 19.2px at 16px). Unitless, so user font-size
+   * scaling is never clamped. */
+  --lh-tight: 1.15;        /* display sizes */
+  --lh-snug: 1.3;          /* headings, labels, meta, CV entry headers */
+  --lh-body: 1.6;          /* prose — replaces the measured `normal` = 1.2 */
+  --lh-fact: 1.45;         /* the fact revealer — mono, centred, short */
 
   /* ---- Measure ------------------------------------------------------------
    * Legacy: `main { max-width:640px; padding:2rem }`. Not 60rem. This is the
@@ -74,8 +97,15 @@
    * reads as left-weighted even with correct centring.
    * ---------------------------------------------------------------------- */
 
-  --measure-main: 640px;
-  --measure-text: 640px;   /* legacy .listlink { max-width:640px } */
+  --measure-main: 640px;   /* the column, and the media maximum */
+  /* typography.md §2.3: prose is measured in `em`, not `ch`. In a proportional
+     face `ch` is the advance of the digit "0" (~0.6em) while average lowercase
+     is ~0.5em, so `ch` over-counts by ~20% and silently produces a 75+
+     character column. 34em ≈ 544px ≈ 60-72 average characters. */
+  --measure-text: 34em;
+  /* Necto's advance is 610/1000em, so 62ch = 605px — within 3px of the legacy
+     608px project column, for the mono surfaces that keep that measure. */
+  --measure-mono: 62ch;
   --measure-video: 640px;  /* legacy .projectVideo { max-width:640px!important } */
   --measure-print-whitebox: 500px; /* legacy @media print .whitebox { width:500px!important } */
 
@@ -113,8 +143,15 @@
   --dur-transition: 420ms;
 
   /* Legacy background dash sweep: `animation: dash 5s ease-in-out forwards`.
-   * Reproduced as a shader uniform sweep (spec/recovered.md#R6.3). */
+   * Reproduced as a shader uniform sweep (spec/recovered.md#R6.4). */
   --dur-dash-sweep: 5s;
+
+  /* ---- Focus (typography.md §2.7) -----------------------------------------
+   * One ring for every interactive element. 21:1 against the sheet and 8.16:1
+   * against the purple page, so it satisfies WCAG 2.2 focus-appearance contrast
+   * on both surfaces. */
+  --focus-ring: 2px solid var(--c-ink);
+  --focus-offset: 2px;
 }
 
 /* ---- Reduced motion --------------------------------------------------------

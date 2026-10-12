@@ -346,6 +346,32 @@ because the 82 % white composite over a black stroke has relative luminance
 **Cost.** Zero GPU: no new context, no shader change, one compositor blur on a
 640 px column.
 
+### D4.13 The back link is sticky, not fixed (2026-10-12)
+
+**Origin:** `design/frontend-architecture.md` §1.4 + measured evidence · **Decision:** accepted, shipped
+
+R2.4 records `.backlink { position:fixed; left:2rem }`. Two measurements
+against that:
+
+1. A fixed element anchors to the **viewport** while the column is centred. At
+   1440×900 the link sat at x=32 while the content it belongs to began at x=400.
+2. D4.12's content plate uses `backdrop-filter` on `main`, which makes `main`
+   the **containing block for fixed descendants** — so `left: 2rem` resolved
+   against the 640px column and the link rendered on top of the project h1.
+   Measured directly: with the plate blur on, `left=320`; with it off,
+   `left=32`. Any future `filter`, `transform` or `contain` on `main` would
+   have done the same thing silently.
+
+`position: sticky` keeps the link attached to the column at every width and
+visible during scroll. The below-600px "go static" rule existed only because the
+link used to be fixed; it is gone. Focus order is unchanged (still the first
+focusable on every subpage), and the sticky link carries a sheet-coloured chip
+so content scrolling beneath it stays legible.
+
+The fixed behaviour was itself the defect the architecture paper named, so this
+is a correction rather than a regression — but it is a departure from R2.4 and
+is registered here as R2.4 requires.
+
 ### D4.9 Reduced motion is a hard requirement
 
 **Origin:** derived · **Decision:** proposed

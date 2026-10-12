@@ -13,24 +13,28 @@ import Button from "../components/Button.astro";
 ---
 
 <Layout title="home">
-  <h1>wolfw.xyz</h1>
+  {/* .centered — the home page is the one surface the paper keeps centred
+      (typography.md §2.3): a short stack of controls, no prose to anchor. */}
+  <div class="centered">
+    <h1>wolfw.xyz</h1>
 
-  <div class="description">
-    Hi, I'm Wolf W<br />
-    I make web happen - both beautiful and useful.
+    <div class="description">
+      Hi, I'm Wolf W<br />
+      I make web happen - both beautiful and useful.
+    </div>
+
+    <div class="double-button">
+      <Button href="/work">work</Button>
+      <Button href="/art">art</Button>
+    </div>
+
+    <Button href="/about">about</Button>
+    <Button href="/cv" locked>cv</Button>
+
+    <Button href="https://github.com/KODHAGe" external>github</Button>
+
+    <Button href="https://www.linkedin.com/in/wwwolf/" external>linkedin</Button>
+
+    <a class="textlink" href="mailto:wolf@grh.fi">get in touch</a>
   </div>
-
-  <div class="double-button">
-    <Button href="/work">work</Button>
-    <Button href="/art">art</Button>
-  </div>
-
-  <Button href="/about">about</Button>
-  <Button href="/cv" locked>cv</Button>
-
-  <Button href="https://github.com/KODHAGe" external>github</Button>
-
-  <Button href="https://www.linkedin.com/in/wwwolf/" external>linkedin</Button>
-
-  <a class="textlink" href="mailto:wolf@grh.fi">get in touch</a>
 </Layout>

@@ -17,17 +17,47 @@ html {
 }
 
 body {
-  font-family: var(--font-mono);
+  /* Prose face (typography.md §2.6). The mono stays the display and interface
+     face — see the selector list below. */
+  font-family: var(--font-text);
   margin-top: 1rem; /* legacy body { margin-top:1rem } */
   color: var(--c-ink);
   /* Legacy sets no background on body; the purple comes from html. */
   background: transparent;
   min-height: 100vh;
-  /* Typography paper §2.3: the legacy set no line-height anywhere, inheriting
-     `normal` = 1.2. 1.6 for prose is the paper's recommendation; headings and
-     labels keep the tighter values. */
+  /* typography.md §2.3: the legacy set no line-height anywhere, inheriting
+     `normal` = 1.2. 1.6 for prose is the paper's value; headings and labels
+     take the tighter ones. Unitless, so font-size scaling is never clamped. */
   line-height: var(--lh-body);
 }
+
+/* The mono is the display and interface face (typography.md §2.6): everything
+   short, tabular or structural. Prose keeps the text face. */
+h1,
+h2,
+h3,
+.button,
+.listtitle,
+.fact,
+.timetag,
+.position,
+.keywords,
+.caption,
+.backlink,
+.facts-progress,
+.project-meta,
+.cvlisttitle,
+.gate label {
+  font-family: var(--font-display);
+}
+
+/* --- The one visible departure (typography.md §2.3, registered in §4) -------
+ * `main` drops text-align:center for text-align:start. Justification, not
+ * taste: the two prose surfaces already left-aligned, so the site was
+ * inconsistently centred, and centring ragged 50-character mono lines removed
+ * the return-sweep anchor. Centring is opted back IN on the home page and
+ * inside .button, where a centred label in a centred block is correct.
+ * ------------------------------------------------------------------------- */
 
 a {
   color: #000; /* legacy a { color:#000 } */
@@ -57,7 +87,9 @@ a {
 main {
   margin: auto;
   max-width: var(--measure-main);
-  text-align: center;
+  /* text-align:start replaces the recovered `center` — see the departure note
+     above; the rule itself lives with the plate below. */
+  text-align: start;
   padding: var(--pad-main);
   position: relative;
   z-index: 1;
@@ -89,15 +121,44 @@ h3 {
   font-weight: 400;
 }
 
-/* Typography paper §2.10: named display sizes. The legacy h1 was the UA
-   default (2em = 32px); this is that value made explicit and fluid-capable. */
+/* typography.md §2.2/§2.6 — the scale, named by role. `text-wrap: balance`
+ * and `pretty` are progressive: they degrade to normal wrapping, are
+ * motion-free, and cost nothing. */
 h1 {
   font-size: var(--fs-h1);
   line-height: var(--lh-tight);
+  margin-block: 0 1.5rem;
+  /* §2.4: `digitaalinenkirjallisuus.fi` is 27 characters of mono at display
+     size on a 311px column. `anywhere` (not `break-word`) because break-word
+     does not affect intrinsic sizing. */
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
+h2 {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-snug);
+  margin-block: 3.5rem 1rem;
+  text-wrap: balance;
+}
+
+h3 {
+  font-size: var(--fs-h3);
+  line-height: var(--lh-snug);
+  margin-block: 2rem 0.5rem;
+  text-wrap: balance;
+}
+
+/* §2.3 — paragraph rhythm. `p + p { margin-block-start: 0 }` preserves the
+ * legacy one-blank-line look rather than stacking two margins. */
 p {
-  margin: 0 0 var(--space-2);
+  margin-block: 0 1em;
+  text-wrap: pretty;
+  max-width: var(--measure-text);
+}
+
+p + p {
+  margin-block-start: 0;
 }
 
 /* ---- Buttons --------------------------------------------------------------
@@ -168,15 +229,32 @@ a.button {
 
 /* ---- Back link ------------------------------------------------------------
  * legacy .backlink { position:fixed; left:2rem; color:#000; text-decoration:none }
- * It is fixed to the viewport, NOT in flow. The rebuild put it in flow, which
- * pushed every heading down by a line.
+ *
+ * `fixed` is the wrong tool here and two independent things proved it:
+ * 1. A fixed element anchors to the VIEWPORT while the column is centred, so
+ *    at 1440x900 the link sat at x=32 while the content it belongs to started
+ *    at x=400 — 370px adrift, and no breakpoint repairs that.
+ * 2. The content plate's `backdrop-filter` (any filter/transform would do)
+ *    makes `main` the containing block for fixed descendants, so `left: 2rem`
+ *    resolved against the 640px column and the link landed ON the h1.
+ *    Measured: with the plate blur on, left=320; with it off, left=32.
+ *
+ * `sticky` keeps the link attached to the column at every width while staying
+ * visible during scroll — frontend-architecture.md §1.4 option 1, which this
+ * becomes the evidence for. Recorded as a departure in desired.md.
  * -------------------------------------------------------------------------- */
 
 .backlink {
-  color: #000;
+  color: var(--c-ink);
   text-decoration: none;
-  position: fixed;
-  left: 2rem;
+  position: sticky;
+  top: 0;
+  display: inline-block;
+  width: fit-content;
+  margin-bottom: var(--space-2);
+  /* Content scrolls under a sticky element; the chip keeps the link readable. */
+  padding-right: var(--space-1);
+  background: var(--c-sheet);
 }
 
 .backlink:hover {
@@ -215,17 +293,40 @@ main.whitebox {
   color: inherit;
 }
 
-/* ---- Focus ---------------------------------------------------------------
- * .button was the only interactive element with an explicit focus rule; every
- * other one (back link, listing cards, text link, password input) relied on the
- * UA default, which is visible in Chrome but unconstrained by the design
- * (audit finding #11). One rule, the same values .button always used.
+/* ---- Focus (typography.md §2.7) -------------------------------------------
+ * ONE rule for every interactive element, from tokens. 21:1 against the sheet
+ * and 8.16:1 against the purple page, so it satisfies WCAG 2.2's focus-
+ * appearance contrast on both surfaces. .button keeps its own rule (audit
+ * finding #11) but now draws from the same tokens.
  * -------------------------------------------------------------------------- */
 
 a:focus-visible,
-input:focus-visible {
-  outline: 2px solid var(--c-ink);
-  outline-offset: 3px;
+input:focus-visible,
+button:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+/* Links keep underlines — the paper's rule is that nothing here may be carried
+ * by colour alone (1.4.1), and these are the site's links. */
+a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+
+/* ---- Project detail meta --------------------------------------------------
+ * typography.md §2.6 — the categories · date line is a `.project-meta`, not the
+ * listing badge. It was `.listtitle` until the Phase 0 fix, which meant the
+ * badge's -3rem overlap and white plate came with it (frontend-architecture.md
+ * #A5): the date line was pulled 48px up under the h1 and boxed in white.
+ * -------------------------------------------------------------------------- */
+.project-meta {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--c-ink-soft);
+  text-align: start;
+  margin: 0 0 var(--space-3);
 }
 
 .listlink img {
@@ -271,6 +372,13 @@ input:focus-visible {
   text-align: left;
   padding: var(--pad-item);
   background-color: #fff;
+  /* typography.md §2.6 — the prose surface. `hyphens: auto` is only correct
+   * once language is marked (3.1.2): with no lang, English hyphenation
+   * patterns get applied to Finnish words, which is worse than none. The
+   * project pages mark their Finnish titles with lang="fi" for exactly this. */
+  hyphens: auto;
+  max-width: var(--measure-text);
+  margin-inline: auto;
 }
 
 .project-block figure {
@@ -305,11 +413,20 @@ input:focus-visible {
 
 .cvlist {
   text-align: left;
+  /* Same prose treatment as .project-block (typography.md §2.6). */
+  hyphens: auto;
+  max-width: var(--measure-text);
+  margin-inline: auto;
 }
 
 .cvlisttitle {
+  /* typography.md §2.6 — section titles move onto the scale rather than the
+   * legacy's separate 1.5rem. The 3.5rem above them preserves the airiness
+   * the legacy 4rem margin-top gave, tightened one space step. */
   margin-top: var(--space-5);
-  font-size: var(--fs-cv-title);
+  margin-bottom: var(--space-2);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-snug);
   text-align: left;
 }
 
@@ -321,11 +438,17 @@ input:focus-visible {
 .timetag {
   font-weight: bold;
   margin-bottom: var(--space-1);
+  /* typography.md §2.6 — dates in mono with tabular figures so the columns of
+   * years line up down the CV instead of shifting per entry. */
+  font-variant-numeric: tabular-nums;
 }
 
 .position {
   font-weight: bold;
   margin-bottom: var(--space-2);
+  /* CV entry headers take the h3 step of the scale. */
+  font-size: var(--fs-h3);
+  line-height: var(--lh-snug);
 }
 
 .description {
@@ -357,8 +480,10 @@ input:focus-visible {
      overlapping the button below it (typography paper defect T1). */
   min-height: 3rem;
   font-weight: bold;
-  font-size: var(--fs-fact);
-  line-height: var(--lh-body);
+  font-size: var(--fs-lead);
+  line-height: var(--lh-fact);
+  /* §2.6: centring a 2-5 line paragraph at 19.2px was never right. */
+  text-align: start;
   margin-bottom: var(--space-5);
 }
 
@@ -366,11 +491,35 @@ input:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---- Home page: the deliberate exception to left alignment ----------------
+ * typography.md §2.3 — centring is opted back in here because the home page
+ * is a short vertical stack of controls, not prose: the h1, the two-line intro
+ * and the buttons are one composition, and the left edge means nothing when
+ * nothing wraps. Everything with paragraphs stays left-aligned.
+ * -------------------------------------------------------------------------- */
+.centered {
+  text-align: center;
+}
+
+.centered p {
+  text-align: center;
+  max-width: none;
+}
+
+.centered .facts-progress,
+.centered .caption {
+  text-align: center;
+}
+
 /* ---- Misc ---------------------------------------------------------------- */
 
 .caption {
   font-size: var(--fs-caption);
   margin-top: var(--space-1);
+  /* typography.md §2.7 — --c-ink-soft is 11.4:1 on the sheet and 4.05:1 on the
+     purple page, so it is SHEET-ONLY. Captions here always sit on the sheet
+     or on a white .whitebox; the purple frame carries no text. */
+  color: var(--c-ink-soft);
 }
 
 .print-button {
@@ -396,10 +545,10 @@ input:focus-visible {
     font-size: var(--fs-h1-fluid);
   }
 
+  /* The back link was static below 600px because it was fixed above it. It is
+     sticky at every width now, so this rule only tightens the spacing. */
   .backlink {
-    position: static;
-    display: inline-block;
-    margin-bottom: var(--space-2);
+    margin-bottom: var(--space-1);
   }
 
   .double-button {
