@@ -316,6 +316,11 @@ export function mountBackground(canvas: HTMLCanvasElement): () => void {
   let uTime: WebGLUniformLocation | null = null;
   let uDpr: WebGLUniformLocation | null = null;
   let uReduced: WebGLUniformLocation | null = null;
+  // See the dummy-attribute note in build(): keeps the draw on the driver's
+  // native path instead of the emulated one. Both are lost on context loss, so
+  // they are created once and re-uploaded by build() after a restore.
+  let vao: WebGLVertexArrayObject | null = null;
+  let dummyBuffer: WebGLBuffer | null = null;
 
   function build(): boolean {
     try {
@@ -334,6 +339,29 @@ export function mountBackground(canvas: HTMLCanvasElement): () => void {
     }
     gl.useProgram(program);
     canvas.dataset.fallback = "false";
+
+    /*
+     * The vertex shader uses gl_VertexID and declares no attributes, so no
+     * attribute array is ever enabled. Chrome/ANGLE then prints
+     *
+     *   "drawArraysInstanced: Drawing without vertex attrib 0 array enabled
+     *    forces the browser to do expensive emulation work …"
+     *
+     * on every frame and takes the emulated path on desktop OpenGL. Binding a
+     * dummy attribute at location 0 and leaving it enabled gives the driver the
+     * array it wants and silences the warning. The buffer is one float the
+     * shader never reads; the cost is the draw call the driver would have
+     * synthesised anyway.
+     */
+    if (!vao) {
+      dummyBuffer = gl.createBuffer();
+      vao = gl.createVertexArray();
+    }
+    gl.bindVertexArray(vao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, dummyBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 1, gl.FLOAT, false, 0, 0);
 
     // Upload parameters. STRIDE is 9, matching the shader's elementProps order:
     // rotation, width, dasharray, frequency, amplitude, gridDistance, offset,

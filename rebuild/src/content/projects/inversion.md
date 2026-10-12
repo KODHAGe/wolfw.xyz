@@ -5,18 +5,18 @@ categories: ["Experiment"]
 publishedAt: 2020-01-01
 summary: "Inversions is an ongoing art/research project into design, technology and control."
 hasVideo: false
-thumbnail: /images/thumbs/inversion.jpg
+thumbnail: /images/thumbs/inversion.webp
 thumbnailWidth: 1000
 thumbnailHeight: 526
 private: false
 images:
-  - src: /images/projects/inversion-1.jpg
+  - src: /images/projects/inversion-1.webp
     w: 4608
     h: 3464
-  - src: /images/projects/inversion-2.jpg
+  - src: /images/projects/inversion-2.webp
     w: 4064
     h: 2988
-  - src: /images/projects/inversion-3.jpg
+  - src: /images/projects/inversion-3.webp
     w: 3995
     h: 2999
 ---

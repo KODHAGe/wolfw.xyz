@@ -5,15 +5,15 @@ categories: ["Web", "Visualization"]
 publishedAt: 2020-01-01
 summary: "A custom photo/microblog for an around-the-world journey, created in collaboration with [karkkikammo](https://karkkikammo.net). Exploring the modality of 'insta"
 hasVideo: false
-thumbnail: /images/thumbs/brb-email.png
+thumbnail: /images/thumbs/brb-email.webp
 thumbnailWidth: 1000
 thumbnailHeight: 702
 private: false
 images:
-  - src: /images/projects/brb-email-1.png
+  - src: /images/projects/brb-email-1.webp
     w: 1218
     h: 1750
-  - src: /images/projects/brb-email-2.png
+  - src: /images/projects/brb-email-2.webp
     w: 2180
     h: 1706
 ---

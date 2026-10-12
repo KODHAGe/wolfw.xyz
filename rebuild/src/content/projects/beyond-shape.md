@@ -5,18 +5,18 @@ categories: ["Experiment"]
 publishedAt: 2020-01-01
 summary: "My thesis project for MA in New Media Production at Aalto University."
 hasVideo: false
-thumbnail: /images/thumbs/beyond-shape.png
+thumbnail: /images/thumbs/beyond-shape.webp
 thumbnailWidth: 1000
 thumbnailHeight: 704
 private: false
 images:
-  - src: /images/projects/beyond-shape-1.png
+  - src: /images/projects/beyond-shape-1.webp
     w: 3508
     h: 2480
-  - src: /images/projects/beyond-shape-2.png
+  - src: /images/projects/beyond-shape-2.webp
     w: 2560
     h: 1440
-  - src: /images/projects/beyond-shape-3.png
+  - src: /images/projects/beyond-shape-3.webp
     w: 1920
     h: 1080
 ---

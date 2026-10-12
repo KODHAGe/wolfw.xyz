@@ -5,18 +5,18 @@ categories: ["Web", "Visualization"]
 publishedAt: 2020-01-01
 summary: "Every year, the national lottery company of Finland distributes millions of euros of their profits back into the economy in the form of culture, sports, youth a"
 hasVideo: true
-thumbnail: /images/thumbs/veikkaus-beneficiaries.png
+thumbnail: /images/thumbs/veikkaus-beneficiaries.webp
 thumbnailWidth: 1000
 thumbnailHeight: 702
 private: false
 images:
-  - src: /images/projects/veikkaus-beneficiaries-1.png
+  - src: /images/projects/veikkaus-beneficiaries-1.webp
     w: 1912
     h: 1416
-  - src: /images/projects/veikkaus-beneficiaries-2.png
+  - src: /images/projects/veikkaus-beneficiaries-2.webp
     w: 880
     h: 1146
-  - src: /images/projects/veikkaus-beneficiaries-3.png
+  - src: /images/projects/veikkaus-beneficiaries-3.webp
     w: 644
     h: 540
 ---

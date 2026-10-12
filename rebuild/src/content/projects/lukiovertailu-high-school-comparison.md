@@ -6,18 +6,18 @@ categories: ["Web", "Visualization"]
 publishedAt: 2020-01-01
 summary: "This application was developed for STT news agency as a part of my final thesis to Metropolia University of Applied Sciences."
 hasVideo: true
-thumbnail: /images/thumbs/lukiovertailu-high-school-comparison.png
+thumbnail: /images/thumbs/lukiovertailu-high-school-comparison.webp
 thumbnailWidth: 1000
 thumbnailHeight: 702
 private: false
 images:
-  - src: /images/projects/lukiovertailu-high-school-comparison-1.png
+  - src: /images/projects/lukiovertailu-high-school-comparison-1.webp
     w: 1390
     h: 1318
-  - src: /images/projects/lukiovertailu-high-school-comparison-2.png
+  - src: /images/projects/lukiovertailu-high-school-comparison-2.webp
     w: 1214
     h: 1260
-  - src: /images/projects/lukiovertailu-high-school-comparison-3.png
+  - src: /images/projects/lukiovertailu-high-school-comparison-3.webp
     w: 1070
     h: 1034
 ---

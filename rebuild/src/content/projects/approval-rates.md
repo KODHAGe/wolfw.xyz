@@ -5,18 +5,18 @@ categories: ["Web", "Visualization"]
 publishedAt: 2020-01-01
 summary: "A customized timeline graph for displaying graphable, quantitative data in juxtaposition with qualitative, textual data to explain the reactions of the graph."
 hasVideo: true
-thumbnail: /images/thumbs/approval-rates.png
+thumbnail: /images/thumbs/approval-rates.webp
 thumbnailWidth: 1000
 thumbnailHeight: 678
 private: false
 images:
-  - src: /images/projects/approval-rates-1.png
+  - src: /images/projects/approval-rates-1.webp
     w: 958
     h: 962
-  - src: /images/projects/approval-rates-2.png
+  - src: /images/projects/approval-rates-2.webp
     w: 1368
     h: 1268
-  - src: /images/projects/approval-rates-3.png
+  - src: /images/projects/approval-rates-3.webp
     w: 1374
     h: 1334
 ---

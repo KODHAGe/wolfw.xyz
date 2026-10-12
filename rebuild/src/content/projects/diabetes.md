@@ -5,15 +5,15 @@ categories: ["Web", "Visualization"]
 publishedAt: 2020-01-01
 summary: "A common type of map-based visualization designed, developed and published as a part of the news production of the finnish news agency [STT](http://stt.fi/). Th"
 hasVideo: true
-thumbnail: /images/thumbs/diabetes.png
+thumbnail: /images/thumbs/diabetes.webp
 thumbnailWidth: 1000
 thumbnailHeight: 678
 private: false
 images:
-  - src: /images/projects/diabetes-1.png
+  - src: /images/projects/diabetes-1.webp
     w: 1106
     h: 1206
-  - src: /images/projects/diabetes-2.png
+  - src: /images/projects/diabetes-2.webp
     w: 1316
     h: 1350
 ---

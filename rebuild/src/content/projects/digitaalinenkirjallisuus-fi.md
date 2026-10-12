@@ -6,12 +6,12 @@ categories: ["Web", "Visualization"]
 publishedAt: 2020-01-01
 summary: "A collaborative project between me and Karkkikammo, a more in depth project description in Finnish can be found @ [karkkikammo.net](https://karkkikammo.net/di-k"
 hasVideo: false
-thumbnail: /images/thumbs/digitaalinenkirjallisuus-fi.png
+thumbnail: /images/thumbs/digitaalinenkirjallisuus-fi.webp
 thumbnailWidth: 1000
 thumbnailHeight: 765
 private: false
 images:
-  - src: /images/projects/digitaalinenkirjallisuus-fi-1.png
+  - src: /images/projects/digitaalinenkirjallisuus-fi-1.webp
     w: 1948
     h: 1356
 ---

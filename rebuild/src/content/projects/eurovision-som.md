@@ -5,7 +5,7 @@ categories: ["Experiment"]
 publishedAt: 2020-01-01
 summary: "Eurovision Self-Organized is an exploration of both Eurovision and [Self-Organizing Map neural networks.](https://en.wikipedia.org/wiki/Self-organizing_map) We "
 hasVideo: true
-thumbnail: /images/thumbs/eurovision-som.png
+thumbnail: /images/thumbs/eurovision-som.webp
 thumbnailWidth: 1000
 thumbnailHeight: 702
 private: false

@@ -371,6 +371,27 @@ function staticChecks() {
     );
   }
 
+  // S13 — every image the content references actually exists in the build.
+  // This check exists because the WebP conversion shipped broken images once:
+  // the frontmatter still pointed at .png after the files were converted, and
+  // the audit reported green because it only counted bytes, never resolved a
+  // path. Byte budgets and existence are different questions.
+  {
+    const refs = new Set();
+    for (const f of allHtml) {
+      for (const m of readFileSync(f, "utf8").matchAll(/(\/images\/[\w./-]+)/g)) {
+        refs.add(m[1]);
+      }
+    }
+    const missing = [...refs].filter((r) => !existsSync(join(DIST, r.replace(/^\//, ""))));
+    record(
+      "S13-image-exists",
+      missing.length === 0 ? "PASS" : "FAIL",
+      "every image referenced by the built pages exists in dist",
+      missing.length === 0 ? `${refs.size} distinct images, all resolve` : `${missing.length} of ${refs.size} missing: ${missing.slice(0, 5).join(", ")}`,
+    );
+  }
+
   // S9 — static heading outline + focus-rule inventory (crude DOM walk)
   for (const [type, rel] of Object.entries(PAGES)) {
     const html = readFileSync(join(DIST, rel));
@@ -932,6 +953,58 @@ async function browserChecks() {
       hidden
         ? `sheet display ${state.sheetDisplay}, canvas ${state.canvasDisplay} — the shader's own pixels cannot be recoloured by forced-colors, so the canvas is removed (it is decorative, aria-hidden); button bg forced to ${state.btnBg}, border to ${state.btnBorder}`
         : `canvas still painting over the forced palette (sheet ${state.sheetDisplay}); a @media (forced-colors: active) rule hiding .sheet/#background is required`,
+    );
+    await page.close();
+  }
+
+  // B16 — do the images actually RENDER, and is the console clean?
+  // S13 proves the files exist; this proves the browser decoded them and that
+  // the WebGL layer is not spewing driver warnings (the attribute-less shader
+  // made Chrome/ANGLE take its emulated path and print one warning per frame).
+  {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const consoleMsgs = [];
+    page.on("console", (m) => {
+      if (m.type() === "warning" || m.type() === "error") consoleMsgs.push(`${m.type()}: ${m.text()}`);
+    });
+    page.on("pageerror", (e) => consoleMsgs.push(`pageerror: ${e.message}`));
+    const broken = [];
+    for (const route of ["/work/", "/art/", "/kaekriaeinen/", "/visualizing-government/"]) {
+      await page.goto(BASE + route, { waitUntil: "networkidle" });
+      // Listing images are loading="lazy", so below-the-fold images are
+      // legitimately unloaded until scrolled to. Walk the page first, or the
+      // check reports lazy-loading as broken images.
+      await page.evaluate(async () => {
+        const step = window.innerHeight;
+        for (let y = 0; y < document.body.scrollHeight; y += step) {
+          window.scrollTo(0, y);
+          await new Promise((r) => setTimeout(r, 120));
+        }
+        window.scrollTo(0, 0);
+      });
+      await page.waitForLoadState("networkidle");
+      await page.waitForTimeout(300);
+      const imgs = await page.evaluate(() =>
+        [...document.querySelectorAll("img")].map((i) => ({
+          src: i.currentSrc || i.src,
+          ok: i.complete && i.naturalWidth > 0,
+        })));
+      for (const i of imgs) if (!i.ok) broken.push(`${route} ${i.src}`);
+    }
+    const webglWarnings = consoleMsgs.filter((m) => /vertex attrib|drawArraysInstanced|webgl|WebGL/i.test(m));
+    record(
+      "B16-images-render",
+      broken.length === 0 ? "PASS" : "FAIL",
+      "every <img> on /work, /art and two project pages decoded (naturalWidth > 0)",
+      broken.length === 0 ? "all images decoded" : `${broken.length} did not: ${broken.slice(0, 3).join(", ")}`,
+    );
+    record(
+      "B16-webgl-console",
+      webglWarnings.length === 0 ? "PASS" : "WARN",
+      "no WebGL driver warnings in the console",
+      webglWarnings.length === 0
+        ? `console clean (${consoleMsgs.length} other warning/error line(s): ${consoleMsgs.slice(0, 2).join(" | ") || "none"})`
+        : `${webglWarnings.length} warning(s), e.g. ${webglWarnings[0].slice(0, 160)}`,
     );
     await page.close();
   }

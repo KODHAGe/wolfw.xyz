@@ -5,15 +5,15 @@ categories: ["Web", "Visualization"]
 publishedAt: 2020-01-01
 summary: "As part of the news package produced for the parliamentary elections of early 2015 in Finland, we at STT produced a set of real-time visualizations of the elect"
 hasVideo: true
-thumbnail: /images/thumbs/election-day-results.png
+thumbnail: /images/thumbs/election-day-results.webp
 thumbnailWidth: 1000
 thumbnailHeight: 702
 private: false
 images:
-  - src: /images/projects/election-day-results-1.png
+  - src: /images/projects/election-day-results-1.webp
     w: 938
     h: 874
-  - src: /images/projects/election-day-results-2.png
+  - src: /images/projects/election-day-results-2.webp
     w: 880
     h: 548
 ---

@@ -5,18 +5,18 @@ categories: ["Experiment"]
 publishedAt: 2020-01-01
 summary: "An instrument of instruments, rain of emoji."
 hasVideo: true
-thumbnail: /images/thumbs/instru-mental.png
+thumbnail: /images/thumbs/instru-mental.webp
 thumbnailWidth: 1000
 thumbnailHeight: 704
 private: false
 images:
-  - src: /images/projects/instru-mental-1.png
+  - src: /images/projects/instru-mental-1.webp
     w: 2456
     h: 1402
-  - src: /images/projects/instru-mental-2.png
+  - src: /images/projects/instru-mental-2.webp
     w: 1478
     h: 1278
-  - src: /images/projects/instru-mental-3.png
+  - src: /images/projects/instru-mental-3.webp
     w: 1930
     h: 1286
 ---

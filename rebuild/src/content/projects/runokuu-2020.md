@@ -6,15 +6,15 @@ categories: ["Web", "Visualization"]
 publishedAt: 2020-01-01
 summary: "A collaborative with project with [Karkkikammo](https://karkkikammo.net/) for Nuoren Voiman Liitto to design the visual theme for Runokuu - Poetry Moon Festival"
 hasVideo: false
-thumbnail: /images/thumbs/runokuu-2020.png
+thumbnail: /images/thumbs/runokuu-2020.webp
 thumbnailWidth: 1000
 thumbnailHeight: 682
 private: false
 images:
-  - src: /images/projects/runokuu-2020-1.png
+  - src: /images/projects/runokuu-2020-1.webp
     w: 640
     h: 454
-  - src: /images/projects/runokuu-2020-2.png
+  - src: /images/projects/runokuu-2020-2.webp
     w: 364
     h: 640
 ---

@@ -5,18 +5,18 @@ categories: ["Web", "Visualization"]
 publishedAt: 2020-01-01
 summary: "As a part of the State Treasury data analyst team, our mission is to make the wealth of data produced by different processes of government accessible and unders"
 hasVideo: false
-thumbnail: /images/thumbs/visualizing-government.png
+thumbnail: /images/thumbs/visualizing-government.webp
 thumbnailWidth: 1000
 thumbnailHeight: 700
 private: false
 images:
-  - src: /images/projects/visualizing-government-1.svg
+  - src: /images/projects/visualizing-government-1.webp
     w: 900
     h: 1179
-  - src: /images/projects/visualizing-government-2.png
+  - src: /images/projects/visualizing-government-2.webp
     w: 2880
     h: 1770
-  - src: /images/projects/visualizing-government-3.png
+  - src: /images/projects/visualizing-government-3.webp
     w: 2880
     h: 2048
 ---

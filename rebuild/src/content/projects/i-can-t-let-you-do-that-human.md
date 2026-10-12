@@ -5,18 +5,18 @@ categories: ["Experiment"]
 publishedAt: 2020-01-01
 summary: "Kinects + Printers === A bad time"
 hasVideo: true
-thumbnail: /images/thumbs/i-can-t-let-you-do-that-human.png
+thumbnail: /images/thumbs/i-can-t-let-you-do-that-human.webp
 thumbnailWidth: 1000
 thumbnailHeight: 704
 private: false
 images:
-  - src: /images/projects/i-can-t-let-you-do-that-human-1.png
+  - src: /images/projects/i-can-t-let-you-do-that-human-1.webp
     w: 1974
     h: 1422
-  - src: /images/projects/i-can-t-let-you-do-that-human-2.png
+  - src: /images/projects/i-can-t-let-you-do-that-human-2.webp
     w: 1594
     h: 682
-  - src: /images/projects/i-can-t-let-you-do-that-human-3.png
+  - src: /images/projects/i-can-t-let-you-do-that-human-3.webp
     w: 1786
     h: 1450
 ---
