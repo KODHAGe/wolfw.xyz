@@ -13,8 +13,19 @@
  *
  * Exists because the background bug was invisible to the build: TypeScript
  * compiles, the page renders, the buttons work, and the canvas is simply blank.
- * `npm run build` cannot catch a bad GLSL uniform or a wrong axis. This page
- * reports what actually landed in the framebuffer.
+ * `npm run build` cannot catch a bad GLSL uniform or a wrong axis, and it
+ * cannot tell you whether the shader costs 1ms or 6ms. This page reports both
+ * what landed in the framebuffer and what it costs.
+ *
+ * What it measures, and why the method matters:
+ * - Kernel time is taken as the MEDIAN of 30 batches with gl.finish() around
+ *   each batch. Without finish() you are timing how fast the driver accepts
+ *   commands, not how long the GPU takes — which on a vsync-locked display is
+ *   the difference between a real number and a flattering one.
+ * - Both tiers are timed against the same budget (visual-effects.md §3.1):
+ *   the instanced program that ships, and the SDF quad kept as the fallback.
+ * - Draws happen with a dummy attribute 0 enabled, because without it ANGLE
+ *   takes its emulated path and every number below is the wrong one.
  */
 const title = "shader probe";
 ---
@@ -27,10 +38,14 @@ const out = document.getElementById("out");
 const log = (...a) => { out.textContent += "\n" + a.join(" "); };
 window.addEventListener("error", (e) => log("ERROR:", e.message, "@", e.filename + ":" + e.lineno));
 
-let SHADERS, ELEMENTS;
+let SHADERS, INSTANCED_SHADERS, ELEMENTS;
 try {
-  ({ SHADERS, ELEMENTS } = await import("/src/lib/background.ts"));
-  log("module loaded");
+  // Two modules, because they are two tiers that load differently at runtime:
+  // background.ts is the eager shipping path, background-sdf.ts is the lazy
+  // fallback. The probe imports both so it can time both.
+  ({ INSTANCED_SHADERS, ELEMENTS } = await import("/src/lib/background.ts"));
+  ({ SDF_SHADERS: SHADERS } = await import("/src/lib/background-sdf.ts"));
+  log("modules loaded (instanced + sdf tiers)");
 } catch (e) {
   log("IMPORT FAILED:", e.message);
   log("(this page needs `astro dev`, not `astro preview`)");
@@ -40,113 +55,217 @@ try {
 // Match the real sheet: the canvas is roughly viewport-width, inset 0.25rem.
 const CSS_W = 1436, CSS_H = 892;
 const canvas = document.getElementById("c");
-const gl = canvas.getContext("webgl2", { alpha: true, antialias: false, premultipliedAlpha: true, preserveDrawingBuffer: true });
-if (!gl) { log("FAIL: no webgl2"); } else {
-  canvas.width = CSS_W * 2; canvas.height = CSS_H * 2;
-  canvas.style.width = CSS_W + "px"; canvas.style.height = CSS_H + "px";
+const gl = canvas.getContext("webgl2", {
+  alpha: true, antialias: false, premultipliedAlpha: true, preserveDrawingBuffer: true,
+});
+if (!gl) {
+  log("FAIL: no webgl2");
+} else {
+  canvas.width = CSS_W * 2;
+  canvas.height = CSS_H * 2;
+  canvas.style.width = CSS_W + "px";
+  canvas.style.height = CSS_H + "px";
+
+  const ext = gl.getExtension("WEBGL_debug_renderer_info");
+  log("renderer:", ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
 
   const compile = (type, src) => {
     const sh = gl.createShader(type);
-    gl.shaderSource(sh, src); gl.compileShader(sh);
-    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error("compile: " + gl.getShaderInfoLog(sh));
+    gl.shaderSource(sh, src);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+      throw new Error("compile: " + gl.getShaderInfoLog(sh));
+    }
     return sh;
   };
 
-  const prog = gl.createProgram();
-  gl.attachShader(prog, compile(gl.VERTEX_SHADER, SHADERS.vert));
-  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, SHADERS.frag));
-  gl.linkProgram(prog);
-  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error("link: " + gl.getProgramInfoLog(prog));
-  gl.useProgram(prog);
-  log("compile+link OK");
+  const link = (src) => {
+    const p = gl.createProgram();
+    gl.attachShader(p, compile(gl.VERTEX_SHADER, src.vert));
+    gl.attachShader(p, compile(gl.FRAGMENT_SHADER, src.frag));
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+      throw new Error("link: " + gl.getProgramInfoLog(p));
+    }
+    return p;
+  };
 
-  const loc = (n) => gl.getUniformLocation(prog, n);
-  for (const n of ["u_resolution","u_time","u_pixelRatio","u_accent","u_alpha","u_reduced","u_p[0]","u_pos[0]"]) {
-    log("  loc", n.padEnd(13), "=>", String(loc(n)));
-  }
+  // Warm the pipeline so the first timed draw does not pay for lazy compile
+  // (visual-effects.md §3.1 measured 384ms cold, 39ms warm).
+  const warm = (draw) => {
+    draw();
+    gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
+  };
+
+  // Median of N batches, divided by the batch size.
+  //
+  // gl.finish() is NOT a usable sync point in Chrome's command-buffer WebGL —
+  // it returns immediately and every measurement came back as 0.00 ms, which is
+  // exactly what this probe reported before the method was fixed. readPixels
+  // of one pixel is the call that actually waits for the GPU. Batching amortises
+  // the sync: 10 draws per batch, so the read is at most ~10% of a sample.
+  const BATCH = 10;
+  const pixel = new Uint8Array(4);
+  const timeKernel = (draw, batches = 15) => {
+    const samples = [];
+    for (let i = 0; i < batches; i++) {
+      draw();
+      gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+      const t0 = performance.now();
+      for (let k = 0; k < BATCH; k++) draw();
+      gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+      samples.push((performance.now() - t0) / BATCH);
+    }
+    samples.sort((a, b) => a - b);
+    return samples[Math.floor(batches / 2)];
+  };
+
+  // Dummy attribute 0 — see the header. Without this ANGLE emulates.
+  const vao = gl.createVertexArray();
+  gl.bindVertexArray(vao);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 1, gl.FLOAT, false, 0, 0);
 
   // NINE fields per element, matching the shader's STRIDE.
-  const build = (elems) => {
+  const paramArray = (elems) => {
     const p = new Float32Array(63);
     elems.forEach((e, i) => {
       const b = i * 9;
-      p[b+0]=e.rotation; p[b+1]=e.width; p[b+2]=e.dash; p[b+3]=e.freq;
-      p[b+4]=e.amp; p[b+5]=e.gridDist; p[b+6]=e.offset; p[b+7]=e.grid; p[b+8]=e.total;
+      p[b + 0] = e.rotation; p[b + 1] = e.width; p[b + 2] = e.dash; p[b + 3] = e.freq;
+      p[b + 4] = e.amp; p[b + 5] = e.gridDist; p[b + 6] = e.offset; p[b + 7] = e.grid;
+      p[b + 8] = e.total;
     });
     return p;
   };
-  const positions = new Float32Array(14);
-  ELEMENTS.forEach((e, i) => { positions[i*2] = e.posX; positions[i*2+1] = e.posY; });
+  const posArray = () => {
+    const pos = new Float32Array(14);
+    ELEMENTS.forEach((e, i) => { pos[i * 2] = e.posX; pos[i * 2 + 1] = e.posY; });
+    return pos;
+  };
 
-  gl.uniform1fv(loc("u_p[0]"), build(ELEMENTS));
-  gl.uniform1fv(loc("u_pos[0]"), positions);
-  gl.uniform3f(loc("u_accent"), 0, 0, 0);
-  gl.uniform1f(loc("u_alpha"), 1.0);
-  gl.uniform1f(loc("u_reduced"), 0);
-  gl.uniform1f(loc("u_time"), 0);
-  gl.viewport(0, 0, canvas.width, canvas.height);
+  const results = {};
+  log("");
+  log("=== GPU kernel per draw (median of 15 batches x 10 draws, readPixels-bracketed) ===");
 
-  const buf = new Uint8Array(canvas.width * canvas.height * 4);
+  for (const [dpr, label] of [[2, "DPR 2"], [1, "DPR 1"]]) {
+    canvas.width = CSS_W * dpr;
+    canvas.height = CSS_H * dpr;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    log(`buffer ${canvas.width}x${canvas.height} (${((canvas.width * canvas.height) / 1e6).toFixed(2)} MP) — ${label}`);
 
-  function measure(dpr) {
-    gl.uniform2f(loc("u_resolution"), canvas.width, canvas.height);
-    gl.uniform1f(loc("u_pixelRatio"), dpr);
-    gl.clearColor(0,0,0,0);
+    // --- tier A: instanced analytic geometry (what ships) ---
+    try {
+      const p = link(INSTANCED_SHADERS);
+      gl.useProgram(p);
+      const L = (n) => gl.getUniformLocation(p, n);
+      gl.uniform1fv(L("u_p[0]"), paramArray(ELEMENTS));
+      gl.uniform1fv(L("u_pos[0]"), posArray());
+      gl.uniform2f(L("u_resolution"), canvas.width, canvas.height);
+      gl.uniform1f(L("u_pixelRatio"), dpr);
+      gl.uniform1f(L("u_time"), 2.0);
+      gl.uniform1f(L("u_reduced"), 0);
+      gl.uniform3f(L("u_field"), 0, 0, 0);
+      gl.uniform3f(L("u_hot"), 0.74, 0.54, 1.0);
+      gl.uniform1f(L("u_alpha"), 1.0);
+      gl.uniform1f(L("u_dashProgress"), 1.0);
+      gl.uniform1f(L("u_dashTravel"), 100.0);
+      gl.uniform2f(L("u_pointer"), -1e4, -1e4);
+      gl.uniform1f(L("u_pointerAmp"), 0);
+      const draw = () => gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 482, 70);
+      warm(draw);
+      results["instanced " + label] = timeKernel(draw);
+    } catch (e) {
+      log(`  instanced ${label}: FAILED — ${e.message}`);
+    }
+
+    // --- tier B: the SDF quad, kept deliberately as the fallback ---
+    try {
+      const p = link(SHADERS);
+      gl.useProgram(p);
+      const L = (n) => gl.getUniformLocation(p, n);
+      gl.uniform1fv(L("u_p[0]"), paramArray(ELEMENTS));
+      gl.uniform1fv(L("u_pos[0]"), posArray());
+      gl.uniform2f(L("u_resolution"), canvas.width, canvas.height);
+      gl.uniform1f(L("u_pixelRatio"), dpr);
+      gl.uniform1f(L("u_time"), 2.0);
+      gl.uniform1f(L("u_reduced"), 0);
+      gl.uniform3f(L("u_accent"), 0, 0, 0);
+      gl.uniform1f(L("u_alpha"), 1.0);
+      const draw = () => gl.drawArrays(gl.TRIANGLES, 0, 3);
+      warm(draw);
+      results["sdf " + label] = timeKernel(draw);
+    } catch (e) {
+      log(`  sdf ${label}: FAILED — ${e.message}`);
+    }
+  }
+
+  log("");
+  for (const [k, v] of Object.entries(results)) {
+    log(`  ${k.padEnd(18)} ${v.toFixed(2)} ms/draw`);
+  }
+  const d2 = results["instanced DPR 2"], d1 = results["instanced DPR 1"];
+  const s2 = results["sdf DPR 2"], s1 = results["sdf DPR 1"];
+  if (d2 && s2) log(`  speedup vs SDF: ${(s2 / d2).toFixed(2)}x at DPR 2, ${s1 && d1 ? (s1 / d1).toFixed(2) : "?"}x at DPR 1 (paper measured 3.6x / 3.5x)`);
+  if (d2) log(`  budget (visual-effects.md §3.1): DPR 2 ${d2 <= 2.0 ? "PASS" : "FAIL"} (≤2.0ms) · DPR 1 ${d1 <= 1.0 ? "PASS" : "FAIL"} (≤1.0ms)`);
+
+  // Coverage from the shipping tier. The old SDF figure (0.49% at DPR 1) was
+  // measured with a shader that measured VERTICAL distance only, so steep curve
+  // sections were under-stroked; the strips expand along the true normal and
+  // legitimately cover more. Compare against the number below, not the old one.
+  {
+    const p = link(INSTANCED_SHADERS);
+    gl.useProgram(p);
+    const L = (n) => gl.getUniformLocation(p, n);
+    canvas.width = CSS_W * 2;
+    canvas.height = CSS_H * 2;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniform1fv(L("u_p[0]"), paramArray(ELEMENTS));
+    gl.uniform1fv(L("u_pos[0]"), posArray());
+    gl.uniform2f(L("u_resolution"), canvas.width, canvas.height);
+    gl.uniform1f(L("u_pixelRatio"), 2);
+    gl.uniform1f(L("u_time"), 2.0);
+    gl.uniform1f(L("u_reduced"), 0);
+    gl.uniform3f(L("u_field"), 0, 0, 0);
+    gl.uniform3f(L("u_hot"), 0.74, 0.54, 1.0);
+    gl.uniform1f(L("u_alpha"), 1.0);
+    gl.uniform1f(L("u_dashProgress"), 1.0);
+    gl.uniform1f(L("u_dashTravel"), 100.0);
+    gl.uniform2f(L("u_pointer"), -1e4, -1e4);
+    gl.uniform1f(L("u_pointerAmp"), 0);
+
+    const buf = new Uint8Array(canvas.width * canvas.height * 4);
+    gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 482, 70);
     gl.readPixels(0, 0, canvas.width, canvas.height, gl.RGBA, gl.UNSIGNED_BYTE, buf);
     let lit = 0;
     for (let i = 3; i < buf.length; i += 4) if (buf[i] > 0) lit++;
-    return (100 * lit / (canvas.width * canvas.height));
-  }
+    log("");
+    log(`instanced ink coverage @DPR 2: ${((100 * lit) / (canvas.width * canvas.height)).toFixed(3)}%`);
 
-  // The page real devicePixelRatio is what production uses; compare it against 1
-  // to prove which one the field is drawn for.
-  const realDpr = window.devicePixelRatio || 1;
-  log("");
-  log("buffer", canvas.width + "x" + canvas.height, " devicePixelRatio:", realDpr);
-  log("LIT%  dpr=1:", measure(1).toFixed(3), " dpr=2:", measure(2).toFixed(3), " dpr=" + realDpr + ":", measure(realDpr).toFixed(3));
-
-  // Per-element coverage: zero every block except one.
-  log("");
-  log("per-element LIT% at dpr=" + realDpr + " (isolated):");
-  for (let i = 0; i < ELEMENTS.length; i++) {
-    gl.uniform1fv(loc("u_p[0]"), build([ELEMENTS[i]]));
-    const pct = measure(realDpr);
-    const e = ELEMENTS[i];
-    log("  el" + i,
-        "rot=" + String(e.rotation).padStart(4),
-        "w=" + String(e.width).padStart(2),
-        "dash=" + String(e.dash).padStart(3),
-        "freq=" + String(e.freq).padStart(3),
-        "amp=" + String(e.amp).padStart(2),
-        "gDist=" + String(e.gridDist).padStart(3),
-        "off=" + String(e.offset).padStart(3),
-        "gSize=" + String(e.grid).padStart(2),
-        "tot=" + String(e.total).padStart(3),
-        "-> " + pct.toFixed(3) + "%");
-  }
-
-  // Coverage map, coarse, for the real config.
-  gl.uniform1fv(loc("u_p[0]"), build(ELEMENTS));
-  measure(realDpr);
-  log("");
-  log("coverage map (16x9, '#' = lit):");
-  const COLS = 16, ROWS = 9;
-  for (let r = ROWS - 1; r >= 0; r--) {
-    let row = "  ";
-    for (let c = 0; c < COLS; c++) {
-      let n = 0, tot = 0;
-      const x0 = Math.floor(c * canvas.width / COLS), x1 = Math.floor((c+1) * canvas.width / COLS);
-      const y0 = Math.floor(r * canvas.height / ROWS), y1 = Math.floor((r+1) * canvas.height / ROWS);
-      for (let y = y0; y < y1; y += 4) for (let x = x0; x < x1; x += 4) {
-        tot++; if (buf[(y*canvas.width+x)*4+3] > 0) n++;
+    log("");
+    log("coverage map (16x9, '#' = lit):");
+    const COLS = 16, ROWS = 9;
+    for (let r = ROWS - 1; r >= 0; r--) {
+      let row = "  ";
+      for (let c = 0; c < COLS; c++) {
+        let n = 0, tot = 0;
+        const x0 = Math.floor((c * canvas.width) / COLS), x1 = Math.floor(((c + 1) * canvas.width) / COLS);
+        const y0 = Math.floor((r * canvas.height) / ROWS), y1 = Math.floor(((r + 1) * canvas.height) / ROWS);
+        for (let y = y0; y < y1; y += 4) for (let x = x0; x < x1; x += 4) {
+          tot++;
+          if (buf[(y * canvas.width + x) * 4 + 3] > 0) n++;
+        }
+        const f = n / tot;
+        row += f > 0.5 ? "#" : f > 0.15 ? "+" : f > 0.01 ? "." : " ";
       }
-      const f = n / tot;
-      row += f > 0.5 ? "#" : f > 0.15 ? "+" : f > 0.01 ? "." : " ";
+      log(row);
     }
-    log(row);
   }
+
+  log("");
   log("gl error:", gl.getError(), "(0 = none)");
 }
 </script>

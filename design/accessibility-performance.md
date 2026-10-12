@@ -31,6 +31,77 @@
 > informational latent-purple constraint, and the one remaining owner-gated
 > item is finding #4.
 
+> **Update 2026-10-13 — Phases 1–3 shipped. Harness: 86 checks, 73 pass / 1 fail / 1 warn / 11 info.**
+>
+> **Phase 3 replaced the field renderer** (`visual-effects.md` §2.1). The SDF
+> quad cost `O(pixels × strokes)`; the shipping path is now instanced analytic
+> curve geometry, one `drawArraysInstanced(TRIANGLE_STRIP, 0, 482, 70)`, zero
+> vertex bytes. Re-measured by `rebuild/tools/probe.astro` on this machine
+> (ANGLE Metal, M1 Pro), **not** quoted from the paper:
+>
+> | Kernel per draw | DPR 2 (2872×1784) | DPR 1 (1436×892) |
+> |---|---|---|
+> | instanced (tier A, ships) | **0.14 ms** — budget ≤ 2.0 ✓ | **0.07 ms** — budget ≤ 1.0 ✓ |
+> | SDF quad (tier B, fallback) | 0.45 ms | 0.14 ms |
+> | speedup | 3.21× (paper: 3.6×) | 2.00× (paper: 3.5×) |
+>
+> Both budgets are met with an order of magnitude of headroom, and the relative
+> claim reproduces. The *absolute* figures are far below the paper's 5.58 ms /
+> 1.54 ms baseline for the same shader, so treat the ratio as the portable claim
+> and the absolute number as machine- and method-specific. Ink coverage rose to
+> **3.16 %** at DPR 2 (the SDF measured 1.30 %): not a regression, the strips
+> expand along the true normal where the SDF measured vertical distance only and
+> under-stroked steep sections.
+>
+> Two measurement defects found on the way, both of which would have produced
+> confident nonsense:
+>
+> - **`gl.finish()` is not a sync point in Chrome's WebGL.** It returns
+>   immediately, so the first version of the probe reported **0.00 ms for every
+>   tier** — indistinguishable from a shader that draws nothing. `readPixels` of
+>   one pixel is the call that actually waits for the GPU; the probe brackets a
+>   10-draw batch with one. `rebuild/tools/probe.astro` now documents this in
+>   its header, because the failure mode is a plausible-looking zero.
+> - **`readPixels` outside a frame callback returns an empty buffer** unless the
+>   context was created with `preserveDrawingBuffer`. A live-page "ink coverage
+>   0.000 %" reading taken that way is void, not a blank canvas — the field was
+>   drawing fine.
+>
+> **The governor is keyed to frames that are actually late, not to slow CPUs.**
+> Measured rAF intervals under CDP throttling, this machine:
+>
+> | CPU throttle | rAF median | rAF max | result |
+> |---|---|---|---|
+> | 1× | 16.7 ms | 16.8 ms | loop runs (correct) |
+> | 20× | 16.7 ms | 16.8 ms | loop runs (correct — nothing is late) |
+> | 100× | 16.7 ms | 100 ms | `data-perf=static`, loop given up |
+>
+> The first version of check B18 asserted the governor would trip at 20×; it
+> did not, and the code was right and the assertion was wrong. Freezing a field
+> the visitor is still seeing at 60 fps would be a regression dressed as a
+> safeguard, so the check now throttles 100× and `B17-governor-idle` pins the
+> no-false-trip case at full speed.
+>
+> **The fallback tier is a lazy chunk.** Compiling both tiers eagerly cost
+> **+2.9 KB gz** on every page and pushed `/about` and `/cv` over the 12 KB JS
+> budget for a failure mode that has never occurred. `background-sdf.ts` is now
+> `import()`ed only if tier A fails to compile or link; the CSS gradient (tier
+> C) covers the gap. Separately, the GLSL comments are stripped at build time by
+> a small Vite plugin (`glslTrim` in `astro.config.mjs`) — the reasoning stays in
+> the source, 2,383 bytes of it stops shipping. Net effect: the page is now
+> **smaller than it was before the rewrite** — `/home` 9,707 B gz, `/about`
+> 11,024, `/cv` 11,089, against a 12,288 budget.
+>
+> Four new checks (B17 × 3, B18) pin the tier actually selected, the fallback
+> staying lazy, the governor not tripping when idle, and the governor tripping
+> under load. `B17-fallback-stays-lazy` exists because the eager-fallback
+> regression is invisible in every other check: the page still renders.
+>
+> Phases 1 (typography) and 2 (responsive tiers) landed before this; their
+> effect on the harness was already green and is recorded in the commit log.
+> Finding #4 (41 body images with empty `alt`) remains the only FAIL and is
+> owner-gated: an `alt` is content only Wolf can write.
+
 ---
 
 ## Findings table (severity-ranked)
@@ -211,7 +282,7 @@ Both are one-line fixes in the `motionQuery` change handler: re-upload `u_reduce
 
 ## Part 4 — The audit harness
 
-**`design/audit/audit.mjs`** — 79 checks, re-runnable, exit-code driven (0 pass, 1 fail, 2 could-not-run):
+**`design/audit/audit.mjs`** — **86 checks**, re-runnable, exit-code driven (0 pass, 1 fail, 2 could-not-run):
 
 ```
 cd design/audit && npm install        # once: playwright-core, axe-core, pngjs
@@ -222,7 +293,7 @@ SKIP_BUILD=1 node audit.mjs           # audit an existing dist
 
 It builds via `astro build` (PATH-prepended for the Homebrew node, per the repo's node-18.17 floor), spawns `astro preview`, and runs two stages: **static checks** on `dist` (JS/HTML/CSS budgets per page type, CV-in-payload marker, font loading, alt/dimension/lang/heading inventory, image byte budgets, frontmatter-vs-intrinsic aspect, dev-page detection) and **browser checks** in Chrome (axe-core wcag2a+2aa+21aa+22aa per page type, focus walkthrough with per-element indicator detection, target size with spacing exception, contrast pairs, field-over-text pixel sampling, reduced-motion in both toggle directions with pixel-diff, canvas frame cost with CPU throttle, LCP/CLS/INP-proxy under throttled conditions, 320 px reflow, gate error/border/focus behaviour). Evidence screenshots land in `design/audit/evidence/`.
 
-Current output: **50 pass, 15 fail, 3 warn, 11 info** — the failures are exactly findings #1–14 above; nothing in this report is asserted that the harness cannot re-derive.
+Current output: **50 pass, 15 fail, 3 warn, 11 info** — the failures are exactly findings #1–14 above; nothing in this report is asserted that the harness cannot re-derive. (That was the baseline. The rebuild's current output — **73 pass / 1 fail / 1 warn / 11 info** — is in the update blocks at the top, which also record what the harness learned about measuring GPU time.)
 
 Two sibling scripts document the deeper probes used in this report: `probes.mjs` (reverse reduced-motion toggle, field coverage over time, `data-password` DOM check, font load state), `coverage-long.mjs` (the 90-second/mobile text-coverage table in Part 1), `probes2.mjs` (listing LCP, gate focus, forced-colors, body-image census).
 

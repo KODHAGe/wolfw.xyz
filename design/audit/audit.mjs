@@ -1009,6 +1009,97 @@ async function browserChecks() {
     await page.close();
   }
 
+  // B17 — the renderer contract (visual-effects.md §2.1, §3.3).
+  //
+  // Three things the instanced rewrite introduced that nothing else would
+  // notice if they broke:
+  //   1. which tier actually ran — a silent fall back to the SDF quad still
+  //      draws a field, 3.2x slower and under-stroked, and looks like success;
+  //   2. the fallback staying a LAZY chunk — make it eager again and every
+  //      visitor pays ~1 KB gz for a failure that has never happened, which is
+  //      what pushed the page over its 12 KB budget in the first place;
+  //   3. the governor not tripping when it should (checked in B18).
+  {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const requested = [];
+    page.on("request", (r) => requested.push(r.url()));
+    await page.goto(BASE + "/", { waitUntil: "networkidle" });
+    await page.waitForTimeout(1200);
+    const state = await page.evaluate(() => {
+      const c = document.querySelector("#background");
+      return {
+        mode: c?.dataset.mode ?? null,
+        fallback: c?.dataset.fallback ?? null,
+        perf: c?.dataset.perf ?? null,
+      };
+    });
+    record(
+      "B17-renderer-tier",
+      state.mode === "instanced" && state.fallback === "false" ? "PASS" : "FAIL",
+      "the field renders on the instanced tier (tier A), not the SDF quad",
+      state.mode === "instanced" && state.fallback === "false"
+        ? `data-mode=${state.mode}, data-fallback=${state.fallback}, governor did not trip (data-perf=${state.perf ?? "unset"})`
+        : `data-mode=${state.mode}, data-fallback=${state.fallback} — expected instanced/false`,
+    );
+    record(
+      "B17-governor-idle",
+      state.perf === null ? "PASS" : "FAIL",
+      "the governor leaves the loop running on an unthrottled page",
+      state.perf === null
+        ? "no data-perf=static after 1.2s on a healthy page"
+        : `governor froze the field immediately (data-perf=${state.perf}) — it is measuring something other than frame time`,
+    );
+    const sdfChunk = requested.filter((u) => /background-sdf/.test(u));
+    record(
+      "B17-fallback-stays-lazy",
+      sdfChunk.length === 0 ? "PASS" : "FAIL",
+      "the SDF fallback chunk is never fetched on the happy path",
+      sdfChunk.length === 0
+        ? `tier A compiled inline; ${requested.length} request(s) total, none for background-sdf`
+        : `${sdfChunk.length} request(s) for the fallback tier: ${sdfChunk[0].split("/").pop()}`,
+    );
+    await page.close();
+  }
+
+  // B18 — the frame-time governor, exercised rather than assumed.
+  //
+  // A governor that never fires is indistinguishable from one that is not
+  // written, and a governor that fires immediately would freeze the field on
+  // every visit. B17 covers the second failure, this covers the first.
+  //
+  // The throttle rate is 100x, not 20x, and that number is measured rather than
+  // guessed: at 20x the rAF interval is still pinned at the 16.7 ms vsync (this
+  // machine, measured median 16.7 / max 16.8 at both 1x and 20x) because the
+  // whole frame is well under budget, so a governor keyed to frame overrun has
+  // correctly nothing to act on. Only at 100x does the interval break (max
+  // 100 ms) and the governor give up the loop. That is the intended design: it
+  // reacts to frames that are actually late, not to a machine that is merely
+  // slow — freezing a field the visitor can still see at 60 fps would be a
+  // regression dressed as a safeguard.
+  {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 100 });
+    await page.goto(BASE + "/", { waitUntil: "domcontentloaded" });
+    let perf = null;
+    for (let i = 0; i < 16 && perf === null; i++) {
+      await page.waitForTimeout(500);
+      perf = await page.evaluate(
+        () => document.querySelector("#background")?.dataset.perf ?? null,
+      );
+    }
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+    record(
+      "B18-governor-engages",
+      perf === "static" ? "PASS" : "FAIL",
+      "100x CPU throttling makes the governor give up the frame loop",
+      perf === "static"
+        ? "data-perf=static within 8s of load; the field holds one frame instead of burning the CPU"
+        : `data-perf=${perf ?? "unset"} after 8s of 100x throttling — §3.3 is dead code or its thresholds never trip`,
+    );
+    await page.close();
+  }
+
   await browser.close();
   return axeFailures;
 }

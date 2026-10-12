@@ -3,6 +3,54 @@ import { readdirSync, readFileSync, existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
 
+// ---------------------------------------------------------------------------
+// GLSL trim.
+//
+// The shaders in src/lib/background*.ts are documented inline, which is the
+// right way to write them: the reasoning behind a normal expansion, the origin
+// of the 9-field stride, and the reason dpr() is a function are all comments
+// that belong next to the line they explain. The browser does not need them.
+// Shipping them cost 2,383 bytes of raw bundle on the two shaders that render
+// the field on every page — which is what pushed /about and /cv past the 12 KB
+// JS budget in audit.mjs.
+//
+// So the comments stay in the source and come out at build time. Only `//`
+// comments are removed (GLSL ES has no block comments, and nothing here puts a
+// `//` inside a string), indentation goes with them, and `#version` stays the
+// first line because the spec requires it to precede everything except
+// comments and whitespace.
+//
+// Verification is not left to inspection: the harness compiles the shipped
+// string (probe.astro) and the audit asserts the live page runs on the
+// instanced tier with a clean console, so a bad transform fails loudly rather
+// than shipping a blank canvas.
+// ---------------------------------------------------------------------------
+function trimGlsl(literal) {
+  return (
+    "`" +
+    literal
+      .slice(1, -1)
+      .split("\n")
+      .map((line) => line.replace(/\/\/.*$/, "").trim())
+      .filter(Boolean)
+      .join("\n") +
+    "`"
+  );
+}
+
+const glslTrim = () => ({
+  name: "glsl-trim",
+  enforce: "pre",
+  transform(code, id) {
+    if (!/src\/lib\/background(-sdf)?\.ts$/.test(id)) return null;
+    // Every shader literal in those two modules opens with the version
+    // directive, so that prefix is the selector. Non-greedy to the closing
+    // backtick — none of these strings contains one.
+    const out = code.replace(/`#version 300 es[\s\S]*?`/g, trimGlsl);
+    return out === code ? null : { code: out, map: null };
+  },
+});
+
 // D2.2 — Vercel stays. Static output, no adapter needed.
 // D4.6 — View Transitions are per-page opt-in via <ClientRouter />, configured
 // in the layout rather than here.
@@ -10,6 +58,7 @@ export default defineConfig({
   site: "https://wolfw.xyz",
   vite: {
     build: { target: "es2022" },
+    plugins: [glslTrim()],
   },
 
   integrations: [

@@ -33,6 +33,11 @@
   /* The background field colour. The legacy drew black strokes; keeping the
      field colour separate from ink lets it be re-tinted without touching UI. */
   --c-field: #000;
+  /* visual-effects.md §2.3: the sweep head is the site's own page purple, so
+     the load animation reads as the site colouring its own drawing in before it
+     goes to ink. Declared there as an addition, not recovered, and read by the
+     GPU layer the same way --c-field is (getComputedStyle). */
+  --c-field-hot: #bc89ff;
 
   /* ---- Type ---------------------------------------------------------------
    * Legacy: `body { font-family:Necto Mono,sans; margin-top:1rem }`. Base font

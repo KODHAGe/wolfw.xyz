@@ -372,6 +372,52 @@ The fixed behaviour was itself the defect the architecture paper named, so this
 is a correction rather than a regression — but it is a departure from R2.4 and
 is registered here as R2.4 requires.
 
+### D4.14 The field is instanced geometry, and its fallback is lazy (2026-10-13)
+
+**Origin:** `design/visual-effects.md` §2.1–2.2 · **Decision:** accepted, shipped
+
+R6's field was a fullscreen fragment shader evaluating every stroke at every
+pixel: `O(pixels × strokes)`, measured at **0.49 % ink coverage for 5.58 ms of
+GPU**. The cost model was the defect, not the shader. The shipping renderer draws
+the curves as instanced triangle strips — one `drawArraysInstanced(TRIANGLE_STRIP,
+0, 482, 70)`, geometry from `gl_VertexID`/`gl_InstanceID` alone, **zero vertex
+bytes** — so the fragment stage only runs on pixels that carry ink.
+
+Three decisions inside that, each with a measurement behind it:
+
+1. **Tier B (the SDF quad) is dynamically imported.** The paper's tier list keeps
+   it as a real fallback; compiling it eagerly cost **+2.9 KB gz on every page**
+   and pushed `/about` and `/cv` past the 12 KB JS budget to guard a failure
+   that has never happened. `background-sdf.ts` is now `import()`ed only if tier
+   A fails to compile or link, and the CSS gradient (tier C) covers the gap. The
+   harness fails if anyone makes it eager again (`B17-fallback-stays-lazy`).
+2. **GLSL comments are stripped at build time** (`glslTrim` in
+   `astro.config.mjs`). The shaders are documented inline, because the reasoning
+   belongs next to the line it explains — 2,383 bytes of which were shipping to
+   every visitor. Keeping the comments in source and dropping them in the build
+   was strictly better than either deleting them or hitting the budget. Net
+   result: `/home` is **9,707 B gz**, smaller than the 10,398 B it was before the
+   rewrite, against a 12,288 B budget.
+3. **The governor gives up the loop rather than the field.** When frames are
+   genuinely late the renderer holds one static frame and sets
+   `data-perf="static"`. Measured: at 20× CPU throttling the rAF interval is
+   still 16.7 ms — nothing is late, so nothing happens, which is correct; at
+   100× the interval breaks (max 100 ms) and the loop is dropped. Freezing a
+   field the visitor is still watching at 60 fps would have been a regression
+   dressed as a safeguard.
+
+Re-measured on this machine rather than quoted from the paper: **0.14 ms/draw at
+DPR 2, 0.07 ms at DPR 1**, against budgets of 2.0 ms and 1.0 ms, and a 3.21×
+speedup over the SDF tier (paper: 3.6×). Ink coverage rose 1.30 % → **3.16 %**,
+which is a correction rather than a regression: the SDF measured vertical
+distance only and under-stroked steep sections, whereas SVG `stroke-width` is a
+perpendicular width.
+
+Two additions the paper declares as additions rather than recoveries: the sweep
+head is coloured with a new token **`--c-field-hot`** (#bc89ff, the site's own
+page purple — the field colours itself in and then settles to ink), and
+pointer-driven amplitude swell. Both are off under reduced motion.
+
 ### D4.9 Reduced motion is a hard requirement
 
 **Origin:** derived · **Decision:** proposed
