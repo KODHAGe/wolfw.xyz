@@ -48,6 +48,18 @@ const projects = defineCollection({
             src: z.string(),
             w: z.number(),
             h: z.number(),
+            // G1, resolved 2026-10-13 with a read token against the live CMS:
+            // the `projectBlock` image type has BOTH `alt` and `caption` fields
+            // in the schema, and all 52 blocks carry both as null. So the field
+            // was never missing — it was never filled in. That distinction
+            // matters: this is content the owner owes, not a schema the rebuild
+            // failed to port, and nothing here may be invented to fill it.
+            //
+            // Optional, because it is genuinely optional in the CMS too. When it
+            // is present the image is the content (1.1.1 — a description is
+            // required); when absent the image is decorative.
+            alt: z.string().optional(),
+            caption: z.string().optional(),
           }),
         )
         .default([]),

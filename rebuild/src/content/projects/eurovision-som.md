@@ -2,7 +2,7 @@
 title: "Eurovision Self-Organized"
 slug: "eurovision-som"
 categories: ["Experiment"]
-publishedAt: 2020-01-01
+publishedAt: 2015-12-29
 summary: "Eurovision Self-Organized is an exploration of both Eurovision and [Self-Organizing Map neural networks.](https://en.wikipedia.org/wiki/Self-organizing_map) We "
 hasVideo: true
 thumbnail: /images/thumbs/eurovision-som.webp

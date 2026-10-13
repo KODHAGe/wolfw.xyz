@@ -2,7 +2,7 @@
 title: "Approval rates"
 slug: "approval-rates"
 categories: ["Web", "Visualization"]
-publishedAt: 2020-01-01
+publishedAt: 2014-09-14
 summary: "A customized timeline graph for displaying graphable, quantitative data in juxtaposition with qualitative, textual data to explain the reactions of the graph."
 hasVideo: true
 thumbnail: /images/thumbs/approval-rates.webp

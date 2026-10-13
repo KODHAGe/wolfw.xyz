@@ -268,14 +268,36 @@ function staticChecks() {
   );
 
   // S6 — img alt + width/height across every page
+  //
+  // `alt` can reach the served HTML in three equivalent forms, and the check has
+  // to accept all three:
+  //   alt="text"   written text
+  //   alt=""        the literal empty value
+  //   alt           a valueless attribute
+  //
+  // The third one is the interesting case. Astro's compressHTML runs
+  // html-minifier-terser with collapseBooleanAttributes, which rewrites
+  // `alt=""` to a bare `alt`. Per the HTML spec a valueless attribute on a
+  // non-boolean attribute HAS the empty string as its value, and the browser
+  // agrees — measured against the built site: hasAttribute("alt") === true,
+  // getAttribute("alt") === "". So a bare `alt` is a decorative image, which is
+  // exactly what it means, not a missing description.
+  //
+  // The previous regex only matched `alt=`, so it reported all 41 as MISSING
+  // and the audit's own output misdescribed correct markup. Reading the built
+  // HTML is not the same as reading what the browser parses, and this check was
+  // doing the former while claiming the latter.
   const allHtml = walk(DIST, (p) => p.endsWith(".html"));
   let imgNoAlt = 0, imgNoDims = 0, imgEmptyAlt = 0, imgTotal = 0;
   for (const f of allHtml) {
     for (const m of readFileSync(f, "utf8").matchAll(/<img[^>]*>/g)) {
       imgTotal++;
       const tag = m[0];
-      if (!/\salt=/.test(tag)) imgNoAlt++;
-      if (/\salt=""/.test(tag)) imgEmptyAlt++;
+      // alt present in any of the three forms: `alt=`, `alt=""`, or bare `alt `
+      // followed by whitespace or the end of the tag.
+      if (!/\salt(=|[\s/>])/.test(tag)) imgNoAlt++;
+      // Empty in either empty form: alt="" or a bare alt.
+      if (/\salt=""(?=[\s/>])|\salt(?=[\s/>])/.test(tag)) imgEmptyAlt++;
       if (!(/\swidth=/.test(tag) && /\sheight=/.test(tag))) imgNoDims++;
     }
   }
@@ -359,7 +381,12 @@ function staticChecks() {
       for (const block of html.matchAll(/<div class="project-block">([\s\S]*?)<\/div>\s*<\/main>/g)) {
         for (const img of block[1].matchAll(/<img[^>]*>/g)) {
           contentImgs++;
-          if (/\salt=""/.test(img[0])) contentImgsEmptyAlt++;
+          // Both empty forms, for the same reason S6 accepts both: Astro's
+          // compressHTML rewrites alt="" to a bare alt. Counting only the
+          // quoted form made this check pass on 41 undescribed screenshots
+          // purely because the minifier changed the spelling — the single
+          // worst failure mode an audit can have, a green that means nothing.
+          if (/\salt=""(?=[\s/>])|\salt(?=[\s/>])/.test(img[0])) contentImgsEmptyAlt++;
         }
       }
     }

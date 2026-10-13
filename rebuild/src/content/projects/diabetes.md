@@ -2,7 +2,7 @@
 title: "Diabetes"
 slug: "diabetes"
 categories: ["Web", "Visualization"]
-publishedAt: 2020-01-01
+publishedAt: 2014-08-14
 summary: "A common type of map-based visualization designed, developed and published as a part of the news production of the finnish news agency [STT](http://stt.fi/). Th"
 hasVideo: true
 thumbnail: /images/thumbs/diabetes.webp

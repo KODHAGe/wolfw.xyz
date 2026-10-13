@@ -11,23 +11,52 @@ close, and whether a rebuild must decide it.
 
 ---
 
-## G1 — The Sanity schema is inferred, never seen
+## G1 — The Sanity schema is inferred, never seen — **RESOLVED**
 
-**Unknown.** Everything in R1.2 is reconstructed from the GraphQL *queries*, not
-from the schema. Actual field types, validation rules, slug generation,
-ordering, drafts, and the full field list of `sanityProjectWolf` and
-`sanityAuthor` are all unverified. Fields present in the CMS but not queried by
-the code are invisible here.
+**Resolution (2026-10-13).** Read token supplied; queried project `5re0s6iv`
+(dataset `prod`) directly. The schema is now measured, not inferred.
 
-**Detected by.** `gatsby-config.js:28-41` configures the source; the schema
-itself is never fetched. No schema file exists in the repo.
+`project_wolf` — 20 documents, of which **2 are drafts** (`drafts.*` ids), so
+the published corpus is **18**, matching the rebuild's 18 files with an exact
+slug-for-slug correspondence and no orphans either way. Fields present, with
+counts out of 20:
 
-**Cost to close.** Read access to Sanity project `5re0s6iv` (dataset `prod`) and
-export the schema.
+| Field | Present | Note |
+|---|---|---|
+| `title` | 20/20 | |
+| `categories` | 19/20 | reference array — 3 `category` docs exist |
+| `mainImage` | 19/20 | |
+| `slug` | 19/20 | drafts have none |
+| `body` | 18/20 | Portable Text |
+| `publishedAt` | 18/20 | **exactly the published set** |
+| `mainVideo` | 8/20 | the rebuild's `hasVideo` boolean |
+| `author` | 1/20 | see G5 |
 
-**Rebuild must decide.** Whether the rebuild keeps Sanity as the CMS, and if so
-whether to pin the schema version so future editorial changes cannot break the
-build.
+**`publishedAt` recovered.** All 18 projects had been carrying a single
+placeholder (`2020-01-01`) in the rebuild, so `/work` sorted alphabetically while
+presenting as chronological. Real dates span **2014-08-14 → 2022-01-23** with no
+gaps and none missing. `/work` now orders newest-first by actual date.
+
+**The `alt` field exists and is empty — this is the answer to the S12 gap.** The
+`projectBlock` image type has **both `alt` and `caption`** in the schema, and
+all **52** image blocks across published projects carry both as `null`. So the
+rebuild did not fail to port an alt field; the CMS never had descriptions either.
+The field is now in `content.config.ts` and wired to `[slug].astro`, so writing
+`alt:` into a project's frontmatter is sufficient — no code change to light it
+up. Writing those descriptions is the owner's work and nothing may be invented
+to fill it.
+
+**Body block types** are exactly `block` and `image` — no custom components.
+
+**Other document types present:** `project_annukka` (13), `category` (3),
+`author` (2), `page` (2), `post` (2), plus 9 `mux.videoAsset` and 1
+`mux.apiKey`. The rebuild models only the `project_wolf` corpus, which is the
+correct scope for a rebuild of this site, but `project_annukka` is a second
+project corpus that was never in scope and is not migrated.
+
+**Rebuild must still decide.** Whether to keep Sanity as the CMS. D1.3 already
+proposes decommissioning it; these numbers are the migration's completeness
+check — 18 of 18 published `project_wolf` documents are accounted for.
 
 ---
 

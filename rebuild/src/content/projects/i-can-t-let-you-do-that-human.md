@@ -2,7 +2,7 @@
 title: "I can't let you do that, human"
 slug: "i-can-t-let-you-do-that-human"
 categories: ["Experiment"]
-publishedAt: 2020-01-01
+publishedAt: 2016-05-30
 summary: "Kinects + Printers === A bad time"
 hasVideo: true
 thumbnail: /images/thumbs/i-can-t-let-you-do-that-human.webp

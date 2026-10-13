@@ -2,7 +2,7 @@
 title: "Inversions"
 slug: "inversion"
 categories: ["Experiment"]
-publishedAt: 2020-01-01
+publishedAt: 2022-01-23
 summary: "Inversions is an ongoing art/research project into design, technology and control."
 hasVideo: false
 thumbnail: /images/thumbs/inversion.webp

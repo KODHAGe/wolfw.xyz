@@ -2,7 +2,7 @@
 title: "brb.email"
 slug: "brb-email"
 categories: ["Web", "Visualization"]
-publishedAt: 2020-01-01
+publishedAt: 2019-08-29
 summary: "A custom photo/microblog for an around-the-world journey, created in collaboration with [karkkikammo](https://karkkikammo.net). Exploring the modality of 'insta"
 hasVideo: false
 thumbnail: /images/thumbs/brb-email.webp

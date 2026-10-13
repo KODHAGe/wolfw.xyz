@@ -2,7 +2,7 @@
 title: "Election day results"
 slug: "election-day-results"
 categories: ["Web", "Visualization"]
-publishedAt: 2020-01-01
+publishedAt: 2015-05-14
 summary: "As part of the news package produced for the parliamentary elections of early 2015 in Finland, we at STT produced a set of real-time visualizations of the elect"
 hasVideo: true
 thumbnail: /images/thumbs/election-day-results.webp

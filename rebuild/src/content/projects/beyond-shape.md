@@ -2,7 +2,7 @@
 title: "Beyond Shape"
 slug: "beyond-shape"
 categories: ["Experiment"]
-publishedAt: 2020-01-01
+publishedAt: 2019-05-29
 summary: "My thesis project for MA in New Media Production at Aalto University."
 hasVideo: false
 thumbnail: /images/thumbs/beyond-shape.webp

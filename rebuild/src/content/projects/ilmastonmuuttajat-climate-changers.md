@@ -3,7 +3,7 @@ title: "Ilmastonmuuttajat – Climate changers"
 slug: "ilmastonmuuttajat-climate-changers"
 titleLang: "fi"
 categories: ["Web", "Visualization"]
-publishedAt: 2020-01-01
+publishedAt: 2016-05-29
 summary: "A website for Ilmastonmuuttajat, a writing competition for youths around the theme of climate change, created in collaboration with [karkkikammo](https://karkki"
 hasVideo: false
 thumbnail: /images/thumbs/ilmastonmuuttajat-climate-changers.webp

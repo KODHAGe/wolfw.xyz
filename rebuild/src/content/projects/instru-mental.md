@@ -2,7 +2,7 @@
 title: "Instru-mental"
 slug: "instru-mental"
 categories: ["Experiment"]
-publishedAt: 2020-01-01
+publishedAt: 2016-05-30
 summary: "An instrument of instruments, rain of emoji."
 hasVideo: true
 thumbnail: /images/thumbs/instru-mental.webp

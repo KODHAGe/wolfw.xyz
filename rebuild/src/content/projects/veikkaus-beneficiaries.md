@@ -2,7 +2,7 @@
 title: "Veikkaus beneficiaries"
 slug: "veikkaus-beneficiaries"
 categories: ["Web", "Visualization"]
-publishedAt: 2020-01-01
+publishedAt: 2015-05-30
 summary: "Every year, the national lottery company of Finland distributes millions of euros of their profits back into the economy in the form of culture, sports, youth a"
 hasVideo: true
 thumbnail: /images/thumbs/veikkaus-beneficiaries.webp

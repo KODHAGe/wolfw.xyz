@@ -2,7 +2,7 @@
 title: "Conversions"
 slug: "conversions"
 categories: ["Experiment"]
-publishedAt: 2020-01-01
+publishedAt: 2022-01-22
 summary: "Conversion is an ongoing research/art project exploring concepts of Inversions within the medium of Photography, mapping the boundary between interior and exter"
 hasVideo: false
 thumbnail: /images/thumbs/conversions.webp

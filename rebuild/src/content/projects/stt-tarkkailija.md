@@ -3,7 +3,7 @@ title: "STT Tarkkailija"
 slug: "stt-tarkkailija"
 titleLang: "fi"
 categories: ["Web", "Visualization"]
-publishedAt: 2020-01-01
+publishedAt: 2016-12-30
 summary: "I worked on the concept, design and development of the first prototype of the STT Tarkkailija analytics and monitoring tool, that would later go on to receive g"
 hasVideo: false
 thumbnail: /images/thumbs/stt-tarkkailija.webp

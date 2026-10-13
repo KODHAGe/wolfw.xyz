@@ -46,7 +46,14 @@ const { Content } = await render(project);
       the h1 (design/frontend-architecture.md#A5, typography paper defect B). */}
   <p class="project-meta">
     {project.data.categories.join(", ")} ·{" "}
-    {project.data.publishedAt.toISOString().slice(0, 10)}
+    {/* typography.md §3.2 rule 3: "as a year (2015), never as YYYY-MM-DD".
+        It was printing full ISO precision the corpus does not have. Every real
+        publishedAt from Sanity is a month-resolution editorial date (the CMS
+        dates cluster on the 14th/29th/30th, which reads as a post-publication
+        stamp rather than a work date) — so a day is precision the source never
+        claimed. Now that the dates are real rather than a shared placeholder,
+        the year is also finally informative: 2014 through 2022. */}
+    {project.data.publishedAt.getUTCFullYear()}
   </p>
 
   {
@@ -71,13 +78,21 @@ const { Content } = await render(project);
 
       Only rendered when the body did not already embed them; the recovery strips
       inline markup, so a duplicate here would double-print.
+
+      `alt` comes straight from the CMS `projectBlock.image.alt` field, which
+      exists and is null on all 52 blocks (G1, verified 2026-10-13). So these
+      still render empty-alt and `S12` still fails — but they render it because
+      nobody has written the descriptions yet, not because the pipeline dropped
+      them. Writing alt: into a project's frontmatter lights the image up and
+      turns the audit check green with no code change. Nothing here may invent
+      a description to fill the gap.
     */}
     {project.data.images.length > 0 && (
       <div class="project-images" style="margin: 1rem 0;">
         {project.data.images.map((img) => (
           <img
             src={img.src}
-            alt=""
+            alt={img.alt || ""}
             width={img.w}
             height={img.h}
             loading="lazy"

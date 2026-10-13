@@ -3,7 +3,7 @@ title: "Runokuu 2020"
 slug: "runokuu-2020"
 titleLang: "fi"
 categories: ["Web", "Visualization"]
-publishedAt: 2020-01-01
+publishedAt: 2020-07-14
 summary: "A collaborative with project with [Karkkikammo](https://karkkikammo.net/) for Nuoren Voiman Liitto to design the visual theme for Runokuu - Poetry Moon Festival"
 hasVideo: false
 thumbnail: /images/thumbs/runokuu-2020.webp

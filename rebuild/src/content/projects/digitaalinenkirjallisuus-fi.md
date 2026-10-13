@@ -3,7 +3,7 @@ title: "digitaalinenkirjallisuus.fi"
 slug: "digitaalinenkirjallisuus-fi"
 titleLang: "fi"
 categories: ["Web", "Visualization"]
-publishedAt: 2020-01-01
+publishedAt: 2021-09-08
 summary: "A collaborative project between me and Karkkikammo, a more in depth project description in Finnish can be found @ [karkkikammo.net](https://karkkikammo.net/di-k"
 hasVideo: false
 thumbnail: /images/thumbs/digitaalinenkirjallisuus-fi.webp
