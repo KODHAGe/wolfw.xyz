@@ -179,17 +179,41 @@ p + p {
 .button {
   border: 1px solid #000;
   display: block;
+  /* The brutalist block is full-bleed across its container, not shrink-to-fit.
+     Form controls default to fit-content even under `display: block`, so a
+     <button> from the same component as an <a> rendered 167px against 544px —
+     the layout was silently half the width on /about.
+     border-box is load-bearing, not tidiness: with the default content-box,
+     width:100% (264px) + 32px padding + 2px border rendered 298px inside a
+     264px column and pushed the document 6px past the viewport at 320, which
+     is how B11-reflow caught it. */
+  box-sizing: border-box;
+  width: 100%;
   padding: var(--pad-item);
   margin-top: var(--space-2);
   box-shadow: 4px 4px #000;
   background-color: #fff;
-  font: inherit;
   color: inherit;
+  /* typography.md §2.1 names buttons as one of four roles where the display
+     face is load-bearing and must stay. This was `font: inherit`, and the
+     `font` SHORTHAND resets font-family to the parent's — so all ten buttons
+     on the site, the most numerous type surface on any page, computed
+     ui-sans-serif while the h1 beside them was Necto Mono. Declaring
+     `font-family` instead of the shorthand is the entire fix. */
+  font-family: var(--font-display);
   text-align: center;
   text-decoration: none;
   cursor: pointer;
   /* legacy: transition box-shadow .5s */
   transition: box-shadow 0.5s;
+}
+
+/* `display: block` above outranks the UA's [hidden] { display: none }, so a
+ * hidden Button still rendered — Facts.astro:40's "send me some some facts"
+ * was visible on /about before anything had asked for it. This has to be a
+ * separate rule because it must beat the one above. */
+.button[hidden] {
+  display: none;
 }
 
 .button:hover {
@@ -304,6 +328,18 @@ main.whitebox {
   color: inherit;
 }
 
+/* Above the media breakpoint the plate widens to --measure-media so images can
+ * breathe (typography.md §1.6.2, "widen the media, not the text"). A listing
+ * card IS media — thumbnail plus a two-line title — but .listlink was left out
+ * of that widening and kept the prose measure, which at 1440 left ~400px of
+ * empty plate to the right of every thumbnail. Matched to .project-block and
+ * .cvlist below, which is where the widening is defined. */
+@media screen and (min-width: 1200px) {
+  .listlink {
+    max-width: var(--measure-media);
+  }
+}
+
 /* ---- Focus (typography.md §2.7) -------------------------------------------
  * ONE rule for every interactive element, from tokens. 21:1 against the sheet
  * and 8.16:1 against the purple page, so it satisfies WCAG 2.2's focus-
@@ -382,12 +418,24 @@ a {
 .project-block {
   text-align: left;
   padding: var(--pad-item);
-  background-color: #fff;
+  /* legacy said `background-color:#fff`. Under D4.12 the column is already a
+   * frosted plate over the field, so an opaque white block on top of it did not
+   * make anything more readable — it cut the field off with a hard vertical seam
+   * at exactly the left edge of the text, which read as a rendering fault rather
+   * than a card. Inheriting the plate keeps the frost continuous. The plate
+   * carries the legibility budget: B6 measures 8.1:1 worst-case composited
+   * contrast with the field at full alpha, and that number is unchanged here. */
   /* typography.md §2.6 — the prose surface. `hyphens: auto` is only correct
    * once language is marked (3.1.2): with no lang, English hyphenation
    * patterns get applied to Finnish words, which is worse than none. The
    * project pages mark their Finnish titles with lang="fi" for exactly this. */
   hyphens: auto;
+  /* typography.md §2.4 sets a floor on how aggressively a word may be broken.
+   * `hyphens: auto` alone happily produced "an-alyist", "visu-alization" and
+   * "data-dri-ven" — six letters into a word — which reads as a defect rather
+   * than a hyphenation. Six characters before the break, three after, is the
+   * paper's own number and is what most dictionaries default to. */
+  hyphenate-limit-chars: 6 3 3;
   max-width: var(--measure-text);
   margin-inline: auto;
 }
@@ -517,6 +565,23 @@ a {
   max-width: none;
 }
 
+/* typography.md §2.2 / §3.3 — the home wordmark is the only element on the site
+ * that takes the display step. Using it here is what makes the home page read as
+ * a front door rather than a page title with buttons under it. */
+.wordmark {
+  font-size: var(--fs-display-fluid);
+}
+
+/* §3.3 names the sizes for home explicitly: "the wordmark at --fs-display in
+ * mono, the two-line intro at --fs-lead". The intro was inheriting --fs-body, so
+ * the poster had no hierarchy inside it at all — one step was specified and two
+ * were missing. */
+.centered .description {
+  font-size: var(--fs-lead);
+  line-height: var(--lh-fact);
+  margin-inline: auto;
+}
+
 .centered .facts-progress,
 .centered .caption {
   text-align: center;
@@ -639,8 +704,25 @@ a {
 }
 
 @media print {
-  body {
+  /* typography.md §2.9 / T3 / P6: the print size belongs on :root, not body.
+   * Every step of the type scale is a `rem`, and `rem` resolves against the
+   * ROOT font size — setting `body { font-size }` changed the inherited size for
+   * the handful of rules that use `em` or `inherit` and left the scale itself
+   * entirely untouched, so `--fs-h1` printed at 33.2px. The legacy had this on
+   * body and it is still recorded in recovered.md; it is recorded here as a
+   * correction rather than a silent departure.
+   *
+   * --fs-print is 12px against a 16px screen root, so this is a genuine 25%
+   * reduction, and it scales the whole scale with it rather than only the text
+   * that happened to inherit. */
+  :root {
     font-size: var(--fs-print) !important;
+  }
+
+  body {
+    /* No size here — see above. Leading only: 1.35 is the print value from
+     * typography.md §2.9, because the screen scale is set for a screen. */
+    line-height: 1.35 !important;
   }
 
   /* The field, buttons and back link have no meaning on paper. */

@@ -16,12 +16,23 @@ import Button from "../components/Button.astro";
   {/* .centered — the home page is the one surface the paper keeps centred
       (typography.md §2.3): a short stack of controls, no prose to anchor. */}
   <div class="centered">
-    <h1>wolfw.xyz</h1>
+    {/*
+      The wordmark gets --fs-display: typography.md §2.2 reserves the top step
+      for "the home wordmark only" and §3.3 repeats it. It was rendering at
+      --fs-h1 (33.2px), the same size as every subpage title, so the one element
+      that was supposed to be the largest thing on the site was not.
+    */}
+    <h1 class="wordmark">wolfw.xyz</h1>
 
-    <div class="description">
+    {/*
+      A <p>, not a <div>. The intro is prose, and `.centered p` (§2.3) is what
+      centres it and lifts the prose measure — as a div it matched neither, so it
+      rendered left-aligned at 16px directly under a centred wordmark.
+    */}
+    <p class="description">
       Hi, I'm Wolf W<br />
       I make web happen - both beautiful and useful.
-    </div>
+    </p>
 
     <div class="double-button">
       <Button href="/work">work</Button>

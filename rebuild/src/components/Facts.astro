@@ -78,8 +78,13 @@ import Button from "./Button.astro";
     function render() {
       const total = state.facts.length;
       const shown = state.seen.length;
-      const ratio = total <= 1 ? 1 : (shown - 1) / (total - 1);
-      const filled = Math.floor(Math.min(Math.max(ratio, 0), 1) * 10);
+      // Clamp ONCE, here. The bar clamped its ratio and the percentage did not,
+      // so before the first fact was shown the readout said "[——————————] -3%"
+      // — a negative progress bar on first paint. Anything derived from `pct`
+      // inherits the clamp.
+      const raw = total <= 1 ? 1 : (shown - 1) / (total - 1);
+      const ratio = Math.min(Math.max(raw, 0), 1);
+      const filled = Math.floor(ratio * 10);
       const pct = Math.floor(ratio * 100);
 
       progressEl.textContent = `[${"=".repeat(filled)}${"—".repeat(10 - filled)}] ${
