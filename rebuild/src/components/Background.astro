@@ -15,10 +15,16 @@
  * GPU to own it. The shader draws the sine field ON the sheet.
  */
 import "../styles/tokens.css";
+
+export interface Props {
+  seed?: string;
+}
+
+const { seed } = Astro.props;
 ---
 
 <div class="sheet" aria-hidden="true">
-  <canvas id="background" class="background-canvas"></canvas>
+  <canvas id="background" class="background-canvas" data-seed={seed}></canvas>
 </div>
 
 <style>
@@ -67,7 +73,7 @@ import "../styles/tokens.css";
     if (canvas === mounted) return; // same page view — already mounted
     mounted = canvas;
     dispose?.();
-    dispose = mountBackground(canvas);
+    dispose = mountBackground(canvas, canvas.dataset.seed ?? undefined);
   }
 
   mount();

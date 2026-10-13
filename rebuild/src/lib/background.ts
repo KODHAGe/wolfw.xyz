@@ -83,6 +83,65 @@ const ELEMENTS = [
   { rotation: -45,  width: 1,  dash: 10,  freq: 10,  amp: 20, gridDist: 10,  offset: 1,   grid: 6,  total: 200, posX: 0,    posY: 0 },
 ];
 
+// ---------------------------------------------------------------------------
+// Per-page seed (visual-effects.md §2, "Interaction the field should own").
+//
+// R6.1 is non-deterministic by design: every parameter is randomised within
+// [0.5v, 1.5v] via getRandomIntAround on each load. The rebuild froze that to
+// one sample — a deliberate trade, documented above — which made every page
+// show the SAME field. The seed restores the original's per-page variation
+// without giving up reproducibility: the seed is the page's pathname, so
+// /work and /cv are visibly different instances of the same species, and the
+// same URL always produces the same field.
+//
+// Two things this deliberately does NOT do:
+//   - It does not touch the Ranges. [0.5v, 1.5v] is the contract; the seed
+//     only picks a different point inside it.
+//   - It does not randomise posX/posY. Those are the bases from
+//     background.js:12-18, already chosen to keep the elements on the sheet;
+//     ±50% on a -430/+250 base would push element 4 further off-screen.
+//
+// mulberry32 is used because it is tiny, fast, and well-distributed enough for
+// this; hashString (FNV-1a) turns the pathname into a 32-bit seed so any
+// string works.
+// ---------------------------------------------------------------------------
+function hashString(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function reseedElements(seed: string) {
+  const rand = mulberry32(hashString(seed));
+  const around = (v: number) => v * (0.5 + rand()); // getRandomIntAround
+  return ELEMENTS.map((e) => ({
+    ...e,
+    rotation: around(e.rotation),
+    width: around(e.width),
+    dash: around(e.dash),
+    freq: around(e.freq),
+    amp: around(e.amp),
+    gridDist: around(e.gridDist),
+    offset: around(e.offset),
+    grid: Math.max(1, Math.round(around(e.grid))),
+    total: around(e.total),
+  }));
+}
+
 const VERT_INSTANCED = `#version 300 es
 // vertex — instanced sine strips. No attribute buffers: geometry comes from
 // gl_VertexID / gl_InstanceID alone, exactly as the quad VERT gets its
@@ -251,7 +310,10 @@ function hexToRgb(hex: string): [number, number, number] {
   return [((v >> 16) & 255) / 255, ((v >> 8) & 255) / 255, (v & 255) / 255];
 }
 
-export function mountBackground(canvas: HTMLCanvasElement): () => void {
+export function mountBackground(
+  canvas: HTMLCanvasElement,
+  seed = "wolfw.xyz",
+): () => void {
   const gl = canvas.getContext("webgl2", {
     alpha: true,
     antialias: false, // we antialias in the shader; MSAA is wasted here
@@ -369,7 +431,8 @@ export function mountBackground(canvas: HTMLCanvasElement): () => void {
     // so element 0 failed its bounds check (invisible) and elements 1-6 read
     // another element's parameters (visual-effects.md §0).
     const params = new Float32Array(7 * 9);
-    ELEMENTS.forEach((e, i) => {
+    const seeded = reseedElements(seed);
+    seeded.forEach((e, i) => {
       const b = i * 9;
       params[b + 0] = e.rotation;
       params[b + 1] = e.width;
@@ -386,7 +449,7 @@ export function mountBackground(canvas: HTMLCanvasElement): () => void {
     // Position offsets. Legacy randomised these around viewport centre on every
     // load (background.js:12-18).
     const positions = new Float32Array(14);
-    ELEMENTS.forEach((e, i) => {
+    seeded.forEach((e, i) => {
       positions[i * 2] = e.posX;
       positions[i * 2 + 1] = e.posY;
     });

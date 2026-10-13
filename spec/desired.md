@@ -418,6 +418,50 @@ head is coloured with a new token **`--c-field-hot`** (#bc89ff, the site's own
 page purple — the field colours itself in and then settles to ink), and
 pointer-driven amplitude swell. Both are off under reduced motion.
 
+### D4.15 The field is seeded per page (2026-10-13)
+
+**Origin:** `design/visual-effects.md` §2, "Interaction the field should own" ·
+**Decision:** accepted, shipped
+
+R6.1 is **non-deterministic by design**: every parameter is randomised within
+`[0.5v, 1.5v]` on each load via `getRandomIntAround`
+(`spec/recovered.md:306-322`), so there is no single correct value for any of
+them — the *range* is the contract. The first rebuild froze that to one hand-
+picked sample, a deliberate trade (`spec/gaps.md`), but it had a consequence that
+was never stated: **every page showed the identical field**, so `/work` and `/cv`
+were the same instance rather than the same species.
+
+The seed restores per-page variation without giving up reproducibility. The seed
+*is* the pathname (`Layout.astro` passes `Astro.url.pathname`, which reaches the
+renderer as `data-seed` on the canvas), hashed with FNV-1a and driving a
+mulberry32 PRNG that picks a fresh point inside each element's `[0.5v, 1.5v]`
+range. Measured on the four representative routes: **31,028–102,965 px of
+difference** between every pair, and `/work` reloaded twice is pixel-identical
+except for the breathing rotation between frames.
+
+Two things it deliberately does not do:
+
+- **It does not touch the ranges.** `[0.5v, 1.5v]` is the recovered contract;
+  the seed only chooses a different point inside it. Widening the range to make
+  pages differ more would be inventing behaviour.
+- **It does not randomise `posX`/`posY`.** Those bases come from
+  `background.js:12-18` and were already chosen to keep all seven elements on the
+  sheet; ±50 % on a −430/+250 base would push element 4 further off-screen, which
+  is the one thing the sample was chosen to avoid.
+
+The randomness is therefore per-*route* rather than per-*load*, which is a
+deliberate divergence from the legacy behaviour (which reseeded on every
+navigation). A visitor who reloads the same page sees the same field — that is
+the reproducibility the design papers asked for, and it costs nothing here
+because the field is decorative.
+
+`define:vars` was tried first and does not work in Astro: it injects the
+variable into the script's scope via `defineScriptVars`, but the variable is not
+in scope at the point the module script is hoisted and bundled, so the build
+fails with `seed is not defined`. A `data-` attribute on the canvas is the
+reliable interface, and it has the side benefit of being readable from the DOM
+for debugging.
+
 ### D4.9 Reduced motion is a hard requirement
 
 **Origin:** derived · **Decision:** proposed

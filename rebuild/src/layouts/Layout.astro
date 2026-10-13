@@ -75,7 +75,7 @@ const fullTitle = `${title} | ${siteTitle}`;
   </head>
 
   <body>
-    <Background />
+    <Background seed={Astro.url.pathname} />
     <ClientRouter />
 
     <div>
