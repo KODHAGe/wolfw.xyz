@@ -23,7 +23,7 @@ export interface Props {
 const { seed } = Astro.props;
 ---
 
-<div class="sheet" aria-hidden="true">
+<div class="sheet" aria-hidden="true" transition:persist="background-sheet">
   <canvas id="background" class="background-canvas" data-seed={seed}></canvas>
 </div>
 
@@ -62,18 +62,30 @@ const { seed } = Astro.props;
 </style>
 
 <script>
-  import { mountBackground } from "../lib/background";
+  import { mountBackground, type BackgroundHandle } from "../lib/background";
 
-  let dispose: (() => void) | null = null;
+  let handle: BackgroundHandle | null = null;
   let mounted: HTMLCanvasElement | null = null;
 
   function mount() {
     const canvas = document.getElementById("background");
     if (!(canvas instanceof HTMLCanvasElement)) return;
-    if (canvas === mounted) return; // same page view — already mounted
+    // transition:persist keeps the SAME canvas element across navigations, so
+    // the field never recompiles — no blank, no sweep restart, just alive.
+    // New seed comes from location (persisted DOM keeps the old dataset.seed).
+    const seed = window.location.pathname;
+    if (canvas === mounted && handle) {
+      canvas.dataset.seed = seed;
+      handle.update({ seed });
+      return;
+    }
     mounted = canvas;
-    dispose?.();
-    dispose = mountBackground(canvas, canvas.dataset.seed ?? undefined);
+    canvas.dataset.seed = seed;
+    // Production life: gentle breathe + occasional lilac, sine identity kept.
+    // Morph stays 0 (shape-morphing the shipped page needs explicit sign-off;
+    // it's a lab/variant tool). Reduced-motion zeroes both in-shader anyway
+    // (bursts via alive, breathing via t=0 static).
+    handle = mountBackground(canvas, seed, { lively: 0.35, burst: 0.3 });
   }
 
   mount();
@@ -83,19 +95,13 @@ const { seed } = Astro.props;
    * it is an external ES module, which the browser deduplicates by module map.
    * The canvas on the new page therefore stayed uninitialised and the field was
    * blank on every page after the first (design/frontend-architecture.md#A2).
-   * astro:page-load fires after each swap and once on first load — the canvas
-   * guard above makes that double-fire harmless.
+   * astro:page-load fires after each swap and once on first load.
+   *
+   * With transition:persist the sheet+canvas survive the swap, so mount() just
+   * updates the seed on the live program — the field stays animated across page
+   * transitions instead of recompiling. No astro:before-swap dispose: killing
+   * the context per navigation is what blanked the canvas in the first place.
+   * One shared context per session (D4.11), not per page view.
    */
   document.addEventListener("astro:page-load", mount);
-
-  /*
-   * Swap: release the outgoing canvas's WebGL context before it leaves the DOM,
-   * so a live context is never leaked per navigation. This is how D4.11's
-   * "one shared context per page" stays true across a session.
-   */
-  document.addEventListener("astro:before-swap", () => {
-    dispose?.();
-    dispose = null;
-    mounted = null;
-  });
 </script>

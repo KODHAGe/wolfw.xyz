@@ -17,9 +17,11 @@ html {
 }
 
 body {
-  /* Prose face (typography.md §2.6). The mono stays the display and interface
-     face — see the selector list below. */
+  /* Prose now also Recursive — proportional (MONO 0), same 55 KB file. Body stays
+     still; only headings breathe. Keeps the glitch from the heading wave out of
+     the reading copy. */
   font-family: var(--font-text);
+  font-variation-settings: "MONO" 0, "CASL" 0, "wght" 400, "slnt" 0;
   margin-top: 1rem; /* legacy body { margin-top:1rem } */
   color: var(--c-ink);
   /* Legacy sets no background on body; the purple comes from html. */
@@ -194,18 +196,35 @@ p + p {
   box-shadow: 4px 4px #000;
   background-color: #fff;
   color: inherit;
-  /* typography.md §2.1 names buttons as one of four roles where the display
-     face is load-bearing and must stay. This was `font: inherit`, and the
-     `font` SHORTHAND resets font-family to the parent's — so all ten buttons
-     on the site, the most numerous type surface on any page, computed
-     ui-sans-serif while the h1 beside them was Necto Mono. Declaring
-     `font-family` instead of the shorthand is the entire fix. */
   font-family: var(--font-display);
+  /* Recursive — MONO 1 default so phrase never changes length (button lab ST2) */
+  font-variation-settings: "MONO" 1, "CASL" 0, "wght" 520, "slnt" 0;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
-  /* legacy: transition box-shadow .5s */
-  transition: box-shadow 0.5s;
+  position: relative;
+  /* no overflow hidden — would clip the hard 4px shadow */
+  /* buttery sine ease, no spring, no lift — shadow moves, button stays */
+  transition:
+    background-color 0.58s cubic-bezier(0.25,0.46,0.45,0.94),
+    border-color 0.5s ease,
+    box-shadow 0.55s cubic-bezier(0.25,0.46,0.45,0.94),
+    font-variation-settings 0.66s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+/* Gradient wash — 10% warm, the purple ties it to the page */
+.button::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  background: linear-gradient(135deg, #bc89ff 0%, #ffe8a3 60%, #ffd6e7 100%);
+  opacity: 0;
+  transition: opacity 0.58s cubic-bezier(0.25,0.46,0.45,0.94);
+  pointer-events: none;
+}
+.button:hover::before { opacity: 0.10; }
+.button__label {
+  position: relative;
+  z-index: 1;
 }
 
 /* `display: block` above outranks the UA's [hidden] { display: none }, so a
@@ -218,13 +237,21 @@ p + p {
 
 .button:hover {
   cursor: pointer;
+  /* shadow moves — brutalist compress, button itself stays at 0,0 */
   box-shadow: 2px 2px #000;
-  transition: box-shadow 0.5s;
+  border-color: #000;
+  /* MONO stays 1 — only CASL/wght/slnt whisper, so outer width never changes */
+  font-variation-settings: "MONO" 1, "CASL" 0.22, "wght" 560, "slnt" -1.8;
 }
 
 .button:active {
-  box-shadow: 0 0 #000;
-  transition: box-shadow 0.25s;
+  box-shadow: 1px 1px #000;
+  transition: box-shadow 0.18s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .button, .button::before { transition: none !important; }
+  .button:hover { font-variation-settings: "MONO" 1, "CASL" 0, "wght" 520, "slnt" 0 !important; }
+  .button:hover::before { opacity: 0 !important; }
 }
 
 .button:focus-visible {
@@ -250,6 +277,7 @@ a.button {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
   gap: var(--space-2);
 }
+.double-button .button { margin-top: 0; }
 
 /* legacy .textlink { margin-top:2rem; display:inline-block } */
 .textlink {
@@ -692,6 +720,25 @@ a {
     min-height: 0;
     margin-bottom: var(--space-4);
   }
+}
+
+/* ---- Heading wave — Recursive, per-letter slow wave from type lab --------
+ * Type lab "Slow wave — per letter" — 8.4s, MONO 1 ↔ 0.51 so glyphs visibly
+ * switch at the threshold you caught, CASL 0→0.38 adds a whisper of casual,
+ * -3deg slant at mid-cycle. Per-letter 520ms stagger so the word ripples
+ * slowly left→right. This is the lab's monoWave exactly. */
+@keyframes headingWave {
+  0%   { font-variation-settings: "MONO" 1,    "CASL" 0,    "wght" 520, "slnt" 0; }
+  50%  { font-variation-settings: "MONO" 0.51, "CASL" 0.38, "wght" 680, "slnt" -3; }
+  100% { font-variation-settings: "MONO" 1,    "CASL" 0,    "wght" 520, "slnt" 0; }
+}
+h1.wave span.char {
+  display: inline-block;
+  font-variation-settings: "MONO" 1, "CASL" 0, "wght" 520, "slnt" 0;
+  animation: headingWave 8.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  h1.wave span.char { animation: none !important; }
 }
 
 /* ---- Print ----------------------------------------------------------------

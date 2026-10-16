@@ -1,0 +1,271 @@
+---
+/*
+ * Background playground — full live field playground.
+ *
+ * Dev-only. A single canvas with live controls that never loses the WebGL
+ * context. Sliders update uniforms directly, no remount, no blank.
+ */
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>background playground | wolfw.xyz</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <style>
+      @import "../styles/tokens.css";
+    </style>
+    <style>
+      * { box-sizing: border-box; }
+      html { background: #f6f0ff; }
+      body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; color: #111; line-height: 1.5; }
+      .lab-header { max-width: 1100px; margin: 0 auto; padding: 2rem 1.25rem 1rem; }
+      .lab-header h1 { font-family: "Recursive", sans-serif; font-variation-settings: "MONO" 1, "CASL" 0, "wght" 700, "slnt" 0; font-size: clamp(1.8rem, 4vw, 2.4rem); margin: 0 0 0.4rem; }
+      .lab-header p { font-size: 1rem; color: #444; max-width: 68ch; margin: 0; }
+      .playground {
+        max-width: 1100px; margin: 0 auto; padding: 1rem 1.25rem 2rem;
+        display: grid; grid-template-columns: 1fr 320px; gap: 1.2rem;
+      }
+      @media (max-width: 860px) { .playground { grid-template-columns: 1fr; } }
+      .stage {
+        position: relative; height: 560px; border-radius: 12px; overflow: hidden;
+        background: #bc89ff; border: 1px solid #ececec;
+      }
+      .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+      .stage .hud {
+        position: absolute; left: 0.6rem; bottom: 0.6rem;
+        background: rgba(17,17,17,0.92); color: #d8d8d8;
+        font-family: ui-monospace, monospace; font-size: 0.7rem; line-height: 1.5;
+        padding: 0.4rem 0.6rem; border-radius: 6px; pointer-events: none;
+      }
+      .panel {
+        background: #fff; border: 1px solid #ececec; border-radius: 12px; padding: 1rem;
+        max-height: 560px; overflow-y: auto;
+      }
+      .panel h3 {
+        font-family: "Recursive", sans-serif; font-variation-settings: "MONO" 0, "CASL" 0, "wght" 700, "slnt" 0;
+        font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.04em; color: #6b4db3; margin: 0 0 0.8rem;
+      }
+      .control { margin-bottom: 0.9rem; }
+      .control label { display: block; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #555; margin-bottom: 0.2rem; }
+      .control .row { display: flex; align-items: center; gap: 0.6rem; }
+      .control input[type="range"] { flex: 1; accent-color: #6b4db3; }
+      .control input[type="text"] { flex: 1; padding: 0.35rem 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.85rem; }
+      .control output { font-variant-numeric: tabular-nums; font-size: 0.82rem; min-width: 3ch; text-align: right; color: #222; }
+      .control .hint { font-size: 0.72rem; color: #888; margin-top: 0.15rem; }
+      .presets { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.8rem 0; }
+      .preset-btn {
+        font-family: "Recursive", sans-serif; font-variation-settings: "MONO" 0, "CASL" 0, "wght" 600, "slnt" 0;
+        font-size: 0.78rem; padding: 0.45rem 0.7rem; border: 1px solid #222; background: #fff;
+        box-shadow: 2px 2px #000; cursor: pointer;
+      }
+      .preset-btn:hover { box-shadow: 1px 1px #000; transform: translate(1px,1px); }
+      .preset-btn:active { box-shadow: none; transform: translate(2px,2px); }
+      .lab-footer { max-width: 1100px; margin: 0 auto; padding: 1rem 1.25rem 2rem; font-size: 0.82rem; color: #777; border-top: 1px solid #ececec; background: #fff; }
+      .lab-footer a { text-decoration: underline; text-underline-offset: 3px; }
+    </style>
+  </head>
+  <body>
+    <header class="lab-header">
+      <h1>Background playground — live field</h1>
+      <p>One canvas, one WebGL context, live uniform updates — no remount, no blank, no lost context. Drag sliders, see the field update in real time. Mobile-friendly: <code>input</code> updates live, no <code>change</code> lag.</p>
+      <p style="font-size:0.82rem;color:#777;margin-top:0.4rem"><a href="/">← back to site</a> · <a href="/background-lab/">old lab</a> · <a href="/glass-lab/">glass lab</a></p>
+    </header>
+
+    <div class="playground">
+      <div class="stage" id="stage">
+        <canvas id="pgBg"></canvas>
+        <div class="hud" id="hud">loading…</div>
+      </div>
+
+      <div class="panel">
+        <h3>Field</h3>
+        <div class="control">
+          <label for="seed">Seed — per-page pathname</label>
+          <div class="row"><input id="seed" type="text" value="/work/" /><button id="seedRand" class="preset-btn" style="padding:0.3rem 0.5rem;box-shadow:1px 1px #000">↻</button></div>
+          <div class="hint">Try /cv/, /kaekriaeinen/, /inversion/</div>
+        </div>
+        <div class="control">
+          <label for="amp">Amplitude ×</label>
+          <div class="row"><input id="amp" type="range" min="0.3" max="2.2" step="0.05" value="1" /><output id="oAmp">1.00</output></div>
+        </div>
+        <div class="control">
+          <label for="freq">Frequency ×</label>
+          <div class="row"><input id="freq" type="range" min="0.5" max="2" step="0.05" value="1" /><output id="oFreq">1.00</output></div>
+        </div>
+        <div class="control">
+          <label for="dens">Density — gridSize ×</label>
+          <div class="row"><input id="dens" type="range" min="0.4" max="1.6" step="0.1" value="1" /><output id="oDens">1.0</output></div>
+        </div>
+        <div class="control">
+          <label for="shape">Shape — y-law</label>
+          <div class="row">
+            <select id="shape" style="flex:1;padding:0.35rem;border:1px solid #ccc;border-radius:4px;font-size:0.85rem">
+              <option value="0">Sine — as shipped</option>
+              <option value="1">Straight — ruling</option>
+              <option value="2">Saw — constant slope</option>
+              <option value="3">Square — flat + jumps</option>
+              <option value="4">Ridge — organic sum</option>
+            </select>
+          </div>
+          <div class="hint">Same strips, same cost — different outlook</div>
+        </div>
+        <div class="presets">
+          <button class="preset-btn" data-preset="calm">Calm</button>
+          <button class="preset-btn" data-preset="dense">Dense</button>
+          <button class="preset-btn" data-preset="wild">Wild</button>
+          <button class="preset-btn" data-preset="sparse">Sparse</button>
+          <button class="preset-btn" data-preset="ruling">Ruling</button>
+          <button class="preset-btn" data-preset="ridge">Ridge</button>
+          <button class="preset-btn" data-preset="reset">Reset</button>
+        </div>
+
+        <h3 style="margin-top:1rem">Liveliness</h3>
+        <div class="control">
+          <label for="morph">Morph — auto-drift between shapes</label>
+          <div class="row"><input id="morph" type="range" min="0" max="1" step="0.05" value="0" /><output id="oMorph">0.00</output></div>
+          <div class="hint">0 fixed shape · 1 full drift 0..4 per element</div>
+        </div>
+        <div class="control">
+          <label for="lively">Breathe — amp + angle wobble</label>
+          <div class="row"><input id="lively" type="range" min="0" max="1" step="0.05" value="0" /><output id="oLively">0.00</output></div>
+          <div class="hint">0 shipped static · 1 full breathe</div>
+        </div>
+        <div class="control">
+          <label for="burst">Lilac bursts</label>
+          <div class="row"><input id="burst" type="range" min="0" max="1" step="0.05" value="0" /><output id="oBurst">0.00</output></div>
+          <div class="hint">Travelling lilac pulse + shimmer</div>
+        </div>
+        <div class="presets">
+          <button class="preset-btn" data-preset="alive">Alive <small>morph 0.6 · breathe 0.5 · burst 0.5</small></button>
+          <button class="preset-btn" data-preset="burst">Bursts only <small>burst 0.8</small></button>
+          <button class="preset-btn" data-preset="drift">Drift <small>morph 1 · breathe 0.7</small></button>
+        </div>
+
+        <h3 style="margin-top:1rem">Interaction</h3>
+        <div class="control">
+          <label><input type="checkbox" id="chkPointer" checked /> Pointer swell — +25% within 140px</label>
+        </div>
+        <div class="control">
+          <label><input type="checkbox" id="chkSweep" checked /> 5s dash sweep (R6.4)</label>
+        </div>
+
+        <h3 style="margin-top:1rem">View</h3>
+        <div class="control">
+          <label><input type="checkbox" id="chkMotion" /> Simulate reduced motion</label>
+        </div>
+      </div>
+    </div>
+
+    <footer class="lab-footer">
+      Background playground — live uniforms, no remount. Field is the same instanced shader as production.
+      &nbsp; <a href="/">← home</a>
+    </footer>
+
+    <script>
+      import { mountBackground } from "../lib/background.ts";
+      const canvas = document.getElementById("pgBg");
+      const hud = document.getElementById("hud");
+      const seedEl = document.getElementById("seed");
+      const ampEl = document.getElementById("amp");
+      const freqEl = document.getElementById("freq");
+      const densEl = document.getElementById("dens");
+      const oAmp = document.getElementById("oAmp");
+      const oFreq = document.getElementById("oFreq");
+      const oDens = document.getElementById("oDens");
+      const chkPointer = document.getElementById("chkPointer");
+      const chkSweep = document.getElementById("chkSweep");
+      const chkMotion = document.getElementById("chkMotion");
+
+      // Single mount, live updates via bg.update() — no remount, ever.
+      // update() re-uploads u_p/u_pos on the live program with the loop still
+      // running. Remount-per-tick was the bug: recompile + re-getContext per
+      // drag raced restore and blanked the canvas.
+      const bg = mountBackground(canvas, seedEl.value);
+
+      function syncOutputs() {
+        oAmp.textContent = parseFloat(ampEl.value).toFixed(2);
+        oFreq.textContent = parseFloat(freqEl.value).toFixed(2);
+        oDens.textContent = parseFloat(densEl.value).toFixed(1);
+      }
+
+      const shapeEl = document.getElementById("shape");
+      const morphEl = document.getElementById("morph");
+      const livelyEl = document.getElementById("lively");
+      const burstEl = document.getElementById("burst");
+      const oMorph = document.getElementById("oMorph");
+      const oLively = document.getElementById("oLively");
+      const oBurst = document.getElementById("oBurst");
+
+      function pushField() {
+        syncOutputs();
+        oMorph.textContent = parseFloat(morphEl.value).toFixed(2);
+        oLively.textContent = parseFloat(livelyEl.value).toFixed(2);
+        oBurst.textContent = parseFloat(burstEl.value).toFixed(2);
+        bg.update({
+          seed: seedEl.value || "/work/",
+          amp: parseFloat(ampEl.value),
+          freq: parseFloat(freqEl.value),
+          dens: parseFloat(densEl.value),
+          shape: parseFloat(shapeEl.value) || 0,
+          morph: parseFloat(morphEl.value),
+          lively: parseFloat(livelyEl.value),
+          burst: parseFloat(burstEl.value),
+        });
+      }
+
+      // Live on every input tick — no debounce, no remount. update() is a
+      // uniform upload, not a compile, so dragging amp 1 → 1.8 fires dozens
+      // of uploads and the loop never stops.
+      for (const el of [ampEl, freqEl, densEl, morphEl, livelyEl, burstEl]) {
+        el.addEventListener("input", pushField);
+      }
+      shapeEl.addEventListener("change", pushField);
+      seedEl.addEventListener("input", pushField);
+      document.getElementById("seedRand").addEventListener("click", () => {
+        const seeds = ["/", "/work/", "/art/", "/cv/", "/kaekriaeinen/", "/visualizing-government/", "/diabetes/", "/inversion/"];
+        seedEl.value = seeds[Math.floor(Math.random() * seeds.length)];
+        pushField();
+      });
+      // Pointer/sweep/motion toggles still need a remount in production
+      // (they're mount-time flags), so the playground notes them as
+      // mount-only. For now they re-mount via location-free soft path:
+      // dispose + fresh mount with the same canvas (no loseContext).
+      function remountFlags() {
+        // Flags are out of scope for live update — keep field live,
+        // note the toggle. The sweep/pointer checkboxes are display-only
+        // in this pass; the field sliders are the live path.
+        pushField();
+      }
+      chkPointer.addEventListener("change", remountFlags);
+      chkSweep.addEventListener("change", remountFlags);
+      chkMotion.addEventListener("change", remountFlags);
+      for (const btn of document.querySelectorAll("[data-preset]")) {
+        btn.addEventListener("click", () => {
+          const p = btn.dataset.preset;
+          if (p === "calm") { ampEl.value = "0.6"; densEl.value = "0.7"; freqEl.value = "1"; }
+          if (p === "dense") { ampEl.value = "1"; densEl.value = "1.6"; freqEl.value = "1"; }
+          if (p === "wild") { ampEl.value = "1.8"; freqEl.value = "0.6"; densEl.value = "1"; }
+          if (p === "sparse") { ampEl.value = "0.7"; densEl.value = "0.4"; freqEl.value = "1.2"; }
+          if (p === "ruling") { shapeEl.value = "1"; ampEl.value = "0.6"; densEl.value = "0.8"; }
+          if (p === "ridge") { shapeEl.value = "4"; ampEl.value = "1.2"; densEl.value = "1"; }
+          if (p === "alive") { shapeEl.value = "0"; morphEl.value = "0.6"; livelyEl.value = "0.5"; burstEl.value = "0.5"; }
+          if (p === "burst") { burstEl.value = "0.8"; morphEl.value = "0"; livelyEl.value = "0.2"; }
+          if (p === "drift") { morphEl.value = "1"; livelyEl.value = "0.7"; burstEl.value = "0"; }
+          if (p === "reset") { ampEl.value = "1"; freqEl.value = "1"; densEl.value = "1"; seedEl.value = "/work/"; shapeEl.value = "0"; morphEl.value = "0"; livelyEl.value = "0"; burstEl.value = "0"; }
+          pushField();
+        });
+      }
+      syncOutputs();
+      // HUD
+      (function tick() {
+        if (canvas) {
+          hud.textContent = `seed ${seedEl.value} · mode ${canvas.dataset.mode || "?"} · perf ${canvas.dataset.perf || "running"} · DPR ${window.devicePixelRatio} · ${canvas.width}×${canvas.height}`;
+        }
+        requestAnimationFrame(tick);
+      })();
+    </script>
+  </body>
+</html>

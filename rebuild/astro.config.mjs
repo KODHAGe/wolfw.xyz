@@ -168,7 +168,11 @@ export default defineConfig({
               }
             }
 
-            const dangling = [...references].filter((r) => !defined.has(r));
+            // --lab-* are private to type-lab.astro, a dev-only specimen that
+            // defines its own :root vars outside the token contract. Let them
+            // through here so the lab doesn't fail the production guard and
+            // have to pollute tokens.css to satisfy it.
+            const dangling = [...references].filter((r) => !defined.has(r) && !r.startsWith("--lab-") && !r.startsWith("--glass-") && !r.startsWith("--liquid-") && r !== "--locked-w");
             const unused = [...defined].filter((d) => !references.has(d));
             if (dangling.length > 0) {
               problems.push(

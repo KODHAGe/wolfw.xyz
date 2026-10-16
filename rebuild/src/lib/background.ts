@@ -156,6 +156,9 @@ uniform float u_pointerAmp;   // 0 = no pointer reactivity (reduced motion)
 uniform vec2  u_pointer;      // CSS px, y-up like gl_FragCoord
 uniform float u_p[63];        // R6.1 table, 7 elements x 9 fields — unchanged
 uniform float u_pos[14];      // 7 x (x, y), CSS px from viewport centre
+uniform float u_shape;        // base shape, continuous 0..4 — fractional blends
+uniform float u_morph;        // auto-morph amount 0..1 — drifts shape over time
+uniform float u_lively;       // breathing amount 0..1 — amp + angle wobble
 
 out float v_s;            // CSS px along the curve — the dash coordinate
 out float v_dist;         // signed distance to centreline at the strip edge
@@ -216,12 +219,38 @@ void main() {
   float swell = exp(-(pd * pd) / (19600.0)) * u_pointerAmp;
   float amp2  = amp * (1.0 + 0.25 * swell);
 
+  // Liveliness: amp breathes and angle wobbles slowly per element+row.
+  // u_lively 0 = the shipped static field; 1 = full breathe. Cheap — same verts.
+  float breathe = 1.0 + u_lively * 0.18 * sin(t * 0.4 + float(e) * 1.7 + float(r) * 0.6);
+  float amp3 = amp2 * breathe;
+
   // Same curve as createPath (backgroundElement.js:47): y from x, then the
   // row's horizontal stair added on emit — bounds semantics preserved by
   // construction, no per-pixel bounds check needed any more.
-  float ang = (x / freq) * TAU;
-  float y   = top + sin(ang) * (amp2 * 0.5);
-  float dy  = cos(ang) * (TAU / freq) * (amp2 * 0.5);
+  // u_shape is CONTINUOUS 0..4 — fractional values blend adjacent y-laws so
+  // shapes morph instead of cutting. u_morph auto-drifts each element's shape
+  // over time at its own phase, so the field is never in a single shape.
+  float shapeEff = clamp(
+    u_shape + u_morph * (1.5 + 1.5 * sin(t * 0.15 + float(e) * 0.7 + float(r) * 0.23)),
+    0.0, 4.0);
+  float ang = (x / freq) * TAU + u_lively * 0.25 * sin(t * 0.3 + float(e) * 0.9);
+  float k = (TAU / freq) * (amp3 * 0.5);
+  // five y-laws, same strips, same cost
+  float y0  = top + sin(ang) * (amp3 * 0.5);
+  float dy0 = cos(ang) * k;
+  float y1  = top; float dy1 = 0.0;                                   // straight
+  float fr2 = fract(ang / TAU);
+  float y2  = top + (fr2 * 2.0 - 1.0) * (amp3 * 0.5);
+  float dy2 = (2.0 / freq) * (amp3 * 0.5);                            // saw
+  float y3  = top + sign(sin(ang)) * (amp3 * 0.5); float dy3 = 0.0;    // square
+  float y4  = top + (sin(ang) * 0.6 + sin(ang * 2.7 + 1.3) * 0.4) * (amp3 * 0.5);
+  float dy4 = (cos(ang) * 0.6 + cos(ang * 2.7 + 1.3) * 2.7 * 0.4) * k; // ridge
+  float s = shapeEff;
+  float y = y0; float dy = dy0;
+  if (s < 1.0)      { y = mix(y0, y1, s);       dy = mix(dy0, dy1, s); }
+  else if (s < 2.0) { y = mix(y1, y2, s - 1.0); dy = mix(dy1, dy2, s - 1.0); }
+  else if (s < 3.0) { y = mix(y2, y3, s - 2.0); dy = mix(dy2, dy3, s - 2.0); }
+  else              { y = mix(y3, y4, s - 3.0); dy = mix(dy3, dy4, s - 3.0); }
 
   // Expand along the true normal, plus one device px of AA feather. The SDF
   // measured VERTICAL distance only, so steep curve sections were under-stroked
@@ -257,6 +286,9 @@ uniform vec3  u_hot;          // --c-field-hot (brand purple)
 uniform float u_alpha;
 uniform float u_dashProgress; // 0..1 — the R6.4 one-shot sweep
 uniform float u_dashTravel;   // 100.0 — the legacy keyframe's end value
+uniform float u_time;         // shared with vertex — drives lilac bursts
+uniform float u_reduced;      // shared with vertex — bursts off under D4.9
+uniform float u_burst;        // lilac burst amount 0..1
 
 out vec4 outColor;
 
@@ -287,6 +319,15 @@ void main() {
   float head = step(v_s, phase) * (1.0 - smoothstep(0.0, 60.0, phase - v_s));
   vec3  col  = mix(u_field, u_hot, head * (1.0 - eased));
 
+  // Lilac bursts — a slow pulse travelling along the curve, then a faint
+  // shimmer. Off under reduced motion (u_reduced shared with vertex).
+  // u_burst 0 = ink field as shipped; 1 = full bursts.
+  float alive = 1.0 - step(0.5, u_reduced);
+  float bp = mod(u_time * 50.0, 600.0);
+  float burst = exp(-pow((v_s - bp) / 50.0, 2.0)) * u_burst * alive;
+  float shimmer = u_burst * 0.12 * (0.5 + 0.5 * sin(u_time * 0.8 + v_s * 0.05)) * alive;
+  col = mix(col, u_hot, clamp(burst * 0.9 + shimmer, 0.0, 1.0));
+
   outColor = vec4(col * a, a);   // premultiplied — matches the context attrs
 }`;
 
@@ -310,10 +351,26 @@ function hexToRgb(hex: string): [number, number, number] {
   return [((v >> 16) & 255) / 255, ((v >> 8) & 255) / 255, (v & 255) / 255];
 }
 
+export interface FieldParams {
+  seed?: string;
+  amp?: number;
+  freq?: number;
+  dens?: number;
+  shape?: number;
+  morph?: number;
+  lively?: number;
+  burst?: number;
+}
+
+export type BackgroundHandle = (() => void) & {
+  update: (opts: FieldParams) => void;
+};
+
 export function mountBackground(
   canvas: HTMLCanvasElement,
   seed = "wolfw.xyz",
-): () => void {
+  opts: FieldParams = {},
+): BackgroundHandle {
   const gl = canvas.getContext("webgl2", {
     alpha: true,
     antialias: false, // we antialias in the shader; MSAA is wasted here
@@ -325,11 +382,25 @@ export function mountBackground(
   // class the caller toggles. Never a black canvas.
   if (!gl) {
     canvas.dataset.fallback = "true";
-    return () => {};
+    const noop = (() => {}) as BackgroundHandle;
+    noop.update = () => {};
+    return noop;
   }
   delete canvas.dataset.fallback;
 
   let disposed = false;
+
+  // Live field state. The playground updates these without remounting —
+  // remount-per-tick recompiled shaders on every drag and raced context
+  // restore, which blanked the canvas. Uploads are cheap; compiles are not.
+  let currentSeed = seed;
+  let multAmp = parseFloat(canvas.dataset.amp || "1") || 1;
+  let multFreq = parseFloat(canvas.dataset.freq || "1") || 1;
+  let multDens = parseFloat(canvas.dataset.dens || "1") || 1;
+  let shapeIdx = opts.shape ?? (parseFloat(canvas.dataset.shape || "0") || 0);
+  let morphAmt = opts.morph ?? 0;
+  let livelyAmt = opts.lively ?? 0;
+  let burstAmt = opts.burst ?? 0;
 
   /*
    * Array uniforms MUST be looked up as "name[0]". Passing "u_p" returns null on
@@ -384,6 +455,75 @@ export function mountBackground(
     }
   }
 
+  // Live param upload. STRIDE is 9, matching the shader's elementProps order:
+  // rotation, width, dasharray, frequency, amplitude, gridDistance, offset,
+  // gridSize, totalWidth. The array is N * STRIDE = 63 floats. The original
+  // upload wrote stride 8 into 56 floats and never wrote gridDist or total,
+  // so element 0 failed its bounds check (invisible) and elements 1-6 read
+  // another element's parameters (visual-effects.md §0).
+  //
+  // Called once at build and again on every playground slider tick — no
+  // recompile, no new program, no context loss. Uploads are cheap; compiles
+  // are not, and remount-per-tick raced context restore and blanked the canvas.
+  function uploadFieldParams(lookup: (name: string) => WebGLUniformLocation | null) {
+    const params = new Float32Array(7 * 9);
+    const seeded = reseedElements(currentSeed);
+    if (multAmp !== 1 || multFreq !== 1 || multDens !== 1) {
+      for (const e of seeded) {
+        e.amp *= multAmp;
+        e.freq *= multFreq;
+        if (multDens !== 1) e.grid = Math.max(1, Math.round(e.grid * multDens));
+      }
+    }
+    seeded.forEach((e, i) => {
+      const b = i * 9;
+      params[b + 0] = e.rotation;
+      params[b + 1] = e.width;
+      params[b + 2] = e.dash;
+      params[b + 3] = e.freq;
+      params[b + 4] = e.amp;
+      params[b + 5] = e.gridDist;
+      params[b + 6] = e.offset;
+      params[b + 7] = e.grid;
+      params[b + 8] = e.total;
+    });
+    gl.uniform1fv(lookup("u_p[0]"), params);
+
+    // Position offsets. Legacy randomised these around viewport centre on every
+    // load (background.js:12-18).
+    const positions = new Float32Array(14);
+    seeded.forEach((e, i) => {
+      positions[i * 2] = e.posX;
+      positions[i * 2 + 1] = e.posY;
+    });
+    gl.uniform1fv(lookup("u_pos[0]"), positions);
+    const sh = lookup("u_shape");
+    if (sh) gl.uniform1f(sh, shapeIdx);
+    const mo = lookup("u_morph");
+    if (mo) gl.uniform1f(mo, morphAmt);
+    const li = lookup("u_lively");
+    if (li) gl.uniform1f(li, livelyAmt);
+    const bu = lookup("u_burst");
+    if (bu) gl.uniform1f(bu, burstAmt);
+  }
+
+  // Live update for the playground: change seed/multipliers/shape/morph/lively/
+  // burst and re-upload, no recompile, no remount, loop keeps running.
+  // Production never calls this (all stay 0 except shape 0).
+  function setField(opts: FieldParams) {
+    if (opts.seed !== undefined) currentSeed = opts.seed;
+    if (opts.amp !== undefined) multAmp = opts.amp;
+    if (opts.freq !== undefined) multFreq = opts.freq;
+    if (opts.dens !== undefined) multDens = opts.dens;
+    if (opts.shape !== undefined) shapeIdx = opts.shape;
+    if (opts.morph !== undefined) morphAmt = opts.morph;
+    if (opts.lively !== undefined) livelyAmt = opts.lively;
+    if (opts.burst !== undefined) burstAmt = opts.burst;
+    if (!program || disposed) return;
+    gl.useProgram(program);
+    uploadFieldParams((name) => gl.getUniformLocation(program!, name));
+  }
+
   // Compile one tier and upload everything it needs. Tier-uniform by design:
   // the instanced program spells the field colour u_field, the SDF quad calls
   // it u_accent, and uploading to the name the other tier uses logs a
@@ -424,36 +564,8 @@ export function mountBackground(
     canvas.dataset.fallback = "false";
     canvas.dataset.mode = tier;
 
-    // Upload parameters. STRIDE is 9, matching the shader's elementProps order:
-    // rotation, width, dasharray, frequency, amplitude, gridDistance, offset,
-    // gridSize, totalWidth. The array is N * STRIDE = 63 floats. The original
-    // upload wrote stride 8 into 56 floats and never wrote gridDist or total,
-    // so element 0 failed its bounds check (invisible) and elements 1-6 read
-    // another element's parameters (visual-effects.md §0).
-    const params = new Float32Array(7 * 9);
-    const seeded = reseedElements(seed);
-    seeded.forEach((e, i) => {
-      const b = i * 9;
-      params[b + 0] = e.rotation;
-      params[b + 1] = e.width;
-      params[b + 2] = e.dash;
-      params[b + 3] = e.freq;
-      params[b + 4] = e.amp;
-      params[b + 5] = e.gridDist;
-      params[b + 6] = e.offset;
-      params[b + 7] = e.grid;
-      params[b + 8] = e.total;
-    });
-    gl.uniform1fv(loc("u_p[0]"), params);
-
-    // Position offsets. Legacy randomised these around viewport centre on every
-    // load (background.js:12-18).
-    const positions = new Float32Array(14);
-    seeded.forEach((e, i) => {
-      positions[i * 2] = e.posX;
-      positions[i * 2 + 1] = e.posY;
-    });
-    gl.uniform1fv(loc("u_pos[0]"), positions);
+    // Upload parameters via the shared live path (no recompile, no remount).
+    uploadFieldParams(loc);
 
     // Legacy drew the field in BLACK (backgroundElement.js:82, defaultProps
     // color 'black'), 1-10px, full opacity — it set no opacity on the paths,
@@ -546,6 +658,8 @@ export function mountBackground(
   const TIERS = window.matchMedia("(pointer: fine)").matches ? [2, 1.5, 1] : [1.5, 1];
   let tierIdx = 0;
   let ema = 16.7;
+  let overFrames = 0;
+  const mountWall = performance.now();
   let last = performance.now();
   let settled = false; // governor froze us, not reduced motion
 
@@ -629,14 +743,42 @@ export function mountBackground(
     // Governor: step the DPR ladder down before giving up the loop, and never
     // during a stall (a backgrounded tab produces huge dt and is not a
     // rendering signal).
-    if (ema > 20 && tierIdx < TIERS.length - 1 && dt < 100) {
-      tierIdx++;
-      resize();
-    } else if (ema > 24 && tierIdx === TIERS.length - 1) {
-      settled = true;
-      canvas.dataset.perf = "static";
-      freeze();
-      return;
+    //
+    // Absolute thresholds, deliberately: a 30Hz-healthy display and a
+    // 60Hz-janky page produce IDENTICAL dt distributions (dt≡33), so no
+    // tracker can tell them apart — an earlier adaptive version proved it by
+    // killing healthy 30fps fields. The numbers below clear BOTH healthy
+    // rates with margin: 60fps sits at ~17ms, 30fps at ~33ms, so step at 36
+    // and freeze at 45 never fires on a healthy display of either kind.
+    // Sustained 40ms+ on a 60Hz panel still steps down; 100× throttling holds
+    // ema at ~100 and freezes. A marginal 30-36ms band on 60Hz takes no
+    // action — at 0.14ms/draw the field isn't what's slow there, and freezing
+    // it wouldn't fix the page.
+    const stepAt = 36;
+    const freezeAt = 45;
+    // Warmup (wall-clock, not frames): the first 1.5s cover font fetch, layout
+    // and first paint — judging them froze the field on load jank and left it
+    // static forever on machines that are actually fine. Under 100× throttle a
+    // frame-count warmup would never elapse inside the audit window; wall time
+    // does. Sustained trip: a single ema crossing (one slow frame) steps
+    // nothing; the overrun must persist 5 frames running. Load spikes are 2-4
+    // frames with fast ones between (which reset the counter); 100× throttling
+    // holds ema at ~100 for every frame, so B18 still trips well in window.
+    if (now - mountWall < 1500) overFrames = 0;
+    else if (ema > stepAt && tierIdx < TIERS.length - 1 && dt < 100) overFrames++;
+    else if (ema > freezeAt && tierIdx === TIERS.length - 1) overFrames++;
+    else overFrames = 0;
+    if (overFrames >= 5) {
+      overFrames = 0;
+      if (tierIdx < TIERS.length - 1) {
+        tierIdx++;
+        resize();
+      } else {
+        settled = true;
+        canvas.dataset.perf = "static";
+        freeze();
+        return;
+      }
     }
 
     resize();
@@ -649,6 +791,7 @@ export function mountBackground(
     if (running || disposed) return;
     running = true;
     settled = false;
+    overFrames = 0; // fresh start — don't carry a stale overrun (e.g. tab return)
     delete canvas.dataset.perf;
     start = performance.now() - elapsed * 1000;
     last = performance.now();
@@ -684,9 +827,11 @@ export function mountBackground(
   // never fires in a backgrounded or headless tab. Under reduced motion this
   // single frame at t=0 IS the field (D4.9: static, not slow).
   if (!build()) {
-    return () => {
+    const noop = (() => {
       disposed = true;
-    };
+    }) as BackgroundHandle;
+    noop.update = () => {};
+    return noop;
   }
   resize();
   drawFrame();
@@ -724,7 +869,7 @@ export function mountBackground(
   const ro = new ResizeObserver(resize);
   ro.observe(canvas);
 
-  return () => {
+  const dispose = (() => {
     disposed = true;
     stopLoop();
     ro.disconnect();
@@ -732,8 +877,14 @@ export function mountBackground(
     window.removeEventListener("pointermove", onPointerMove);
     canvas.removeEventListener("webglcontextlost", onContextLost);
     canvas.removeEventListener("webglcontextrestored", onContextRestored);
-    gl.getExtension("WEBGL_lose_context")?.loseContext();
-  };
+    // No loseContext: the context belongs to the canvas, not the mount. The
+    // playground remounted per slider tick and each dispose lost the context,
+    // so the next mount raced restore and both shaders failed to compile.
+    // Remounting is gone anyway — sliders call update(), which re-uploads
+    // uniforms on the live program with the loop still running.
+  }) as BackgroundHandle;
+  dispose.update = setField;
+  return dispose;
 }
 
 // Exported for the probe (see tools/probe.astro). The shader strings are

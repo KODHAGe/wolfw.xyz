@@ -8,12 +8,22 @@
  * could be reviewed (design/frontend-architecture.md#A1).
  *
  * Values are recovered, not chosen: the legacy declared the same two files.
+ * Recursive is the replacement, self-hosted, 55 KB latin subset. Kept Necto
+ * for reference until the replacement is confirmed shipped.
  */
 @font-face {
   font-family: "Necto Mono";
   src: url("/fonts/Necto-Mono.woff2") format("woff2"),
     url("/fonts/Necto-Mono.woff") format("woff");
   font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Recursive";
+  src: url("/fonts/Recursive.woff2") format("woff2") tech(variations),
+    url("/fonts/Recursive.woff2") format("woff2-variations");
+  font-weight: 300 1000;
   font-style: normal;
   font-display: swap;
 }

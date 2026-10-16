@@ -60,6 +60,13 @@ const fullTitle = `${title} | ${siteTitle}`;
     */}
     <link
       rel="preload"
+      href="/fonts/Recursive.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
       href="/fonts/Necto-Mono.woff2"
       as="font"
       type="font/woff2"
@@ -83,5 +90,28 @@ const fullTitle = `${title} | ${siteTitle}`;
         <slot />
       </main>
     </div>
+  <script>
+    // Heading wave — type lab "Slow wave — per letter" — 8.4s, MONO 1 ↔ 0.51, staggered.
+    // 520ms per glyph so the word ripples slowly left→right, same as the lab preset.
+    function waveHeadings() {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      for (const h1 of document.querySelectorAll("h1:not(.wave)")) {
+        const text = h1.textContent;
+        if (!text || h1.querySelector(".char")) continue;
+        if (h1.children.length > 0) continue;
+        h1.classList.add("wave");
+        h1.textContent = "";
+        for (let i = 0; i < text.length; i++) {
+          const s = document.createElement("span");
+          s.className = "char";
+          s.textContent = text[i] === " " ? "\u00a0" : text[i];
+          s.style.animationDelay = `${i * 520}ms`;
+          h1.appendChild(s);
+        }
+      }
+    }
+    waveHeadings();
+    document.addEventListener("astro:page-load", waveHeadings);
+  </script>
   </body>
 </html>

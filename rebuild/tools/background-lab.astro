@@ -1,0 +1,382 @@
+---
+/*
+ * Background lab — field playground.
+ *
+ * Dev-only. Lets you live-tweak the sine field that lives behind every page:
+ * seeds, density, amplitude, frequency, pointer swell. Same instanced shader
+ * as production, just with controls.
+ */
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>background lab | wolfw.xyz</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Recursive:slnt,wght,CASL,MONO@-15..0,300..1000,0..1,0..1&display=swap" rel="stylesheet" />
+    <style>
+      @import "../styles/tokens.css";
+    </style>
+    <style>
+      :root { --lab-grid: #ececec; }
+      * { box-sizing: border-box; }
+      html { background: #f6f0ff; }
+      body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; color: #111; line-height: 1.5; }
+      a { color: inherit; }
+      .lab-header { max-width: 980px; margin: 0 auto; padding: 2.5rem 1.25rem 1rem; }
+      .lab-header h1 {
+        font-family: "Recursive", sans-serif; font-variation-settings: "MONO" 1, "CASL" 0, "wght" 700, "slnt" 0;
+        font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.1; margin: 0 0 0.35rem; letter-spacing: -0.02em;
+      }
+      .lab-header p.lead { font-size: 1.05rem; color: #444; max-width: 68ch; margin: 0 0 0.4rem; }
+      .lab-header .meta { font-size: 0.82rem; color: #777; }
+      .lab-header .meta code { font-size: 0.92em; background: #eee; padding: 0.1em 0.3em; border-radius: 3px; }
+      .lab-section { max-width: 980px; margin: 0 auto; padding: 1.6rem 1.25rem; border-top: 1px solid var(--lab-grid); background: #fff; }
+      .lab-section h2 {
+        font-family: "Recursive", sans-serif; font-variation-settings: "MONO" 0, "CASL" 0, "wght" 700, "slnt" 0;
+        font-size: 1.05rem; letter-spacing: 0.04em; text-transform: uppercase; color: #6b4db3; margin: 0 0 1rem;
+      }
+      .lab-note { font-size: 0.88rem; color: #666; max-width: 68ch; margin: 0.4rem 0 0.8rem; line-height: 1.6; }
+      .lab-note strong { color: #222; }
+      /* Stage */
+      .stage {
+        position: relative; height: 520px; border-radius: 10px; overflow: hidden;
+        border: 1px solid var(--lab-grid); background: #bc89ff;
+      }
+      .stage .sheet {
+        position: absolute; inset: 0.45rem; background: rgba(255,255,255,0.82);
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        border-radius: 8px; display: grid; place-items: center; text-align: center; padding: 1rem;
+      }
+      .stage .sheet h2 {
+        font-family: "Recursive", sans-serif; font-variation-settings: "MONO" 1, "CASL" 0, "wght" 700, "slnt" 0;
+        font-size: var(--fs-h1); margin: 0; color: #111;
+      }
+      .stage .sheet p { font-size: var(--fs-lead); color: #333; margin: 0.6rem 0 0; max-width: 28ch; }
+      .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+      .stage .hud {
+        position: absolute; left: 0.7rem; bottom: 0.7rem;
+        background: rgba(17,17,17,0.92); color: #d8d8d8;
+        font-family: ui-monospace, monospace; font-size: 0.72rem; line-height: 1.5;
+        padding: 0.4rem 0.6rem; border-radius: 6px; pointer-events: none;
+      }
+      .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem 1.4rem; margin-top: 1rem; }
+      .control label { display: block; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #555; margin-bottom: 0.25rem; }
+      .control .row { display: flex; align-items: center; gap: 0.6rem; }
+      .control input[type="range"], .control input[type="text"] { flex: 1; accent-color: #6b4db3; }
+      .control input[type="text"] { padding: 0.35rem 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.85rem; }
+      .control output { font-variant-numeric: tabular-nums; font-size: 0.85rem; min-width: 3.2ch; text-align: right; color: #222; }
+      .control .hint { font-size: 0.75rem; color: #888; margin-top: 0.15rem; }
+      .presets { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.8rem 0 0.4rem; }
+      .preset-btn {
+        font-family: "Recursive", sans-serif; font-variation-settings: "MONO" 0, "CASL" 0, "wght" 600, "slnt" 0;
+        font-size: 0.82rem; padding: 0.55rem 0.9rem; border: 1px solid #222; background: #fff;
+        box-shadow: 3px 3px #000; cursor: pointer; transition: box-shadow 0.18s, transform 0.18s;
+      }
+      .preset-btn:hover { box-shadow: 1px 1px #000; transform: translate(1px, 1px); }
+      .preset-btn:active { box-shadow: none; transform: translate(3px, 3px); }
+      .preset-btn small { display: block; font-size: 0.68rem; color: #666; font-variation-settings: "MONO" 0, "CASL" 0, "wght" 400, "slnt" 0; margin-top: 0.1rem; }
+      .toggle-row { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.8rem; font-size: 0.88rem; }
+      .toggle-row input { accent-color: #6b4db3; }
+      .liquid-glass {
+        position: absolute;
+        width: 180px; height: 120px;
+        background: rgba(255,255,255,0.18);
+        backdrop-filter: blur(14px) saturate(1.6);
+        -webkit-backdrop-filter: blur(14px) saturate(1.6);
+        border: 1px solid rgba(255,255,255,0.42);
+        border-radius: 32px;
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.62),
+          inset 0 -1px 0 rgba(0,0,0,0.04),
+          0 8px 32px rgba(0,0,0,0.14),
+          0 2px 8px rgba(0,0,0,0.08);
+        /* filter: url(#liquid) removed — combined backdrop-filter + SVG displacement + morph stalled in Safari when in viewport. Backdrop blur + morph is enough for the lab. */
+        will-change: backdrop-filter, border-radius;
+        transform: translateZ(0);
+        animation: liquidMorph 8s ease-in-out infinite;
+        display: grid; place-items: center;
+        font-family: "Recursive", sans-serif; font-variation-settings: "MONO" 1, "CASL" 0, "wght" 600, "slnt" 0;
+        font-size: 0.85rem; color: #111;
+        cursor: grab;
+      }
+      .liquid-glass::after {
+        content: ""; position: absolute; inset: 1px; border-radius: inherit;
+        background: linear-gradient(180deg, rgba(255,255,255,0.42) 0%, transparent 55%);
+        pointer-events: none;
+      }
+      @keyframes liquidMorph {
+        0%   { border-radius: 32px 48px 36px 44px / 36px 32px 48px 44px; }
+        33%  { border-radius: 48px 32px 44px 36px / 44px 48px 32px 36px; }
+        66%  { border-radius: 36px 44px 32px 48px / 32px 44px 36px 48px; }
+        100% { border-radius: 32px 48px 36px 44px / 36px 32px 48px 44px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .liquid-glass { animation: none !important; filter: none !important; }
+      }
+      .lab-footer { max-width: 980px; margin: 0 auto; padding: 1.2rem 1.25rem 2.5rem; font-size: 0.82rem; color: #777; border-top: 1px solid var(--lab-grid); background: #fff; }
+      .lab-footer a { text-decoration: underline; text-underline-offset: 3px; }
+    </style>
+  </head>
+  <body>
+    <header class="lab-header">
+      <h1>Background lab — field playground</h1>
+      <p class="lead">
+        The sine field is one <code>drawArraysInstanced(TRIANGLE_STRIP, 0, 482, 70)</code>, 8.4s <code>MONO 1 ↔ 0.51</code> per-letter on headings,
+        pointer swell, DPR governor. This lab lets you live-tweak it: seeds, density, amplitude, pointer.
+      </p>
+      <p class="meta">
+        Dev-only. <a href="/">← back to site</a> · <a href="/type-lab/">type lab</a> · <a href="/button-lab/">button lab</a> · <a href="/glass-lab/">glass lab →</a>
+      </p>
+    </header>
+
+    <section class="lab-section">
+      <h2>Live field</h2>
+      <p class="lab-note">Move your pointer over the stage — swell is 140 CSS px, +25% amplitude. The HUD shows tier and frame budget.</p>
+      <div class="stage" id="stage">
+        <canvas id="labBg"></canvas>
+        <div class="hud" id="hud">loading…</div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <label for="seed">Seed — per-page pathname</label>
+          <div class="row"><input id="seed" type="text" value="/work/" /><button id="seedRand" class="preset-btn" style="padding:0.35rem 0.6rem;box-shadow:2px 2px #000">↻</button></div>
+          <div class="hint"><code>MONO 1 ↔ 0.51</code> picks a point in [0.5v,1.5v]; seed changes the point. Try <code>/cv/</code>, <code>/kaekriaeinen/</code></div>
+        </div>
+        <div class="control">
+          <label for="ampScale">Amplitude ×</label>
+          <div class="row"><input id="ampScale" type="range" min="0.3" max="2.2" step="0.05" value="1" /><output id="oAmp">1.00</output></div>
+          <div class="hint">Global multiplier on all 7 elements' amp</div>
+        </div>
+        <div class="control">
+          <label for="freqScale">Frequency ×</label>
+          <div class="row"><input id="freqScale" type="range" min="0.5" max="2" step="0.05" value="1" /><output id="oFreq">1.00</output></div>
+          <div class="hint">Lower = wider waves</div>
+        </div>
+        <div class="control">
+          <label for="density">Density — gridSize ×</label>
+          <div class="row"><input id="density" type="range" min="0.4" max="1.6" step="0.1" value="1" /><output id="oDens">1.0</output></div>
+          <div class="hint">Scales every element's gridSize (rows). 70 → ~42–112 instances</div>
+        </div>
+      </div>
+
+      <div class="presets">
+        <button class="preset-btn" data-preset="calm">Calm <small>amp 0.6 · sparse</small></button>
+        <button class="preset-btn" data-preset="dense">Dense <small>amp 1 · density 1.6</small></button>
+        <button class="preset-btn" data-preset="wild">Wild <small>amp 1.8 · freq 0.6</small></button>
+        <button class="preset-btn" data-preset="sparse">Sparse <small>amp 0.7 · density 0.4</small></button>
+        <button class="preset-btn" data-preset="mono">Mono only <small>one element, grid 1</small></button>
+        <button class="preset-btn" data-preset="reset">Reset <small>seed /work/ · all ×1</small></button>
+      </div>
+
+      <div class="toggle-row">
+        <input type="checkbox" id="chkPointer" checked />
+        <label for="chkPointer">Pointer swell — +25% amplitude within 140px</label>
+        <span style="flex:1"></span>
+        <input type="checkbox" id="chkSweep" checked />
+        <label for="chkSweep">5s dash sweep (R6.4)</label>
+      </div>
+    </section>
+
+    <section class="lab-section">
+      <h2>What to judge</h2>
+      <p class="lab-note">
+        <strong>Density vs legibility:</strong> dense still reads over the frosted plate? <strong>Amplitude</strong> — wild feels energetic but does it fight the text?
+        <strong>Frequency</strong> — low freq is calm wide waves, high is nervous. The field should be present, not loud. Try <code>Wild</code> then <code>Calm</code> — which feels like <em>your</em> site?
+      </p>
+      <p class="lab-note">
+        Creative directions to try here: <strong>color</strong> (field in <code>--c-field-hot</code> purple, not just ink), <strong>thickness</strong> (width ×), <strong>speed</strong> (rotation drift), <strong>pointer radius</strong> (140px → 240px), <strong>seed as palette</strong> (per-page seed already does this — every route its own field).
+      </p>
+    </section>
+
+    <section class="lab-section">
+      <h2>Liquid glass — iOS 26 over live field</h2>
+      <p class="lab-note">
+        Frosted glass that <em>refracts</em> the field behind it — <code>backdrop-filter: blur + saturate</code> + SVG <code>feDisplacementMap</code> via <code>feTurbulence</code> + morphing <code>border-radius</code> + highlight.
+        Drag the blobs. This is CSS + SVG filter, not WebGL — the field stays the same instanced shader underneath, the glass just bends it.
+      </p>
+
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <filter id="liquid" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+          <feTurbulence baseFrequency="0.015" numOctaves="2" seed="2" result="turb" />
+          <feDisplacementMap in="SourceGraphic" in2="turb" scale="12" xChannelSelector="R" yChannelSelector="G" result="disp" />
+        </filter>
+      </svg>
+
+      <div class="stage" id="glassStage" style="height: 420px;">
+        <canvas id="glassBg"></canvas>
+        <div class="liquid-glass" style="left: 22%; top: 28%;" data-drag>glass</div>
+        <div class="liquid-glass" style="left: 52%; top: 42%; width: 160px; height: 100px; animation-delay: -2.7s;" data-drag>glass</div>
+        <div class="liquid-glass" style="left: 38%; top: 62%; width: 200px; height: 80px; animation-delay: -5.1s;" data-drag>glass</div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <label for="glassBlur">Glass — blur</label>
+          <div class="row"><input id="glassBlur" type="range" min="4" max="28" step="1" value="18" /><output id="oGlassBlur">18px</output></div>
+        </div>
+        <div class="control">
+          <label for="glassDistort">Glass — distort</label>
+          <div class="row"><input id="glassDistort" type="range" min="0" max="28" step="1" value="12" /><output id="oGlassDistort">12</output></div>
+        </div>
+        <div class="control">
+          <label for="glassOpacity">Glass — fill</label>
+          <div class="row"><input id="glassOpacity" type="range" min="0.06" max="0.36" step="0.01" value="0.18" /><output id="oGlassOpacity">0.18</output></div>
+        </div>
+      </div>
+
+      <div class="presets">
+        <button class="preset-btn" data-glass="frosted">Frosted <small>18px · 12 distort · morph</small></button>
+        <button class="preset-btn" data-glass="clear">Clear <small>8px · 4 distort</small></button>
+        <button class="preset-btn" data-glass="heavy">Heavy <small>24px · 20 distort</small></button>
+        <button class="preset-btn" data-glass="subtle">Subtle <small>12px · 0 distort · no morph</small></button>
+      </div>
+
+      <p class="lab-note">Blur is <code>backdrop-filter</code>, distort is the SVG <code>scale</code> on <code>feDisplacementMap</code>, fill is <code>rgba(255,255,255, opacity)</code>. Morph is just <code>border-radius</code> keyframes — turn it off for a static lens.</p>
+    </section>
+
+    <footer class="lab-footer">
+      Background lab — 7×10 instanced strips, pointer + DPR + governor. Field is the same shader as production, just with live controls.
+      &nbsp; <a href="/type-lab/">← type lab</a> · <a href="/button-lab/">← button lab</a> · <a href="/glass-lab/">glass lab →</a>
+    </footer>
+
+    <script>
+      import { mountBackground } from "../lib/background.ts";
+      // We mount the real background on #labBg and drive it via a tiny control layer.
+      // The lab's seed/amp/freq/density are applied by rebuilding the param table
+      // and re-mounting — cheap, and exactly what a per-page seed already does.
+      const canvas = document.getElementById("labBg");
+      const stage = document.getElementById("stage");
+      const hud = document.getElementById("hud");
+      const seedEl = document.getElementById("seed");
+      const ampEl = document.getElementById("ampScale");
+      const freqEl = document.getElementById("freqScale");
+      const densEl = document.getElementById("density");
+      const oAmp = document.getElementById("oAmp");
+      const oFreq = document.getElementById("oFreq");
+      const oDens = document.getElementById("oDens");
+      const chkPointer = document.getElementById("chkPointer");
+      const chkSweep = document.getElementById("chkSweep");
+
+      // Single mount, live updates — no remount, ever. update() re-uploads
+      // uniforms on the live program with the loop still running.
+      const bg = mountBackground(canvas, seedEl.value || "/work/");
+
+      function syncOutputs() {
+        oAmp.textContent = parseFloat(ampEl.value).toFixed(2);
+        oFreq.textContent = parseFloat(freqEl.value).toFixed(2);
+        oDens.textContent = parseFloat(densEl.value).toFixed(1);
+      }
+      function pushField() {
+        syncOutputs();
+        bg.update({
+          seed: seedEl.value || "/work/",
+          amp: parseFloat(ampEl.value),
+          freq: parseFloat(freqEl.value),
+          dens: parseFloat(densEl.value),
+        });
+      }
+      for (const el of [ampEl, freqEl, densEl]) {
+        el.addEventListener("input", pushField);
+      }
+      seedEl.addEventListener("input", pushField);
+      seedEl.addEventListener("keydown", (e) => { if (e.key === "Enter") pushField(); });
+      document.getElementById("seedRand").addEventListener("click", () => {
+        const seeds = ["/", "/work/", "/art/", "/cv/", "/kaekriaeinen/", "/visualizing-government/", "/diabetes/", "/inversion/"];
+        seedEl.value = seeds[Math.floor(Math.random() * seeds.length)];
+        pushField();
+      });
+      chkPointer.addEventListener("change", pushField);
+      chkSweep.addEventListener("change", pushField);
+      for (const btn of document.querySelectorAll("[data-preset]")) {
+        btn.addEventListener("click", () => {
+          const p = btn.dataset.preset;
+          if (p === "calm") { ampEl.value = "0.6"; densEl.value = "0.7"; freqEl.value = "1"; }
+          if (p === "dense") { ampEl.value = "1"; densEl.value = "1.6"; freqEl.value = "1"; }
+          if (p === "wild") { ampEl.value = "1.8"; freqEl.value = "0.6"; densEl.value = "1"; }
+          if (p === "sparse") { ampEl.value = "0.7"; densEl.value = "0.4"; freqEl.value = "1.2"; }
+          if (p === "mono") { ampEl.value = "1"; densEl.value = "0.2"; freqEl.value = "1"; }
+          if (p === "reset") { ampEl.value = "1"; freqEl.value = "1"; densEl.value = "1"; seedEl.value = "/work/"; }
+          pushField();
+        });
+      }
+      syncOutputs();
+      // HUD — DPR tier + perf flag
+      (function tick() {
+        const c = document.querySelector("#labBg");
+        if (c) {
+          hud.textContent = `seed ${seedEl.value} · mode ${c.dataset.mode || "?"} · perf ${c.dataset.perf || "running"} · DPR ${window.devicePixelRatio} · ${c.width}×${c.height}`;
+        }
+        requestAnimationFrame(tick);
+      })();
+
+      // Glass stage — static purple gradient, not a second live field.
+      // Two simultaneous WebGL canvases + three liquid blobs stalled Safari
+      // when the section scrolled into view (backdrop-filter + SVG filter +
+      // morph all composited). One live field is enough; the glass refracts
+      // the stage's own gradient, which is cheaper and still reads.
+      const glassBg = document.getElementById("glassBg");
+      if (glassBg) {
+        glassBg.style.background = "linear-gradient(135deg, #bc89ff 0%, #d4b8ff 30%, #ffe8a3 78%, #ffd6e7 100%)";
+        // no mountBackground — static is enough for the lens demo
+        const gBlur = document.getElementById("glassBlur");
+        const gDistort = document.getElementById("glassDistort");
+        const gOpacity = document.getElementById("glassOpacity");
+        const oGB = document.getElementById("oGlassBlur");
+        const oGD = document.getElementById("oGlassDistort");
+        const oGO = document.getElementById("oGlassOpacity");
+        const disp = document.querySelector("#liquid feDisplacementMap");
+        function syncGlass() {
+          const b = parseInt(gBlur.value, 10);
+          const d = parseInt(gDistort.value, 10);
+          const o = parseFloat(gOpacity.value);
+          document.querySelectorAll(".liquid-glass").forEach(el => {
+            el.style.backdropFilter = `blur(${b}px) saturate(1.6)`;
+            el.style.webkitBackdropFilter = `blur(${b}px) saturate(1.6)`;
+            el.style.background = `rgba(255,255,255,${o})`;
+          });
+          if (disp) disp.setAttribute("scale", String(d));
+          oGB.textContent = b + "px";
+          oGD.textContent = String(d);
+          oGO.textContent = o.toFixed(2);
+        }
+        for (const el of [gBlur, gDistort, gOpacity]) el.addEventListener("input", syncGlass);
+        syncGlass();
+        for (const btn of document.querySelectorAll("[data-glass]")) {
+          btn.addEventListener("click", () => {
+            const p = btn.dataset.glass;
+            if (p === "frosted") { gBlur.value = "18"; gDistort.value = "12"; gOpacity.value = "0.18"; }
+            if (p === "clear") { gBlur.value = "8"; gDistort.value = "4"; gOpacity.value = "0.12"; }
+            if (p === "heavy") { gBlur.value = "24"; gDistort.value = "20"; gOpacity.value = "0.26"; }
+            if (p === "subtle") { gBlur.value = "12"; gDistort.value = "0"; gOpacity.value = "0.14"; }
+            syncGlass();
+          });
+        }
+        for (const el of document.querySelectorAll("[data-drag]")) {
+          let sx=0, sy=0, ox=0, oy=0, dragging=false;
+          el.addEventListener("pointerdown", e => {
+            dragging=true; el.setPointerCapture(e.pointerId);
+            sx=e.clientX; sy=e.clientY;
+            const r=el.getBoundingClientRect(); const pr=el.parentElement.getBoundingClientRect();
+            ox=r.left - pr.left; oy=r.top - pr.top;
+            el.style.cursor="grabbing";
+          });
+          el.addEventListener("pointermove", e => {
+            if (!dragging) return;
+            const pr=el.parentElement.getBoundingClientRect();
+            let nx=ox + (e.clientX - sx);
+            let ny=oy + (e.clientY - sy);
+            nx=Math.max(0, Math.min(nx, pr.width - el.offsetWidth));
+            ny=Math.max(0, Math.min(ny, pr.height - el.offsetHeight));
+            el.style.left=nx+"px"; el.style.top=ny+"px"; el.style.right="auto"; el.style.bottom="auto";
+          });
+          el.addEventListener("pointerup", e => { dragging=false; el.style.cursor="grab"; });
+        }
+      }
+    </script>
+  </body>
+</html>

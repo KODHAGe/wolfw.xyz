@@ -1,0 +1,965 @@
+---
+/*
+ * Type lab — Recursive.
+ *
+ * Dev-only specimen. Not part of the production build's design system;
+ * it exists to judge a variable-font replacement for Necto Mono before
+ * committing to it. Delete or gate behind an env flag before merging to main.
+ *
+ * What it shows, and why each section exists:
+ *  - Real copy at real sizes: your h1, a project title, a CV line. Not lorem.
+ *  - Necto baseline beside Recursive, so you see what you lose.
+ *  - Four driveable axes (MONO, CASL, wght, slnt) with sliders.
+ *  - Four choreography presets, replayable on click, each illustrating a
+ *    different "life" the headings could have.
+ *  - Reduced-motion toggle: what a prefers-reduced-motion visitor sees.
+ *  - Still frames at 0/25/50/75/100% for judging intermediate glyph shapes.
+ *  - The specimen over a field-simulated background, so you see it against
+ *    the purple/white context the real site lives in.
+ */
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>type lab — Recursive | wolfw.xyz</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Recursive:slnt,wght,CASL,MONO@-15..0,300..1000,0..1,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preload" href="/fonts/Necto-Mono.woff2" as="font" type="font/woff2" crossorigin />
+    <style>
+      @import "../styles/tokens.css";
+    </style>
+    <style>
+      /* Lab chrome — deliberately outside global.css, not part of the system. */
+      :root {
+        --lab-mono: 0;
+        --lab-casl: 0;
+        --lab-wght: 400;
+        --lab-slnt: 0;
+        --lab-grid: #ececec;
+      }
+      * { box-sizing: border-box; }
+      html { background: #f6f0ff; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        color: #111;
+        line-height: 1.5;
+      }
+      a { color: inherit; }
+      /* Header */
+      .lab-header {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 2.5rem 1.25rem 1rem;
+      }
+      .lab-header h1 {
+        font-family: "Recursive", sans-serif;
+        font-variation-settings: "MONO" 0, "CASL" 0.3, "wght" 700, "slnt" 0;
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+        line-height: 1.1;
+        margin: 0 0 0.35rem;
+        letter-spacing: -0.02em;
+      }
+      .lab-header p.lead {
+        font-size: 1.05rem;
+        color: #444;
+        max-width: 62ch;
+        margin: 0 0 0.4rem;
+      }
+      .lab-header .meta {
+        font-size: 0.82rem;
+        color: #777;
+        font-variant-numeric: tabular-nums;
+      }
+      .lab-header .meta code { font-size: 0.92em; background: #eee; padding: 0.1em 0.3em; border-radius: 3px; }
+      /* Section shell */
+      .lab-section {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 1.6rem 1.25rem;
+        border-top: 1px solid var(--lab-grid);
+        background: #fff;
+      }
+      .lab-section h2 {
+        font-family: "Recursive", sans-serif;
+        font-variation-settings: "MONO" 0, "CASL" 0, "wght" 700, "slnt" 0;
+        font-size: 1.05rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #6b4db3;
+        margin: 0 0 1rem;
+      }
+      .lab-section h3 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin: 1.4rem 0 0.5rem;
+        color: #222;
+      }
+      .lab-note {
+        font-size: 0.88rem;
+        color: #666;
+        max-width: 68ch;
+        margin: 0.4rem 0 0.8rem;
+        line-height: 1.6;
+      }
+      .lab-note strong { color: #222; }
+      /* Playground */
+      .playground-preview {
+        font-family: "Recursive", sans-serif;
+        font-variation-settings:
+          "MONO" var(--lab-mono),
+          "CASL" var(--lab-casl),
+          "wght" var(--lab-wght),
+          "slnt" var(--lab-slnt);
+        font-size: var(--fs-display-fluid);
+        line-height: var(--lh-tight);
+        text-align: center;
+        padding: 2.2rem 1rem;
+        background: #fbfaf8;
+        border: 1px solid var(--lab-grid);
+        border-radius: 8px;
+        min-height: 7.5rem;
+        display: grid;
+        place-items: center;
+        /* for entrance presets */
+        transition: font-variation-settings 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .playground-preview.is-animating {
+        transition: font-variation-settings 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .playground-preview span.char {
+        display: inline-block;
+        transition: font-variation-settings 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem 1.4rem;
+        margin-top: 1.2rem;
+      }
+      .control label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #555;
+        margin-bottom: 0.25rem;
+      }
+      .control .row { display: flex; align-items: center; gap: 0.6rem; }
+      .control input[type="range"] { flex: 1; accent-color: #6b4db3; }
+      .control output {
+        font-variant-numeric: tabular-nums;
+        font-size: 0.85rem;
+        min-width: 3.2ch;
+        text-align: right;
+        color: #222;
+      }
+      .control .hint { font-size: 0.75rem; color: #888; margin-top: 0.15rem; }
+      .code {
+        margin-top: 0.8rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.78rem;
+        background: #111;
+        color: #d8d8d8;
+        padding: 0.6rem 0.75rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+      /* Presets */
+      .presets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin: 0.8rem 0 0.4rem;
+      }
+      .preset-btn {
+        font-family: "Recursive", sans-serif;
+        font-variation-settings: "MONO" 0, "CASL" 0, "wght" 600, "slnt" 0;
+        font-size: 0.82rem;
+        padding: 0.55rem 0.9rem;
+        border: 1px solid #222;
+        background: #fff;
+        box-shadow: 3px 3px #000;
+        cursor: pointer;
+        transition: box-shadow 0.18s, transform 0.18s;
+      }
+      .preset-btn:hover { box-shadow: 1px 1px #000; transform: translate(1px, 1px); }
+      .preset-btn:active { box-shadow: none; transform: translate(3px, 3px); }
+      .preset-btn small { display: block; font-size: 0.68rem; color: #666; font-variation-settings: "MONO" 0, "CASL" 0, "wght" 400, "slnt" 0; margin-top: 0.1rem; }
+      /* Comparison */
+      .compare {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 0.6rem;
+      }
+      @media (max-width: 640px) { .compare { grid-template-columns: 1fr; } }
+      .compare-card {
+        border: 1px solid var(--lab-grid);
+        border-radius: 8px;
+        padding: 1.2rem 1rem;
+        background: #fbfaf8;
+      }
+      .compare-card .label {
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #888;
+        margin-bottom: 0.6rem;
+      }
+      .compare-card .specimen {
+        font-size: var(--fs-display-fluid);
+        line-height: var(--lh-tight);
+        text-align: center;
+      }
+      .compare-card .specimen.necto { font-family: var(--font-display); }
+      .compare-card .specimen.recursive {
+        font-family: "Recursive", sans-serif;
+        font-variation-settings: "MONO" 0, "CASL" 0.15, "wght" 650, "slnt" 0;
+      }
+      .compare-card .sub {
+        margin-top: 0.7rem;
+        font-size: 0.82rem;
+        color: #555;
+        line-height: 1.6;
+        text-align: left;
+      }
+      .compare-card .sub em { font-style: normal; color: #222; font-weight: 600; }
+      /* Real content specimens */
+      .specimen-row {
+        border: 1px solid var(--lab-grid);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-top: 0.8rem;
+      }
+      .specimen-row .row-label {
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #888;
+        padding: 0.5rem 0.9rem 0;
+      }
+      .specimen-row .row-preview {
+        padding: 1rem 0.9rem 1.2rem;
+        text-align: left;
+      }
+      .specimen-row .row-preview h3.recursive-h {
+        font-family: "Recursive", sans-serif;
+        font-variation-settings: "MONO" 0, "CASL" 0.15, "wght" 700, "slnt" 0;
+        font-size: var(--fs-h1);
+        line-height: var(--lh-tight);
+        margin: 0;
+      }
+      .specimen-row .row-preview h3.necto-h {
+        font-family: var(--font-display);
+        font-size: var(--fs-h1);
+        line-height: var(--lh-tight);
+        margin: 0;
+      }
+      .specimen-row .row-preview p {
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: var(--fs-body);
+        line-height: var(--lh-body);
+        color: #333;
+        max-width: var(--measure-text);
+        margin: 0.5rem 0 0;
+      }
+      .specimen-row .row-preview .meta-line {
+        font-family: "Recursive", sans-serif;
+        font-variation-settings: "MONO" 0, "CASL" 0, "wght" 500, "slnt" 0;
+        font-size: var(--fs-caption);
+        color: #666;
+        margin-top: 0.35rem;
+      }
+      /* Still frames */
+      .frames {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.6rem;
+        margin-top: 0.8rem;
+      }
+      @media (max-width: 700px) { .frames { grid-template-columns: repeat(2, 1fr); } }
+      .frame {
+        border: 1px solid var(--lab-grid);
+        border-radius: 6px;
+        padding: 0.7rem 0.5rem;
+        text-align: center;
+        background: #fbfaf8;
+      }
+      .frame .pct { font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: #888; margin-bottom: 0.3rem; }
+      .frame .glyph {
+        font-family: "Recursive", sans-serif;
+        font-size: 1.9rem;
+        line-height: 1.1;
+      }
+      /* Home simulation */
+      .home-sim {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--lab-grid);
+        border-radius: 8px;
+        background: #bc89ff;
+        padding: 0.9rem;
+        margin-top: 0.8rem;
+      }
+      .home-sim .sheet {
+        background: rgba(255,255,255,0.82);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 6px;
+        padding: 1.6rem 1rem 1.4rem;
+        text-align: center;
+      }
+      .home-sim .sheet h1 {
+        font-family: "Recursive", sans-serif;
+        font-variation-settings: "MONO" 0, "CASL" 0.15, "wght" 700, "slnt" 0;
+        font-size: var(--fs-display-fluid);
+        margin: 0;
+        line-height: var(--lh-tight);
+      }
+      .home-sim .sheet p {
+        font-size: var(--fs-lead);
+        line-height: var(--lh-fact);
+        margin: 0.7rem auto 0;
+        max-width: 28ch;
+      }
+      .home-sim .sheet .btns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+        max-width: 520px;
+        margin: 1rem auto 0;
+      }
+      .home-sim .sheet .btns span {
+        display: block;
+        border: 1px solid #000;
+        background: #fff;
+        box-shadow: 3px 3px #000;
+        padding: 0.6rem;
+        font-family: "Recursive", sans-serif;
+        font-variation-settings: "MONO" 0, "CASL" 0, "wght" 600, "slnt" 0;
+        font-size: 0.85rem;
+      }
+      /* Cost box */
+      .cost {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.8rem;
+        margin-top: 0.8rem;
+      }
+      .cost-card {
+        border: 1px solid var(--lab-grid);
+        border-radius: 8px;
+        padding: 0.8rem 0.9rem;
+        background: #fbfaf8;
+      }
+      .cost-card strong { display: block; font-size: 0.85rem; margin-bottom: 0.2rem; }
+      .cost-card span { font-size: 0.82rem; color: #555; }
+      .cost-card code { font-size: 0.78rem; background: #eee; padding: 0.1em 0.3em; border-radius: 3px; }
+      /* Reduced motion */
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-top: 0.8rem;
+        font-size: 0.88rem;
+      }
+      .toggle-row input { accent-color: #6b4db3; }
+      /* Constant slow breath — whole heading, all axes drifting.
+         Stable: MONO stays 1 so phrase size never changes (your last note).
+         Only CASL/wght/slnt move — the word breathes without growing. 8.4s. */
+      @keyframes monoBreatheSlow {
+        0%   { font-variation-settings: "MONO" 1, "CASL" 0,    "wght" 520, "slnt" 0; }
+        25%  { font-variation-settings: "MONO" 1, "CASL" 0.18, "wght" 580, "slnt" -1.5; }
+        50%  { font-variation-settings: "MONO" 1, "CASL" 0.38, "wght" 620, "slnt" -3; }
+        75%  { font-variation-settings: "MONO" 1, "CASL" 0.2,  "wght" 580, "slnt" -1; }
+        100% { font-variation-settings: "MONO" 1, "CASL" 0,    "wght" 520, "slnt" 0; }
+      }
+      .playground-preview.constant-breathe,
+      #presetPreview.constant-breathe,
+      #homeH1.constant-breathe {
+        animation: monoBreatheSlow 8.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+      }
+      /* Per-letter slow wave — same breathe, staggered per glyph. MONO stays 1. */
+      @keyframes monoWave {
+        0%   { font-variation-settings: "MONO" 1, "CASL" 0,    "wght" 520, "slnt" 0; }
+        50%  { font-variation-settings: "MONO" 1, "CASL" 0.38, "wght" 620, "slnt" -3; }
+        100% { font-variation-settings: "MONO" 1, "CASL" 0,    "wght" 520, "slnt" 0; }
+      }
+      .playground-preview.constant-wave span.char,
+      #presetPreview.constant-wave span.char,
+      #homeH1.constant-wave span.char {
+        animation: monoWave 8.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+      }
+      /* Hover — transform on hover. Mono 1 → 0.51, so glyphs never switch past 0.5.
+         Whole heading: one transition. Per-letter: staggered transitions. */
+      .hover-breathe {
+        font-variation-settings: "MONO" 1, "CASL" 0, "wght" 520, "slnt" 0;
+        transition: font-variation-settings 0.72s cubic-bezier(0.25,0.46,0.45,0.94);
+        cursor: default;
+      }
+      .hover-breathe:hover {
+        /* stable: MONO stays 1 so phrase never changes length */
+        font-variation-settings: "MONO" 1, "CASL" 0.28, "wght" 580, "slnt" -1;
+      }
+      .hover-wave { cursor: default; }
+      .hover-wave span.char {
+        display: inline-block;
+        font-variation-settings: "MONO" 1, "CASL" 0, "wght" 520, "slnt" 0;
+        transition: font-variation-settings 0.62s cubic-bezier(0.25,0.46,0.45,0.94);
+      }
+      .hover-wave:hover span.char {
+        font-variation-settings: "MONO" 1, "CASL" 0.28, "wght" 580, "slnt" -1;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .hover-breathe, .hover-wave span.char { transition: none !important; }
+        .hover-breathe:hover, .hover-wave:hover span.char {
+          font-variation-settings: "MONO" 1, "CASL" 0, "wght" 520, "slnt" 0 !important;
+        }
+      }
+      .lab-section.simulate-reduced .playground-preview.constant-breathe,
+      .lab-section.simulate-reduced #presetPreview.constant-breathe,
+      .lab-section.simulate-reduced #homeH1.constant-breathe,
+      .lab-section.simulate-reduced .playground-preview.constant-wave span.char,
+      .lab-section.simulate-reduced #presetPreview.constant-wave span.char,
+      .lab-section.simulate-reduced #homeH1.constant-wave span.char {
+        animation: none !important;
+        font-variation-settings: "MONO" 0.75, "CASL" 0.12, "wght" 580, "slnt" -1 !important;
+      }
+      /* When reduced-motion simulation is on, kill transitions */
+      .lab-section.simulate-reduced * {
+        transition: none !important;
+        animation: none !important;
+      }
+      .lab-footer {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 1.2rem 1.25rem 2.5rem;
+        font-size: 0.82rem;
+        color: #777;
+        border-top: 1px solid var(--lab-grid);
+        background: #fff;
+      }
+      .lab-footer a { text-decoration: underline; text-underline-offset: 3px; }
+      @media (prefers-reduced-motion: reduce) {
+        .playground-preview, .playground-preview span.char { transition: none !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="lab-header">
+      <h1>Recursive — type lab</h1>
+      <p class="lead">
+        A variable-font replacement for Necto Mono, judged with your real copy at your real sizes.
+        Five axes: <code>MONO</code> 0→1 · <code>CASL</code> 0→1 · <code>wght</code> 300→1000 · <code>slnt</code> −15→0.
+        Latin subset 55&thinsp;KB vs Necto 25&thinsp;KB. Arrow Type / Stephen Nixon, SIL OFL.
+      </p>
+      <p class="meta">
+        Dev-only specimen — not part of the production build. Delete or gate before merging to <code>main</code>.
+        Specimen copy is real: <code>wolfw.xyz</code> · <code>Visualizing government</code> · CV line.
+        &nbsp; <a href="/">← back to site</a>
+      </p>
+    </header>
+
+    <!-- 1 — Necto vs Recursive -->
+    <section class="lab-section">
+      <h2>1 — What you lose, what you gain</h2>
+      <p class="lab-note">
+        Necto is static — one instance, zero axes. Its charm is fixed. Recursive can be the same mono you have
+        (<code>MONO 1, CASL 0</code>) or something else entirely. The question is whether the range is worth the
+        30&thinsp;KB and a second display family.
+      </p>
+      <div class="compare">
+        <div class="compare-card">
+          <div class="label">Necto Mono — today (static, 25 KB)</div>
+          <div class="specimen necto">wolfw.xyz</div>
+          <div class="sub"><em>One instance.</em> Quirky, bitmap-ish, the site's one distinctive asset. Charming at display size, harder at reading size. No axes — nothing to animate.</div>
+        </div>
+        <div class="compare-card">
+          <div class="label">Recursive — proportional, Linear (MONO 0 / CASL 0)</div>
+          <div class="specimen recursive">wolfw.xyz</div>
+          <div class="sub"><em>Same string, contemporary.</em> Proportional, rational, calm. This is the settled state if you replace Necto — not the animation, the thing that stays.</div>
+        </div>
+      </div>
+      <div class="compare" style="margin-top:1rem">
+        <div class="compare-card">
+          <div class="label">Recursive — Monospace, Linear (MONO 1 / CASL 0)</div>
+          <div class="specimen recursive" style="font-variation-settings: 'MONO' 1, 'CASL' 0, 'wght' 550, 'slnt' 0">wolfw.xyz</div>
+          <div class="sub">Mono heritage intact. If the mono <em>is</em> the identity, this is where Recursive can still be that — and then breathe out of it.</div>
+        </div>
+        <div class="compare-card">
+          <div class="label">Recursive — Proportional, Casual (MONO 0 / CASL 1)</div>
+          <div class="specimen recursive" style="font-variation-settings: 'MONO' 0, 'CASL' 1, 'wght' 550, 'slnt' 0">wolfw.xyz</div>
+          <div class="sub">Curved terminals, softer, more energetic. A different site — worth seeing so you know what you're <em>not</em> choosing if you stay Linear.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 — Axis playground -->
+    <section class="lab-section" id="playground">
+      <h2>2 — Axis playground</h2>
+      <p class="lab-note">Drag any axis. The preview is live — and the code block shows the exact <code>font-variation-settings</code> you'd ship.</p>
+      <div class="playground-preview" id="playgroundPreview">wolfw.xyz</div>
+      <div class="controls">
+        <div class="control">
+          <label for="sMono">MONO — Monospace</label>
+          <div class="row"><input id="sMono" type="range" min="0" max="1" step="0.01" value="0" /><output id="oMono">0.00</output></div>
+          <div class="hint">0 proportional → 1 monospace</div>
+        </div>
+        <div class="control">
+          <label for="sCasl">CASL — Casual</label>
+          <div class="row"><input id="sCasl" type="range" min="0" max="1" step="0.01" value="0.15" /><output id="oCasl">0.15</output></div>
+          <div class="hint">0 Linear → 1 Casual</div>
+        </div>
+        <div class="control">
+          <label for="sWght">wght — Weight</label>
+          <div class="row"><input id="sWght" type="range" min="300" max="1000" step="1" value="650" /><output id="oWght">650</output></div>
+          <div class="hint">300 → 1000 (default 400)</div>
+        </div>
+        <div class="control">
+          <label for="sSlnt">slnt — Slant</label>
+          <div class="row"><input id="sSlnt" type="range" min="-15" max="0" step="0.5" value="0" /><output id="oSlnt">0</output></div>
+          <div class="hint">−15 slanted → 0 upright</div>
+        </div>
+      </div>
+      <pre class="code" id="codeOut">font-variation-settings: "MONO" 0, "CASL" 0.15, "wght" 650, "slnt" 0;</pre>
+    </section>
+
+    <!-- 3 — Choreography presets -->
+    <section class="lab-section" id="presets">
+      <h2>3 — Choreography — headings only</h2>
+      <p class="lab-note">
+        Top row: <strong>entrance</strong> — one shot, settled state <em>is</em> the design. Bottom row:
+        <strong>constant, slow</strong> — the mono↔proportional breath looping at 5.2&thinsp;s, the pace you asked for.
+        Watch for horizontal wobble on <code>wght</code> — that's the reflow cost of animating weight on centred text.
+        Under <code>prefers-reduced-motion</code> everything jumps to the settled state.
+      </p>
+      <div class="playground-preview" id="presetPreview" style="font-variation-settings: 'MONO' 0, 'CASL' 0.15, 'wght' 700, 'slnt' 0">wolfw.xyz</div>
+      <div class="presets">
+        <button class="preset-btn" data-preset="breathe">Mono breathe <small>MONO 1 → 0 · 800 ms</small></button>
+        <button class="preset-btn" data-preset="weight">Gain weight <small>wght 300 → 700 · 800 ms</small></button>
+        <button class="preset-btn" data-preset="casual">Linear → Casual <small>CASL 0 → 1 · 800 ms</small></button>
+        <button class="preset-btn" data-preset="cascade">Per-char cascade <small>stagger 28 ms · MONO + wght</small></button>
+        <button class="preset-btn" data-preset="sweep">Sweep-synced <small>800 ms · same easing as --dur-dash-sweep field</small></button>
+      </div>
+      <div class="presets" style="margin-top:0.5rem">
+        <button class="preset-btn" data-preset="slow-breathe" style="background:#f0eaff;border-color:#6b4db3">Slow breathe — loop <small>MONO 1 ↔ 0.51 · CASL + wght + slnt · 8.4 s</small></button>
+        <button class="preset-btn" data-preset="slow-wave" style="background:#f0eaff;border-color:#6b4db3">Slow wave — per letter <small>same 4 axes · staggered · 8.4 s</small></button>
+        <button class="preset-btn" data-preset="stop">■ Stop <small>back to settled</small></button>
+      </div>
+      <p class="lab-note" style="margin-top:0.6rem">
+        <strong>What to judge:</strong> does the mono→proportional breath carry meaning (heritage → contemporary)?
+        Does weight animation wobble the centred heading? Does <code>CASL</code> add voice or just noise? Is the cascade beautiful or startup-cringe?
+        The sweep-synced preset uses the same <code>cubic-bezier(0.65,0,0.35,1)</code> as the field's R6.4 dash sweep — one arrival, not two.
+      </p>
+      <div class="toggle-row">
+        <input type="checkbox" id="chkReduced" />
+        <label for="chkReduced">Simulate <code>prefers-reduced-motion</code> — preset buttons jump to the end state, no animation</label>
+      </div>
+    </section>
+
+    <!-- 3b — Hover -->
+    <section class="lab-section">
+      <h2>3b — Hover — transform on hover</h2>
+      <p class="lab-note">
+        Hover the headings. Whole heading morphs as one; per-letter staggers one glyph at a time (same 4 axes, MONO 1 → 0.51 so glyphs never switch past the 0.5 threshold you caught). Respects <code>prefers-reduced-motion</code> — no transform at all.
+      </p>
+      <div class="playground-preview hover-breathe" style="font-size: var(--fs-display-fluid)">wolfw.xyz</div>
+      <p class="lab-note" style="text-align:center;margin-top:0.4rem">↑ hover — whole heading, 0.72s</p>
+      <div class="playground-preview hover-wave" id="hoverWave" style="margin-top:1rem">wolfw.xyz</div>
+      <p class="lab-note" style="text-align:center;margin-top:0.4rem">↑ hover — per letter, staggered 54ms, 0.62s each</p>
+      <p class="lab-note">Per-letter hover is the wildest one you asked for: each glyph independently on the same 4-axis breathe, so the wave traverses the word as your pointer arrives. Try it on the home poster ↓ too.</p>
+      <div class="home-sim">
+        <div class="sheet">
+          <h1 class="hover-breathe" style="font-family:Recursive,sans-serif;font-size:var(--fs-display-fluid);line-height:var(--lh-tight);margin:0">wolfw.xyz</h1>
+          <p>Hi, I'm Wolf W<br />I make web happen — both beautiful and useful.</p>
+          <div class="btns"><span>work</span><span>art</span></div>
+        </div>
+      </div>
+      <p class="lab-note" style="text-align:center;margin-top:0.4rem">↑ hover the home h1 — same mono 1 → 0.51, in context</p>
+    </section>
+
+    <!-- 4 — Still frames -->
+    <section class="lab-section">
+      <h2>4 — Still frames — judging the intermediates</h2>
+      <p class="lab-note">Type animation is near-impossible to judge in motion, trivial to judge in stills. Each frame is the same string at the same size, only the axis values change.</p>
+      <h3>Mono breathe — MONO 1 → 0</h3>
+      <div class="frames" id="framesMono"></div>
+      <h3>Weight — wght 300 → 700</h3>
+      <div class="frames" id="framesWght"></div>
+      <h3>CASL — 0 → 1</h3>
+      <div class="frames" id="framesCasl"></div>
+    </section>
+
+    <!-- 5 — Real content specimens -->
+    <section class="lab-section">
+      <h2>5 — Real copy, real sizes</h2>
+      <p class="lab-note">Not lorem. Your h1, a project title, a CV line — at the sizes the site actually uses.</p>
+      <div class="specimen-row">
+        <div class="row-label">Home wordmark — --fs-display-fluid · 39.8 px · Necto today vs Recursive settled</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+          <div class="row-preview" style="border-right:1px solid #eee"><h3 class="necto-h">wolfw.xyz</h3><p style="font-size:var(--fs-caption);color:#888">Necto Mono / 25 KB / static</p></div>
+          <div class="row-preview"><h3 class="recursive-h">wolfw.xyz</h3><p style="font-size:var(--fs-caption);color:#888">Recursive MONO 0 CASL 0.15 wght 700 / 55 KB</p></div>
+        </div>
+      </div>
+      <div class="specimen-row">
+        <div class="row-label">Project title — --fs-h1 · 33.2 px</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+          <div class="row-preview" style="border-right:1px solid #eee"><h3 class="necto-h" style="font-size:var(--fs-h1)">Visualizing government</h3></div>
+          <div class="row-preview"><h3 class="recursive-h" style="font-size:var(--fs-h1)">Visualizing government</h3></div>
+        </div>
+      </div>
+      <div class="specimen-row">
+        <div class="row-label">Listing card — --fs-h3 · 23 px · ProjectList badge</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+          <div class="row-preview" style="border-right:1px solid #eee"><h3 class="necto-h" style="font-size:var(--fs-h3)">Approval rates</h3><div class="meta-line" style="font-family:var(--font-display)">Web, Visualization · 2014</div></div>
+          <div class="row-preview"><h3 class="recursive-h" style="font-size:var(--fs-h3)">Approval rates</h3><div class="meta-line">Web, Visualization · 2014</div></div>
+        </div>
+      </div>
+      <div class="specimen-row">
+        <div class="row-label">CV entry — --fs-h3 position · --fs-caption clients</div>
+        <div class="row-preview"><h3 class="recursive-h" style="font-size:var(--fs-h3)">Senior Designer — Fjord</h3><div class="meta-line">Helsinki · 2021 —</div><p style="font-size:var(--fs-body)">Led service design for public-sector clients including the State Treasury of Finland.</p></div>
+      </div>
+      <div class="specimen-row">
+        <div class="row-label">Body prose — --fs-body · 16 px (prose stays in --font-text, not Recursive — shown for pairing judgement)</div>
+        <div class="row-preview"><p>A common type of map-based visualization designed for news production. Thicker strokes mark the choropleth; thinner ones carry the timeline. The pairing is set in Recursive for headings and the system stack for body — judge whether they rhyme.</p></div>
+      </div>
+    </section>
+
+    <!-- 6 — Home simulation -->
+    <section class="lab-section">
+      <h2>6 — In context — the home poster over the field</h2>
+      <p class="lab-note">The same purple page and frosted sheet the real site lives in. The heading sits where it will actually sit.</p>
+      <div class="home-sim" id="homeSim">
+        <div class="sheet" id="homeSheet">
+          <h1 id="homeH1">wolfw.xyz</h1>
+          <p>Hi, I'm Wolf W<br />I make web happen — both beautiful and useful.</p>
+          <div class="btns"><span>work</span><span>art</span></div>
+        </div>
+      </div>
+      <div class="presets" style="margin-top:0.8rem">
+        <button class="preset-btn" data-home="breathe">Breathe the home h1 <small>MONO 1 → 0</small></button>
+        <button class="preset-btn" data-home="weight">Gain weight <small>wght 300 → 700</small></button>
+        <button class="preset-btn" data-home="slow-breathe" style="background:#f0eaff;border-color:#6b4db3">Slow loop — whole h1 <small>MONO 1 ↔ 0.51 · 4 axes · 8.4 s</small></button>
+        <button class="preset-btn" data-home="slow-wave" style="background:#f0eaff;border-color:#6b4db3">Slow wave — per letter <small>same · staggered · 8.4 s</small></button>
+        <button class="preset-btn" data-home="stop">■ Stop</button>
+      </div>
+    </section>
+
+    <!-- 7 — Cost -->
+    <section class="lab-section">
+      <h2>7 — Cost, honestly</h2>
+      <div class="cost">
+        <div class="cost-card">
+          <strong>Bytes</strong>
+          <span>Necto 25 KB → Recursive latin 55 KB <em>(+30 KB)</em>. Against 2.0 MB of images, ~1.5% of total payload. Subsetting harder (only axes you use) could trim further, but 55 KB is already the latin-only subset.</span>
+        </div>
+        <div class="cost-card">
+          <strong>Not compositor-accelerated</strong>
+          <span><code>font-variation-settings</code> re-rasterises glyph outlines on the main thread every frame. Bounded one-shot on one <code>h1</code> is free. Continuous animation would be jank — same cost-model error as the SDF.</span>
+        </div>
+        <div class="cost-card">
+          <strong>FOUT / reflow</strong>
+          <span>55 KB replaces 25 KB — first-paint metrics move. Needs <code>size-adjust</code> fallback or CLS will shift. Current CLS 0.0000 is load-bearing.</span>
+        </div>
+        <div class="cost-card">
+          <strong>One distinctive face → two</strong>
+          <span>Recovered identity (R8.2) is single-typeface. Replacing Necto with Recursive keeps one face; <em>adding</em> Recursive alongside Necto makes two — a departure that belongs in <code>desired.md</code>.</span>
+        </div>
+      </div>
+      <p class="lab-note" style="margin-top:0.8rem">
+        <strong>GRAD</strong> (grade — perceived weight without advance-width change) would solve the centred-heading wobble, but Recursive doesn't have it.
+        <code>wght</code> changes widths, so weight animation on centred text visibly reflows. <code>MONO</code> and <code>CASL</code> change letterforms without that specific wobble — the more honest animation axes for this site.
+      </p>
+    </section>
+
+    <footer class="lab-footer">
+      Lab font: <a href="https://fonts.google.com/specimen/Recursive" target="_blank" rel="noopener">Recursive</a> by Arrow Type / Stephen Nixon, SIL OFL.
+      Axes: <code>MONO</code> 0→1 · <code>CASL</code> 0→1 · <code>wght</code> 300→1000 · <code>slnt</code> −15→0.
+      <code>CRSV</code> is fallback-only (browser substitutes cursive forms at its discretion, CSS can't drive it).
+      Current site face: <a href="/fonts/Necto-Mono.woff2">Necto Mono</a> 25 KB, static.
+      &nbsp; <a href="/">← back to site</a>
+    </footer>
+
+    <script>
+      // Playground sliders
+      const els = {
+        mono: document.getElementById("sMono"),
+        casl: document.getElementById("sCasl"),
+        wght: document.getElementById("sWght"),
+        slnt: document.getElementById("sSlnt"),
+        oMono: document.getElementById("oMono"),
+        oCasl: document.getElementById("oCasl"),
+        oWght: document.getElementById("oWght"),
+        oSlnt: document.getElementById("oSlnt"),
+        preview: document.getElementById("playgroundPreview"),
+        code: document.getElementById("codeOut"),
+      };
+      function syncPlayground() {
+        const mono = parseFloat(els.mono.value), casl = parseFloat(els.casl.value);
+        const wght = parseInt(els.wght.value, 10), slnt = parseFloat(els.slnt.value);
+        els.oMono.textContent = mono.toFixed(2);
+        els.oCasl.textContent = casl.toFixed(2);
+        els.oWght.textContent = String(wght);
+        els.oSlnt.textContent = String(slnt);
+        els.preview.style.setProperty("--lab-mono", String(mono));
+        els.preview.style.setProperty("--lab-casl", String(casl));
+        els.preview.style.setProperty("--lab-wght", String(wght));
+        els.preview.style.setProperty("--lab-slnt", String(slnt));
+        els.code.textContent = `font-variation-settings: "MONO" ${mono.toFixed(2)}, "CASL" ${casl.toFixed(2)}, "wght" ${wght}, "slnt" ${slnt};`;
+      }
+      for (const k of ["mono","casl","wght","slnt"]) els[k].addEventListener("input", syncPlayground);
+      syncPlayground();
+
+      // Still frames
+      function renderFrames(id, axis, values) {
+        const root = document.getElementById(id);
+        for (const v of values) {
+          const d = document.createElement("div");
+          d.className = "frame";
+          const pct = document.createElement("div"); pct.className = "pct"; pct.textContent = String(v);
+          const g = document.createElement("div"); g.className = "glyph"; g.textContent = "wolfw.xyz";
+          if (axis === "MONO") g.style.fontVariationSettings = `"MONO" ${v}, "CASL" 0.15, "wght" 600, "slnt" 0`;
+          if (axis === "wght") g.style.fontVariationSettings = `"MONO" 0, "CASL" 0.15, "wght" ${v}, "slnt" 0`;
+          if (axis === "CASL") g.style.fontVariationSettings = `"MONO" 0, "CASL" ${v}, "wght" 600, "slnt" 0`;
+          d.append(pct, g); root.append(d);
+        }
+      }
+      renderFrames("framesMono", "MONO", [1, 0.75, 0.5, 0.25, 0]);
+      renderFrames("framesWght", "wght", [300, 400, 550, 700, 900]);
+      renderFrames("framesCasl", "CASL", [0, 0.25, 0.5, 0.75, 1]);
+
+      // Hover per-letter — split #hoverWave into spans with staggered transition-delay
+      // 54ms × 9 ≈ 486ms spread, so the word ripples on hover and un-ripples on leave
+      // Astro scopes CSS with data-astro-cid, so dynamically created spans must
+      // carry the same attribute to match `.hover-wave:hover span.char`.
+      (function() {
+        const el = document.getElementById("hoverWave");
+        if (!el) return;
+        const cid = [...el.attributes].find(a => a.name.startsWith("data-astro-cid"))?.name;
+        const text = el.textContent;
+        el.textContent = "";
+        for (let i = 0; i < text.length; i++) {
+          const s = document.createElement("span");
+          s.className = "char";
+          if (cid) s.setAttribute(cid, "");
+          s.textContent = text[i] === " " ? "\u00a0" : text[i];
+          s.style.transitionDelay = `${i * 54}ms`;
+          el.appendChild(s);
+        }
+      })();
+
+      // Preset choreography — presetPreview is the stage
+      const presetPreview = document.getElementById("presetPreview");
+      const chkReduced = document.getElementById("chkReduced");
+      const presetsSection = document.getElementById("presets");
+
+      function stopConstant(el) {
+        el.classList.remove("constant-breathe", "constant-wave");
+        el.style.animation = "";
+        // collapse wave spans back to plain text if present
+        if (el.querySelector(".char")) {
+          const txt = [...el.querySelectorAll(".char")].map(s => s.textContent).join("");
+          el.textContent = txt || "wolfw.xyz";
+        }
+        // settled: mid of the slow loop — still mono-dominant, not fully proportional
+        el.style.fontVariationSettings = '"MONO" 0.75, "CASL" 0.12, "wght" 580, "slnt" -1';
+        el.style.transition = "";
+      }
+
+      function startSlowBreathe(el) {
+        stopConstant(el);
+        void el.offsetWidth;
+        el.classList.add("constant-breathe");
+      }
+
+      function startSlowWave(el, text) {
+        stopConstant(el);
+        const str = text || el.textContent.trim() || "wolfw.xyz";
+        el.innerHTML = "";
+        el.classList.add("constant-wave");
+        for (let i = 0; i < str.length; i++) {
+          const s = document.createElement("span");
+          s.className = "char";
+          s.textContent = str[i] === " " ? "\u00a0" : str[i];
+          // Astro scopes CSS, so dynamically created spans lack data-astro-cid and
+          // would miss the `.constant-wave span.char { animation: ... }` rule.
+          // Set animation inline so it works regardless of scoping.
+          s.style.animation = "monoWave 8.4s cubic-bezier(0.45, 0, 0.55, 1) infinite";
+          // stagger via animation-delay — each letter's breathe offset by 520ms
+          // 9 chars × 520ms ≈ 4.2s wave travel inside the 8.4s cycle
+          s.style.animationDelay = `${i * 520}ms`;
+          el.append(s);
+        }
+      }
+
+      function animatePreset(kind) {
+        const reduce = chkReduced.checked || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (kind === "slow-breathe") {
+          if (reduce) return;
+          startSlowBreathe(presetPreview);
+          return;
+        }
+        if (kind === "slow-wave") {
+          if (reduce) return;
+          startSlowWave(presetPreview, "wolfw.xyz");
+          return;
+        }
+        if (kind === "stop") {
+          stopConstant(presetPreview);
+          return;
+        }
+        // one-shot presets — stop any constant loop first
+        stopConstant(presetPreview);
+        // reset cascade spans if present
+        presetPreview.innerHTML = "wolfw.xyz";
+        presetPreview.style.fontVariationSettings = "";
+
+        if (reduce) {
+          // jump to end state, no transition
+          presetPreview.style.transition = "none";
+          if (kind === "breathe") presetPreview.style.fontVariationSettings = '"MONO" 0, "CASL" 0.15, "wght" 700, "slnt" 0';
+          if (kind === "weight") presetPreview.style.fontVariationSettings = '"MONO" 0, "CASL" 0.15, "wght" 700, "slnt" 0';
+          if (kind === "casual") presetPreview.style.fontVariationSettings = '"MONO" 0, "CASL" 1, "wght" 700, "slnt" 0';
+          if (kind === "cascade") presetPreview.style.fontVariationSettings = '"MONO" 0, "CASL" 0.15, "wght" 700, "slnt" 0';
+          if (kind === "sweep") presetPreview.style.fontVariationSettings = '"MONO" 0, "CASL" 0.15, "wght" 700, "slnt" 0';
+          // force reflow then restore transition for next time
+          void presetPreview.offsetWidth;
+          presetPreview.style.transition = "";
+          return;
+        }
+
+        if (kind === "breathe") {
+          presetPreview.style.transition = "none";
+          presetPreview.style.fontVariationSettings = '"MONO" 1, "CASL" 0.15, "wght" 700, "slnt" 0';
+          void presetPreview.offsetWidth;
+          presetPreview.style.transition = "font-variation-settings 0.8s cubic-bezier(0.16, 1, 0.3, 1)";
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              presetPreview.style.fontVariationSettings = '"MONO" 0, "CASL" 0.15, "wght" 700, "slnt" 0';
+            });
+          });
+        } else if (kind === "weight") {
+          presetPreview.style.transition = "none";
+          presetPreview.style.fontVariationSettings = '"MONO" 0, "CASL" 0.15, "wght" 300, "slnt" 0';
+          void presetPreview.offsetWidth;
+          presetPreview.style.transition = "font-variation-settings 0.8s cubic-bezier(0.16, 1, 0.3, 1)";
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            presetPreview.style.fontVariationSettings = '"MONO" 0, "CASL" 0.15, "wght" 700, "slnt" 0';
+          }));
+        } else if (kind === "casual") {
+          presetPreview.style.transition = "none";
+          presetPreview.style.fontVariationSettings = '"MONO" 0, "CASL" 0, "wght" 700, "slnt" 0';
+          void presetPreview.offsetWidth;
+          presetPreview.style.transition = "font-variation-settings 0.8s cubic-bezier(0.16, 1, 0.3, 1)";
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            presetPreview.style.fontVariationSettings = '"MONO" 0, "CASL" 1, "wght" 700, "slnt" 0';
+          }));
+        } else if (kind === "cascade") {
+          // per-char stagger
+          const text = "wolfw.xyz";
+          presetPreview.innerHTML = "";
+          presetPreview.style.transition = "none";
+          for (let i = 0; i < text.length; i++) {
+            const s = document.createElement("span");
+            s.className = "char";
+            s.textContent = text[i] === " " ? "\u00a0" : text[i];
+            s.style.fontVariationSettings = '"MONO" 1, "CASL" 0, "wght" 300, "slnt" 0';
+            s.style.transitionDelay = `${i * 28}ms`;
+            presetPreview.append(s);
+          }
+          void presetPreview.offsetWidth;
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            for (const c of presetPreview.querySelectorAll(".char")) {
+              c.style.fontVariationSettings = '"MONO" 0, "CASL" 0.15, "wght" 700, "slnt" 0';
+            }
+          }));
+          // collapse back to plain text after animation
+          setTimeout(() => {
+            if (presetPreview.querySelector(".char")) presetPreview.textContent = "wolfw.xyz";
+            presetPreview.style.fontVariationSettings = '"MONO" 0, "CASL" 0.15, "wght" 700, "slnt" 0';
+          }, 1400);
+        } else if (kind === "sweep") {
+          presetPreview.style.transition = "none";
+          presetPreview.style.fontVariationSettings = '"MONO" 1, "CASL" 0, "wght" 300, "slnt" 0';
+          void presetPreview.offsetWidth;
+          // same easing as --dur-dash-sweep field: ease-in-out
+          presetPreview.style.transition = "font-variation-settings 0.8s cubic-bezier(0.65, 0, 0.35, 1)";
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            presetPreview.style.fontVariationSettings = '"MONO" 0, "CASL" 0.15, "wght" 700, "slnt" 0';
+          }));
+        }
+      }
+
+      for (const btn of document.querySelectorAll("[data-preset]")) {
+        btn.addEventListener("click", () => animatePreset(btn.dataset.preset));
+      }
+      // auto-play mono breathe once on load for first impression, respecting reduced motion
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        setTimeout(() => animatePreset("breathe"), 600);
+      }
+
+      // Home sim presets
+      const homeH1 = document.getElementById("homeH1");
+      for (const btn of document.querySelectorAll("[data-home]")) {
+        btn.addEventListener("click", () => {
+          const kind = btn.dataset.home;
+          const reduce = chkReduced.checked || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          if (kind === "slow-breathe") {
+            if (reduce) return;
+            startSlowBreathe(homeH1);
+            return;
+          }
+          if (kind === "slow-wave") {
+            if (reduce) return;
+            startSlowWave(homeH1, "wolfw.xyz");
+            return;
+          }
+          if (kind === "stop") {
+            stopConstant(homeH1);
+            return;
+          }
+          if (reduce) {
+            homeH1.style.transition = "none";
+            homeH1.style.fontVariationSettings = '"MONO" 0, "CASL" 0.15, "wght" 700, "slnt" 0';
+            void homeH1.offsetWidth; homeH1.style.transition = "";
+            return;
+          }
+          stopConstant(homeH1);
+          if (kind === "breathe") {
+            homeH1.style.transition = "none";
+            homeH1.style.fontVariationSettings = '"MONO" 1, "CASL" 0.15, "wght" 700, "slnt" 0';
+            void homeH1.offsetWidth;
+            homeH1.style.transition = "font-variation-settings 0.8s cubic-bezier(0.16, 1, 0.3, 1)";
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+              homeH1.style.fontVariationSettings = '"MONO" 0, "CASL" 0.15, "wght" 700, "slnt" 0';
+            }));
+          } else if (kind === "weight") {
+            homeH1.style.transition = "none";
+            homeH1.style.fontVariationSettings = '"MONO" 0, "CASL" 0.15, "wght" 300, "slnt" 0';
+            void homeH1.offsetWidth;
+            homeH1.style.transition = "font-variation-settings 0.8s cubic-bezier(0.16, 1, 0.3, 1)";
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+              homeH1.style.fontVariationSettings = '"MONO" 0, "CASL" 0.15, "wght" 700, "slnt" 0';
+            }));
+          }
+        });
+      }
+
+      // Reduced-motion simulation toggle — add class to the presets section
+      chkReduced.addEventListener("change", () => {
+        presetsSection.classList.toggle("simulate-reduced", chkReduced.checked);
+      });
+    </script>
+  </body>
+</html>

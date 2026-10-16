@@ -1,0 +1,638 @@
+---
+/*
+ * Button lab — hover + type + shape.
+ *
+ * Dev-only. Not part of production build. Delete or gate before merging.
+ * Shows current brutalist button vs buttery variants that combine shape,
+ * shadow, gradient tinge and Recursive type.
+ */
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>button lab | wolfw.xyz</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Recursive:slnt,wght,CASL,MONO@-15..0,300..1000,0..1,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preload" href="/fonts/Necto-Mono.woff2" as="font" type="font/woff2" crossorigin />
+    <style>
+      @import "../styles/tokens.css";
+    </style>
+    <style>
+      :root { --lab-grid: #ececec; }
+      * { box-sizing: border-box; }
+      html { background: #f6f0ff; }
+      body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; color: #111; line-height: 1.5; }
+      a { color: inherit; }
+      .lab-header {
+        max-width: 980px; margin: 0 auto; padding: 2.5rem 1.25rem 1rem;
+      }
+      .lab-header h1 {
+        font-family: "Recursive", sans-serif;
+        font-variation-settings: "MONO" 1, "CASL" 0, "wght" 700, "slnt" 0;
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+        line-height: 1.1; margin: 0 0 0.35rem; letter-spacing: -0.02em;
+      }
+      .lab-header p.lead { font-size: 1.05rem; color: #444; max-width: 68ch; margin: 0 0 0.4rem; }
+      .lab-header .meta { font-size: 0.82rem; color: #777; }
+      .lab-header .meta code { font-size: 0.92em; background: #eee; padding: 0.1em 0.3em; border-radius: 3px; }
+      .lab-section {
+        max-width: 980px; margin: 0 auto; padding: 1.6rem 1.25rem;
+        border-top: 1px solid var(--lab-grid); background: #fff;
+      }
+      .lab-section h2 {
+        font-family: "Recursive", sans-serif;
+        font-variation-settings: "MONO" 0, "CASL" 0, "wght" 700, "slnt" 0;
+        font-size: 1.05rem; letter-spacing: 0.04em; text-transform: uppercase;
+        color: #6b4db3; margin: 0 0 1rem;
+      }
+      .lab-note { font-size: 0.88rem; color: #666; max-width: 68ch; margin: 0.4rem 0 0.8rem; line-height: 1.6; }
+      .lab-note strong { color: #222; }
+      /* Baseline brutalist button — as shipped today */
+      .btn {
+        display: block; width: 100%; max-width: 520px;
+        padding: 1rem; border: 1px solid #000; background: #fff; color: inherit;
+        text-align: center; text-decoration: none; cursor: pointer;
+        font-family: var(--font-display); font-size: 1rem;
+        box-shadow: 4px 4px #000;
+        transition: box-shadow 0.5s cubic-bezier(0.65,0,0.35,1), transform 0.22s cubic-bezier(0.16,1,0.3,1);
+      }
+      .btn:hover { box-shadow: 2px 2px #000; }
+      .btn:active { box-shadow: none; transform: translate(4px, 4px); }
+      /* Lab button base — resets for variants */
+      .btn-lab {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 0.85rem 1.4rem; border: 1px solid #000; background: #fff;
+        font-family: "Recursive", sans-serif;
+        font-variation-settings: "MONO" 1, "CASL" 0, "wght" 500, "slnt" 0;
+        font-size: 0.92rem; letter-spacing: -0.01em;
+        cursor: pointer; text-decoration: none; color: #111;
+        box-shadow: 4px 4px #000;
+        transition:
+          box-shadow 0.55s cubic-bezier(0.16,1,0.3,1),
+          transform 0.45s cubic-bezier(0.34,1.56,0.64,1),
+          border-radius 0.55s cubic-bezier(0.16,1,0.3,1),
+          background 0.55s ease,
+          border-color 0.45s ease,
+          font-variation-settings 0.62s cubic-bezier(0.16,1,0.3,1);
+      }
+      /* Variant A — soft: radius + blurred shadow, buttery spring */
+      .btn-soft:hover {
+        border-radius: 14px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.14), 4px 4px #000;
+        transform: translateY(-1px);
+        font-variation-settings: "MONO" 0.51, "CASL" 0.28, "wght" 620, "slnt" -1;
+        background: #fffdf8;
+      }
+      .btn-soft:active {
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        transform: translateY(0);
+      }
+      /* Variant B — gradient tinge: subtle warm wash + gradient border */
+      .btn-tinge {
+        position: relative; background: #fff; border-color: #000;
+        overflow: hidden;
+      }
+      .btn-tinge::before {
+        content: ""; position: absolute; inset: 0; border-radius: inherit;
+        background: linear-gradient(135deg, #bc89ff 0%, #ffe8a3 55%, #ff9a9e 100%);
+        opacity: 0; transition: opacity 0.55s ease;
+        pointer-events: none;
+      }
+      .btn-tinge:hover::before { opacity: 0.18; }
+      .btn-tinge:hover {
+        border-color: #3a1a7a;
+        box-shadow: 0 10px 28px rgba(188,137,255,0.28), 3px 3px #000;
+        transform: translateY(-1px);
+        border-radius: 12px;
+        font-variation-settings: "MONO" 0.51, "CASL" 0.22, "wght" 640, "slnt" -1;
+      }
+      /* Variant C — pill morph: brutalist → pill, shadow evaporates */
+      .btn-pill:hover {
+        border-radius: 999px;
+        padding-inline: 1.8rem;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        transform: translateY(-1px);
+        background: #111; color: #fff; border-color: #111;
+        font-variation-settings: "MONO" 0.6, "CASL" 0.45, "wght" 680, "slnt" -1;
+      }
+      .btn-pill:active { transform: translateY(0) scale(0.99); }
+      /* Variant D — type wave on hover: per-letter stagger, shape stays */
+      .btn-wave span.char {
+        display: inline-block;
+        font-variation-settings: "MONO" 1, "CASL" 0, "wght" 520, "slnt" 0;
+        transition: font-variation-settings 0.52s cubic-bezier(0.16,1,0.3,1);
+      }
+      .btn-wave:hover span.char {
+        font-variation-settings: "MONO" 0.51, "CASL" 0.35, "wght" 680, "slnt" -2;
+      }
+      .btn-wave:hover { box-shadow: 2px 2px #000; transform: translateY(-1px); }
+      /* Variant E — combined: soft + tinge + type */
+      .btn-combo {
+        border-radius: 6px;
+        background: #fff;
+        font-variation-settings: "MONO" 1, "CASL" 0, "wght" 500, "slnt" 0;
+      }
+      .btn-combo span.char {
+        display: inline-block;
+        transition: font-variation-settings 0.58s cubic-bezier(0.16,1,0.3,1);
+        font-variation-settings: "MONO" 1, "CASL" 0, "wght" 500, "slnt" 0;
+      }
+      .btn-combo:hover {
+        border-radius: 14px;
+        background: linear-gradient(135deg, #fff 0%, #f6f0ff 55%, #fff7e6 100%);
+        box-shadow: 0 12px 32px rgba(188,137,255,0.22), 0 2px 8px rgba(0,0,0,0.08);
+        transform: translateY(-1.5px);
+        border-color: #7a4bd6;
+      }
+      .btn-combo:hover span.char {
+        font-variation-settings: "MONO" 0.51, "CASL" 0.32, "wght" 700, "slnt" -2;
+      }
+      /* Variant F — buttery spring: overshoot + settle */
+      .btn-butter:hover {
+        border-radius: 12px;
+        box-shadow: 0 14px 30px rgba(0,0,0,0.14);
+        transform: translateY(-2px);
+        transition-timing-function: cubic-bezier(0.34,1.56,0.64,1);
+        font-variation-settings: "MONO" 0.55, "CASL" 0.3, "wght" 650, "slnt" -1.5;
+        background: #fffffe;
+      }
+      /* ── Subtle butter — refined per feedback ──────────────────────────
+         Slippy → smooth: longer duration, sine ease (no spring), barely-there
+         shadow change, type whispers. MONO 1 → 0.82 so the button doesn't grow.
+         The brutalist hard shadow stays; it just softens, it doesn't bloom. */
+      .btn-subtle {
+        /* sharp stays — no rounding, brutalist */
+        border-radius: 0;
+        background: #fff;
+        box-shadow: 4px 4px #000;
+        font-variation-settings: "MONO" 1, "CASL" 0, "wght" 520, "slnt" 0;
+        letter-spacing: -0.01em;
+        transition:
+          box-shadow 0.62s cubic-bezier(0.25,0.46,0.45,0.94),
+          background 0.62s ease,
+          transform 0.62s cubic-bezier(0.25,0.46,0.45,0.94),
+          letter-spacing 0.68s cubic-bezier(0.25,0.46,0.45,0.94),
+          font-variation-settings 0.68s cubic-bezier(0.25,0.46,0.45,0.94);
+      }
+      .btn-subtle:hover {
+        border-radius: 0;
+        /* shadow barely moves — hard offset stays, just a whisper of blur */
+        box-shadow: 4px 4px 10px rgba(0,0,0,0.10), 3px 3px #000;
+        transform: translateY(-0.5px);
+        letter-spacing: 0.04em;
+        font-variation-settings: "MONO" 0.82, "CASL" 0.14, "wght" 560, "slnt" -0.6;
+        background: #fffefb;
+      }
+      .btn-subtle-tinge {
+        position: relative; overflow: hidden;
+      }
+      .btn-subtle-tinge::before {
+        content: ""; position: absolute; inset: 0; border-radius: inherit;
+        background: linear-gradient(135deg, #bc89ff 0%, #ffe8a3 60%, #ffd6e7 100%);
+        opacity: 0; transition: opacity 0.62s cubic-bezier(0.25,0.46,0.45,0.94);
+        pointer-events: none;
+      }
+      .btn-subtle-tinge:hover::before { opacity: 0.10; }
+      .btn-subtle-tinge:hover {
+        border-radius: 0;
+        box-shadow: 4px 4px 10px rgba(0,0,0,0.08), 3px 3px #000;
+        border-color: #2a1a4a;
+      }
+      /* Per-letter subtle — same whisper, staggered */
+      .btn-subtle-wave span.char {
+        display: inline-block;
+        font-variation-settings: "MONO" 1, "CASL" 0, "wght" 520, "slnt" 0;
+        transition: font-variation-settings 0.68s cubic-bezier(0.25,0.46,0.45,0.94);
+      }
+      .btn-subtle-wave:hover span.char {
+        font-variation-settings: "MONO" 0.82, "CASL" 0.14, "wght" 560, "slnt" -0.6;
+      }
+      /* Width-stable: lock outer width so MONO doesn't make the button grow.
+         JS measures and sets inline width on [data-lock-width] at load. */
+      .btn-locked { width: var(--locked-w); }
+      /* Reduced motion — no shape or type transform */
+      @media (prefers-reduced-motion: reduce) {
+        .btn-lab, .btn-lab span.char { transition: none !important; }
+        .btn-lab:hover { transform: none !important; border-radius: 0 !important; }
+      }
+      .variant {
+        border: 1px solid var(--lab-grid); border-radius: 8px; padding: 1.1rem;
+        background: #fbfaf8; margin-top: 0.9rem;
+      }
+      .variant .label {
+        font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-bottom: 0.7rem;
+      }
+      .variant .row { display: flex; gap: 0.7rem; flex-wrap: wrap; align-items: center; }
+      .variant .desc { font-size: 0.82rem; color: #555; margin-top: 0.6rem; line-height: 1.5; max-width: 68ch; }
+      .variant .desc code { font-size: 0.85em; background: #eee; padding: 0.1em 0.3em; border-radius: 3px; }
+      /* ── Buttery glass — frosted, sharp stays, whisper type ───────────── */
+      .glass-stage {
+        background: linear-gradient(135deg, #bc89ff 0%, #d4b8ff 30%, #ffe8a3 78%, #ffd6e7 100%);
+        border-radius: 10px; padding: 1.4rem 1rem; margin-top: 0.6rem;
+        position: relative; overflow: hidden;
+      }
+      .glass-stage::before {
+        content: ""; position: absolute; inset: 0; opacity: 0.35;
+        background:
+          radial-gradient(ellipse 60% 40% at 20% 30%, rgba(255,255,255,0.55) 0%, transparent 60%),
+          radial-gradient(ellipse 50% 50% at 85% 70%, rgba(255,255,255,0.35) 0%, transparent 55%);
+        pointer-events: none;
+      }
+      .btn-glass {
+        position: relative;
+        border-radius: 0;
+        border: 1px solid rgba(0,0,0,0.10);
+        background: rgba(255,255,255,0.68);
+        backdrop-filter: blur(14px) saturate(1.4);
+        -webkit-backdrop-filter: blur(14px) saturate(1.4);
+        box-shadow: 4px 4px 0 rgba(0,0,0,0.92), 0 4px 14px rgba(0,0,0,0.06);
+        font-variation-settings: "MONO" 1, "CASL" 0, "wght" 520, "slnt" 0;
+        letter-spacing: -0.01em;
+        transition:
+          background 0.62s cubic-bezier(0.25,0.46,0.45,0.94),
+          backdrop-filter 0.62s ease,
+          border-color 0.5s ease,
+          box-shadow 0.62s cubic-bezier(0.25,0.46,0.45,0.94),
+          transform 0.62s cubic-bezier(0.25,0.46,0.45,0.94),
+          letter-spacing 0.68s cubic-bezier(0.25,0.46,0.45,0.94),
+          font-variation-settings 0.68s cubic-bezier(0.25,0.46,0.45,0.94);
+      }
+      .btn-glass:hover {
+        background: rgba(255,255,255,0.86);
+        backdrop-filter: blur(16px) saturate(1.5);
+        -webkit-backdrop-filter: blur(16px) saturate(1.5);
+        border-color: rgba(0,0,0,0.14);
+        box-shadow: 4px 4px 0 rgba(0,0,0,0.92), 0 8px 22px rgba(0,0,0,0.10);
+        transform: translateY(-0.5px);
+        letter-spacing: 0.04em;
+        font-variation-settings: "MONO" 0.82, "CASL" 0.14, "wght" 560, "slnt" -0.6;
+      }
+      .btn-glass span.char {
+        display: inline-block;
+        font-variation-settings: "MONO" 1, "CASL" 0, "wght" 520, "slnt" 0;
+        transition: font-variation-settings 0.68s cubic-bezier(0.25,0.46,0.45,0.94);
+      }
+      .btn-glass:hover span.char {
+        font-variation-settings: "MONO" 0.82, "CASL" 0.14, "wght" 560, "slnt" -0.6;
+      }
+      .btn-glass-tinge::after {
+        content: ""; position: absolute; inset: 0;
+        background: linear-gradient(135deg, rgba(188,137,255,0.0) 0%, rgba(255,232,163,0.0) 60%, rgba(255,214,231,0.0) 100%);
+        opacity: 0; transition: opacity 0.62s ease; pointer-events: none;
+      }
+      .btn-glass-tinge:hover::after { opacity: 1; }
+      .btn-glass-tinge:hover {
+        background: rgba(255,255,255,0.88);
+        border-color: rgba(42,26,74,0.18);
+      }
+      /* width-stable glass */
+      .btn-glass.btn-locked { width: var(--locked-w); justify-content: center; }
+      /* ── Stable — no shift, no grow ─────────────────────────────────── */
+      .btn-stable {
+        border-radius: 0;
+        background: #fff;
+        box-shadow: 4px 4px #000;
+        font-variation-settings: "MONO" 1, "CASL" 0, "wght" 520, "slnt" 0;
+        /* no letter-spacing, no transform — button and phrase never move */
+        transition:
+          background 0.58s cubic-bezier(0.25,0.46,0.45,0.94),
+          border-color 0.5s ease,
+          box-shadow 0.55s cubic-bezier(0.25,0.46,0.45,0.94),
+          font-variation-settings 0.66s cubic-bezier(0.25,0.46,0.45,0.94);
+      }
+      .btn-stable:hover {
+        background: #fffefb;
+        border-color: #000;
+        /* shadow moves — brutalist compress, button itself stays */
+        box-shadow: 2px 2px #000;
+        /* MONO stays 1 — only CASL/wght/slnt move, so advance widths don't change.
+           slnt bumped to -1.8 for ST2 so the slant is just visible on hover. */
+        font-variation-settings: "MONO" 1, "CASL" 0.22, "wght" 560, "slnt" -1.8;
+      }
+      .btn-stable.btn-stable-tinge { position: relative; overflow: hidden; }
+      .btn-stable.btn-stable-tinge::before {
+        content: ""; position: absolute; inset: 0;
+        background: linear-gradient(135deg, #bc89ff 0%, #ffe8a3 60%, #ffd6e7 100%);
+        opacity: 0; transition: opacity 0.58s ease; pointer-events: none;
+      }
+      .btn-stable.btn-stable-tinge:hover::before { opacity: 0.10; }
+      .btn-stable span.char {
+        display: inline-block;
+        font-variation-settings: "MONO" 1, "CASL" 0, "wght" 520, "slnt" 0;
+        transition: font-variation-settings 0.66s cubic-bezier(0.25,0.46,0.45,0.94);
+      }
+      .btn-stable:hover span.char {
+        font-variation-settings: "MONO" 1, "CASL" 0.22, "wght" 560, "slnt" -1.8;
+      }
+      .lab-footer {
+        max-width: 980px; margin: 0 auto; padding: 1.2rem 1.25rem 2.5rem;
+        font-size: 0.82rem; color: #777; border-top: 1px solid var(--lab-grid); background: #fff;
+      }
+      .lab-footer a { text-decoration: underline; text-underline-offset: 3px; }
+    </style>
+  </head>
+  <body>
+    <header class="lab-header">
+      <h1>Button lab — buttery + type</h1>
+      <p class="lead">
+        Current brutalist button vs variants that play <em>shape, shadow, gradient tinge and Recursive type</em> together on hover.
+        Hover each — whole heading vs per-letter, soft vs pill, tinge vs combo. All respect <code>prefers-reduced-motion</code>.
+      </p>
+      <p class="meta">
+        Dev-only. Not in production. <a href="/type-lab/">← type lab</a> · <a href="/">← back to site</a>
+        &nbsp; Base: <code>MONO 1 → 0.51</code> so glyphs never switch past the threshold you caught.
+      </p>
+    </header>
+
+    <section class="lab-section">
+      <h2>Baseline — as shipped today</h2>
+      <p class="lab-note">Hard 1px border, white, <code>4px 4px #000</code> shadow compressing to <code>2px 2px</code> on hover. No radius, no gradient, Necto Mono. The shadow <em>is</em> the animation.</p>
+      <a class="btn" href="#">work</a>
+      <p class="lab-note" style="margin-top:0.6rem">↑ brutalist, correct, a bit severe. The variants below keep the shadow language but soften it.</p>
+    </section>
+
+    <section class="lab-section">
+      <h2>Variants — hover each</h2>
+      <p class="lab-note">All variants animate <code>border-radius</code> + <code>box-shadow</code> + <code>transform</code> + <code>font-variation-settings</code> together — the buttery feel is the <em>combined</em> easing, not any one property.</p>
+
+      <div class="variant">
+        <div class="label">A — Soft · radius + blurred shadow · buttery spring</div>
+        <div class="row"><button class="btn-lab btn-soft">work</button><button class="btn-lab btn-soft">about</button><a class="btn-lab btn-soft" href="#">github →</a></div>
+        <div class="desc"><code>border-radius 0 → 14px</code> · shadow blooms to <code>0 8px 24px</code> + hard offset · <code>translateY(-1px)</code> with <code>cubic-bezier(0.34,1.56,0.64,1)</code> spring · type <code>MONO 1 → 0.51</code> whole-word.</div>
+      </div>
+
+      <div class="variant">
+        <div class="label">B — Gradient tinge · warm wash on hover</div>
+        <div class="row"><button class="btn-lab btn-tinge">work</button><button class="btn-lab btn-tinge">käkriäinen</button><a class="btn-lab btn-tinge" href="#">visualizing government →</a></div>
+        <div class="desc">Pseudo-element gradient <code>#bc89ff → #ffe8a3 → #ff9a9e</code> at <code>opacity 0 → 0.18</code> behind the label · border tints to <code>#3a1a7a</code> · radius 12px. The purple ties it to the page.</div>
+      </div>
+
+      <div class="variant">
+        <div class="label">C — Pill morph · brutalist → pill, shadow evaporates</div>
+        <div class="row"><button class="btn-lab btn-pill">work</button><button class="btn-lab btn-pill">send me some facts</button><a class="btn-lab btn-pill" href="#">get in touch →</a></div>
+        <div class="desc"><code>border-radius 999px</code> · background inverts to <code>#111</code> · shadow becomes soft <code>0 6px 20px</code> — the block becomes a pill, the shadow becomes bloom. Most dramatic, most “different site”.</div>
+      </div>
+
+      <div class="variant">
+        <div class="label">D — Type wave · per-letter stagger, shape stays brutalist</div>
+        <div class="row"><button class="btn-lab btn-wave" data-wave>work</button><button class="btn-lab btn-wave" data-wave>about</button><button class="btn-lab btn-wave" data-wave>github</button></div>
+        <div class="desc">Shape stays — only the <em>letters</em> ripple <code>MONO 1 → 0.51</code> at <code>42ms</code> stagger per glyph. Hover the word and it shivers mono→proportional left→right.</div>
+      </div>
+
+      <div class="variant">
+        <div class="label">E — Combo · soft + tinge + type (the maximal buttery)</div>
+        <div class="row"><button class="btn-lab btn-combo" data-wave>work</button><button class="btn-lab btn-combo" data-wave>visualizing government</button><a class="btn-lab btn-combo" data-wave href="#">käkriäinen →</a></div>
+        <div class="desc">Radius 6→14px · gradient wash · shadow blooms to <code>0 12px 32px</code> · <em>per-letter</em> type wave underneath. The one where everything moves together.</div>
+      </div>
+
+      <div class="variant">
+        <div class="label">F — Buttery spring · overshoot + settle</div>
+        <div class="row"><button class="btn-lab btn-butter">work</button><button class="btn-lab btn-butter">linkedin</button><a class="btn-lab btn-butter" href="#">art →</a></div>
+        <div class="desc">Same soft radius + shadow but with <code>cubic-bezier(0.34,1.56,0.64,1)</code> spring on <code>transform</code> — the button lifts, overshoots, settles. Feels physical rather than interpolated.</div>
+      </div>
+    </section>
+
+    <section class="lab-section" style="background:#f6f0ff">
+      <h2 style="color:#111">Subtle butter — refined</h2>
+      <p class="lab-note" style="color:#333">
+        Your notes, addressed: <strong>jumpy → smooth</strong> (sine ease <code>0.25,0.46,0.45,0.94</code> instead of spring, 0.62–0.68s, no overshoot),
+        <strong>rounding → none</strong> (sharp stays, brutalist), <strong>shadow → whisper</strong> (hard offset stays <code>4px 4px #000</code>, just a 10px blur halo),
+        <strong>type → whisper + tracking</strong> (<code>MONO 1 → 0.82</code> so the button doesn't grow, <code>-0.01em → 0.04em</code> tracking),
+        <strong>gradient → 10% wash</strong> not 18%. The mono threshold stays at <code>0.51</code> — these stop at <code>0.82</code>, well above it.
+      </p>
+
+      <div class="variant" style="background:#fff">
+        <div class="label">S1 — Subtle soft · sharp stays · shadow whisper + tracking</div>
+        <div class="row"><button class="btn-lab btn-subtle">work</button><button class="btn-lab btn-subtle">about</button><a class="btn-lab btn-subtle" href="#">github →</a></div>
+        <div class="desc">Sharp stays; hover adds 10px blur halo + <code>translateY(-0.5px)</code> + tracking <code>-0.01em → 0.04em</code> + type whisper <code>MONO 1 → 0.82</code>. Sine ease, 0.68s.</div>
+      </div>
+
+      <div class="variant" style="background:#fff">
+        <div class="label">S2 — Subtle tinge · 10% wash · sharp stays</div>
+        <div class="row"><button class="btn-lab btn-subtle btn-subtle-tinge">work</button><button class="btn-lab btn-subtle btn-subtle-tinge">käkriäinen</button><a class="btn-lab btn-subtle btn-subtle-tinge" href="#">visualizing government →</a></div>
+        <div class="desc">Same subtle shape + shadow as S1, plus a <code>10%</code> warm gradient wash. The purple ties it to the page without tinting the label.</div>
+      </div>
+
+      <div class="variant" style="background:#fff">
+        <div class="label">S3 — Subtle type wave · per-letter whisper, shape stays brutalist</div>
+        <div class="row"><button class="btn-lab btn-subtle btn-subtle-wave" data-wave-subtle>work</button><button class="btn-lab btn-subtle btn-subtle-wave" data-wave-subtle>about</button><button class="btn-lab btn-subtle btn-subtle-wave" data-wave-subtle>github</button></div>
+        <div class="desc">Shape stays brutalist (no radius/shadow) — only letters ripple <code>MONO 1 → 0.82</code> at <code>62ms</code> stagger. Width-stable (see below).</div>
+      </div>
+
+      <div class="variant" style="background:#fff">
+        <div class="label">S4 — Subtle combo · sharp + tinge + whisper wave · width-stable</div>
+        <div class="row"><button class="btn-lab btn-subtle btn-subtle-tinge btn-subtle-wave" data-wave-subtle data-lock-width>work</button><button class="btn-lab btn-subtle btn-subtle-tinge btn-subtle-wave" data-wave-subtle data-lock-width>visualizing government</button><a class="btn-lab btn-subtle btn-subtle-tinge btn-subtle-wave" data-wave-subtle data-lock-width href="#">käkriäinen →</a></div>
+        <div class="desc">All subtle together <em>and</em> width-locked: JS measures each button's width at load and locks it via <code>--locked-w</code> so <code>MONO</code> never makes the outer box grow. The letters still morph, the button doesn't.</div>
+      </div>
+    </section>
+
+    <section class="lab-section">
+      <h2>Stack — how they feel together</h2>
+      <p class="lab-note">A real home stack, all Variant E (combo) — so you see the rhythm when every button does it, not just one in isolation. Hover any, then sweep across the stack.</p>
+      <div style="max-width:520px;display:grid;gap:0.6rem">
+        <button class="btn-lab btn-combo" data-wave>work</button>
+        <button class="btn-lab btn-combo" data-wave>art</button>
+        <button class="btn-lab btn-combo" data-wave>about</button>
+        <button class="btn-lab btn-combo" data-wave>cv 🔒</button>
+        <button class="btn-lab btn-combo" data-wave>github →</button>
+        <button class="btn-lab btn-combo" data-wave>linkedin →</button>
+      </div>
+      <p class="lab-note" style="margin-top:0.8rem">If the stack feels too busy with per-letter on every button, the calmer shipping choice is <strong>combo shape + whole-word type</strong> (A/B) and save per-letter for headings only.</p>
+    </section>
+
+    <section class="lab-section" style="background:#f6f0ff">
+      <h2 style="color:#111">Subtle stack — whisper together</h2>
+      <p class="lab-note" style="color:#333">Same six buttons, all <strong>S4 subtle combo</strong> — sweep slowly and feel the difference from the maximal stack above.</p>
+      <div style="max-width:520px;display:grid;gap:0.6rem">
+        <button class="btn-lab btn-subtle btn-subtle-tinge btn-subtle-wave" data-wave-subtle data-lock-width>work</button>
+        <button class="btn-lab btn-subtle btn-subtle-tinge btn-subtle-wave" data-wave-subtle data-lock-width>art</button>
+        <button class="btn-lab btn-subtle btn-subtle-tinge btn-subtle-wave" data-wave-subtle data-lock-width>about</button>
+        <button class="btn-lab btn-subtle btn-subtle-tinge btn-subtle-wave" data-wave-subtle data-lock-width>cv 🔒</button>
+        <button class="btn-lab btn-subtle btn-subtle-tinge btn-subtle-wave" data-wave-subtle data-lock-width>github →</button>
+        <button class="btn-lab btn-subtle btn-subtle-tinge btn-subtle-wave" data-wave-subtle data-lock-width>linkedin →</button>
+      </div>
+    </section>
+
+    <section class="lab-section">
+      <h2>Buttery glass — frosted, sharp stays</h2>
+      <p class="lab-note">
+        Frosted glass that still feels like this site: the hard <code>4px 4px #000</code> offset stays — but the fill is translucent and blurs what's behind it.
+        The purple page gradient is the demo background so the blur actually has something to blur. Hover just lifts + warms; sharp stays, type whispers. Respects reduced-motion.
+      </p>
+
+      <div class="variant">
+        <div class="label">G1 — Glass · frosted sharp · shadow stays</div>
+        <div class="glass-stage">
+          <div style="display:flex;gap:0.7rem;flex-wrap:wrap;position:relative">
+            <button class="btn-lab btn-glass">work</button>
+            <button class="btn-lab btn-glass">about</button>
+            <a class="btn-lab btn-glass" href="#">github →</a>
+          </div>
+        </div>
+        <div class="desc"><code>rgba(255,255,255,0.68) + blur 14px saturate(1.4)</code> → hover <code>0.86 + blur 16px</code> + <code>0.04em</code> tracking + <code>MONO 1 → 0.82</code>. Hard shadow stays.</div>
+      </div>
+
+      <div class="variant">
+        <div class="label">G2 — Glass tinge · 10% warm wash, frosted</div>
+        <div class="glass-stage">
+          <div style="display:flex;gap:0.7rem;flex-wrap:wrap;position:relative">
+            <button class="btn-lab btn-glass btn-glass-tinge">work</button>
+            <button class="btn-lab btn-glass btn-glass-tinge">käkriäinen</button>
+            <a class="btn-lab btn-glass btn-glass-tinge" href="#">visualizing government →</a>
+          </div>
+        </div>
+        <div class="desc">Same frosted base plus a 10% warm gradient wash on hover. The purple ties it to the page without tinting the label.</div>
+      </div>
+
+      <div class="variant">
+        <div class="label">G3 — Glass wave · per-letter whisper, frosted</div>
+        <div class="glass-stage">
+          <div style="display:flex;gap:0.7rem;flex-wrap:wrap;position:relative">
+            <button class="btn-lab btn-glass" data-wave-glass>work</button>
+            <button class="btn-lab btn-glass" data-wave-glass>about</button>
+            <button class="btn-lab btn-glass" data-wave-glass>github</button>
+          </div>
+        </div>
+        <div class="desc">Shape stays — only letters ripple <code>MONO 1 → 0.82</code> at <code>62ms</code> stagger. Frost + wave together is the most "buttery glass" — the glass is still, the type shivers.</div>
+      </div>
+
+      <div class="variant">
+        <div class="label">G4 — Glass stack · frosted over purple</div>
+        <div class="glass-stage" style="padding:1rem">
+          <div style="max-width:520px;display:grid;gap:0.6rem;position:relative">
+            <button class="btn-lab btn-glass">work</button>
+            <button class="btn-lab btn-glass">art</button>
+            <button class="btn-lab btn-glass">about</button>
+            <button class="btn-lab btn-glass">cv 🔒</button>
+            <button class="btn-lab btn-glass">github →</button>
+            <button class="btn-lab btn-glass">linkedin →</button>
+          </div>
+        </div>
+        <div class="desc">The real home stack as buttery glass over the actual page gradient — hover any and sweep. This is the one to judge “does glass belong here?”</div>
+      </div>
+    </section>
+
+    <section class="lab-section" style="background:#fff;border-top:2px solid #111">
+      <h2 style="color:#111">Stable — no shift, no grow</h2>
+      <p class="lab-note" style="color:#333">
+        Your last notes: <strong>no position shift</strong> (so no <code>translateY</code>, no shadow offset change) and
+        <strong>no phrase size change</strong> (so no <code>MONO</code>, no <code>letter-spacing</code> — both change advance widths).
+        These hover <em>only</em> on axes that keep the phrase size the same: <code>CASL</code> + <code>wght</code> (+ tiny <code>slnt</code>).
+        Sharp stays, hard <code>4px 4px #000</code> stays exactly, outer width stays via <code>--locked-w</code>.
+      </p>
+      <style>
+        /* scoped to this section via extra class to avoid leaking */
+      </style>
+      <div class="variant">
+        <div class="label">ST1 — Stable whisper · whole-word · no move</div>
+        <div class="row"><button class="btn-lab btn-stable">work</button><button class="btn-lab btn-stable">about</button><a class="btn-lab btn-stable" href="#">github →</a></div>
+        <div class="desc"><code>CASL 0 → 0.22</code> · <code>wght 520 → 560</code> · <code>slnt 0 → -0.6</code> · no radius, no shadow move, no tracking, <code>MONO</code> stays 1. The button doesn't move and doesn't grow.</div>
+      </div>
+      <div class="variant">
+        <div class="label">ST2 — Stable tinge · same + 10% wash</div>
+        <div class="row"><button class="btn-lab btn-stable btn-stable-tinge">work</button><button class="btn-lab btn-stable btn-stable-tinge">käkriäinen</button><a class="btn-lab btn-stable btn-stable-tinge" href="#">visualizing government →</a></div>
+        <div class="desc">Same stable type as ST1 plus a 10% warm gradient wash. The wash is the only background change — still no shift.</div>
+      </div>
+      <div class="variant">
+        <div class="label">ST3 — Stable wave · per-letter stagger, width-stable</div>
+        <div class="row"><button class="btn-lab btn-stable" data-wave-stable>work</button><button class="btn-lab btn-stable" data-wave-stable>about</button><button class="btn-lab btn-stable" data-wave-stable>github</button></div>
+        <div class="desc">Per-letter <code>62ms</code> stagger, but <em>width-stable axes only</em> — each glyph whispers the same <code>CASL/wght</code>, <code>MONO</code> stays 1 so the phrase length never changes.</div>
+      </div>
+      <div class="variant">
+        <div class="label">ST4 — Glass stable · frosted + stable whisper</div>
+        <div class="glass-stage" style="padding:1.2rem">
+          <div style="display:flex;gap:0.7rem;flex-wrap:wrap;position:relative">
+            <button class="btn-lab btn-glass btn-stable">work</button>
+            <button class="btn-lab btn-glass btn-stable">about</button>
+            <button class="btn-lab btn-glass" data-wave-stable>github</button>
+          </div>
+        </div>
+        <div class="desc">Glass stays frosted (<code>0.68 → 0.86</code>), no offset change, no lift — just the type whisper inside the frost.</div>
+      </div>
+      <p class="lab-note">This is the honest “buttery glass” without the slip: the glass doesn't move, the type doesn't make the box grow, the phrase stays the same length. If the earlier variants felt jumpy, this is the control.</p>
+    </section>
+
+    <footer class="lab-footer">
+      Button lab — six variants + stack. All hover respects <code>prefers-reduced-motion</code>.
+      Lab font: <a href="https://fonts.google.com/specimen/Recursive" target="_blank" rel="noopener">Recursive</a> 55 KB latin.
+      &nbsp; <a href="/type-lab/">← type lab</a> · <a href="/">← home</a>
+    </footer>
+
+    <script>
+      // Per-letter wave buttons — split [data-wave] into spans with staggered transition-delay
+      for (const btn of document.querySelectorAll("[data-wave]")) {
+        const text = btn.textContent;
+        const cid = [...btn.attributes].find(a => a.name.startsWith("data-astro-cid"))?.name;
+        btn.textContent = "";
+        for (let i = 0; i < text.length; i++) {
+          const s = document.createElement("span");
+          s.className = "char";
+          if (cid) s.setAttribute(cid, "");
+          s.textContent = text[i] === " " ? "\u00a0" : text[i];
+          // stagger only on hover — delay is baked into the span, but only matters when :hover triggers
+          s.style.transitionDelay = `${i * 42}ms`;
+          btn.appendChild(s);
+        }
+      }
+      // Subtle wave — same but whisper: 62ms stagger, longer linger
+      for (const btn of document.querySelectorAll("[data-wave-subtle]")) {
+        const text = btn.textContent;
+        const cid = [...btn.attributes].find(a => a.name.startsWith("data-astro-cid"))?.name;
+        btn.textContent = "";
+        for (let i = 0; i < text.length; i++) {
+          const s = document.createElement("span");
+          s.className = "char";
+          if (cid) s.setAttribute(cid, "");
+          s.textContent = text[i] === " " ? "\u00a0" : text[i];
+          s.style.transitionDelay = `${i * 62}ms`;
+          btn.appendChild(s);
+        }
+      }
+      // Glass wave — frosted + per-letter, same whisper
+      for (const btn of document.querySelectorAll("[data-wave-glass]")) {
+        const text = btn.textContent;
+        const cid = [...btn.attributes].find(a => a.name.startsWith("data-astro-cid"))?.name;
+        btn.textContent = "";
+        for (let i = 0; i < text.length; i++) {
+          const s = document.createElement("span");
+          s.className = "char";
+          if (cid) s.setAttribute(cid, "");
+          s.textContent = text[i] === " " ? "\u00a0" : text[i];
+          s.style.transitionDelay = `${i * 62}ms`;
+          btn.appendChild(s);
+        }
+      }
+      // Stable wave — width-stable: MONO stays 1, only CASL/wght move so phrase never changes length
+      for (const btn of document.querySelectorAll("[data-wave-stable]")) {
+        const text = btn.textContent;
+        const cid = [...btn.attributes].find(a => a.name.startsWith("data-astro-cid"))?.name;
+        btn.textContent = "";
+        for (let i = 0; i < text.length; i++) {
+          const s = document.createElement("span");
+          s.className = "char";
+          if (cid) s.setAttribute(cid, "");
+          s.textContent = text[i] === " " ? "\u00a0" : text[i];
+          s.style.transitionDelay = `${i * 54}ms`;
+          btn.appendChild(s);
+        }
+      }
+      // Width-stable: lock outer width so MONO doesn't make the button grow.
+      // Measure after wave splitting (spans now in place, still MONO 1), then
+      // set --locked-w and add .btn-locked which applies width: var(--locked-w).
+      for (const btn of document.querySelectorAll("[data-lock-width]")) {
+        const w = Math.ceil(btn.getBoundingClientRect().width);
+        btn.style.setProperty("--locked-w", w + "px");
+        btn.classList.add("btn-locked");
+      }
+    </script>
+  </body>
+</html>

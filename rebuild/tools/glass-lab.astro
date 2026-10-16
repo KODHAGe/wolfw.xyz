@@ -1,0 +1,410 @@
+---
+/*
+ * Glass lab — the plate under text.
+ *
+ * Dev-only. The plate is `main`'s frosted sheet (82% white + blur 8px) and
+ * `.project-block` inheriting it so the seam disappeared. This lab lets you
+ * tune translucency, blur, tint, and whether the block is frosted or opaque —
+ * over real project copy and over the live field.
+ */
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>glass lab | wolfw.xyz</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Recursive:slnt,wght,CASL,MONO@-15..0,300..1000,0..1,0..1&display=swap" rel="stylesheet" />
+    <style>
+      @import "../styles/tokens.css";
+    </style>
+    <style>
+      :root { --lab-grid: #ececec; --glass-alpha: 0.82; --glass-blur: 8px; --glass-tint: 255,255,255; }
+      * { box-sizing: border-box; }
+      html { background: #f6f0ff; }
+      body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; color: #111; line-height: 1.5; }
+      a { color: inherit; }
+      .lab-header { max-width: 980px; margin: 0 auto; padding: 2.5rem 1.25rem 1rem; }
+      .lab-header h1 {
+        font-family: "Recursive", sans-serif; font-variation-settings: "MONO" 1, "CASL" 0, "wght" 700, "slnt" 0;
+        font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.1; margin: 0 0 0.35rem; letter-spacing: -0.02em;
+      }
+      .lab-header p.lead { font-size: 1.05rem; color: #444; max-width: 68ch; margin: 0 0 0.4rem; }
+      .lab-header .meta { font-size: 0.82rem; color: #777; }
+      .lab-header .meta code { font-size: 0.92em; background: #eee; padding: 0.1em 0.3em; border-radius: 3px; }
+      .lab-section { max-width: 980px; margin: 0 auto; padding: 1.6rem 1.25rem; border-top: 1px solid var(--lab-grid); background: #fff; }
+      .lab-section h2 {
+        font-family: "Recursive", sans-serif; font-variation-settings: "MONO" 0, "CASL" 0, "wght" 700, "slnt" 0;
+        font-size: 1.05rem; letter-spacing: 0.04em; text-transform: uppercase; color: #6b4db3; margin: 0 0 1rem;
+      }
+      .lab-note { font-size: 0.88rem; color: #666; max-width: 68ch; margin: 0.4rem 0 0.8rem; line-height: 1.6; }
+      .lab-note strong { color: #222; }
+      /* Stage — purple page + canvas + glass plate */
+      .stage {
+        position: relative; min-height: 560px; border-radius: 10px; overflow: hidden;
+        background: #bc89ff; border: 1px solid var(--lab-grid);
+      }
+      .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+      .stage .plate {
+        position: relative; z-index: 1;
+        max-width: 640px; margin: 1.2rem auto; padding: 1.2rem;
+        background: rgba(var(--glass-tint), var(--glass-alpha));
+        backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+        border-radius: 8px;
+      }
+      .stage .plate.opaque { background: #fff; backdrop-filter: none; -webkit-backdrop-filter: none; }
+      .stage .plate h1, .stage .plate h2, .stage .plate p { font-family: var(--font-text); }
+      .stage .plate h1 {
+        font-family: "Recursive", sans-serif; font-variation-settings: "MONO" 1, "CASL" 0, "wght" 700, "slnt" 0;
+        font-size: var(--fs-h1); margin: 0 0 0.4rem; line-height: 1.15;
+      }
+      .stage .plate .meta { font-family: "Recursive", sans-serif; font-variation-settings: "MONO" 1, "CASL" 0, "wght" 500, "slnt" 0; font-size: var(--fs-caption); color: #666; margin: 0 0 0.8rem; }
+      .stage .plate p { font-size: var(--fs-body); line-height: var(--lh-body); color: #222; margin: 0 0 0.8rem; }
+      .stage .plate .block {
+        margin-top: 1rem; padding: 1rem; border: 1px solid #eee;
+        background: rgba(var(--glass-tint), var(--glass-alpha));
+        backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+      }
+      .stage .plate.opaque .block { background: #fff; backdrop-filter: none; }
+      .stage .plate .block p { margin: 0; font-size: 0.92rem; }
+      .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem 1.4rem; margin-top: 1rem; }
+      .control label { display: block; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #555; margin-bottom: 0.25rem; }
+      .control .row { display: flex; align-items: center; gap: 0.6rem; }
+      .control input[type="range"] { flex: 1; accent-color: #6b4db3; }
+      .control select { flex: 1; padding: 0.35rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; }
+      .control output { font-variant-numeric: tabular-nums; font-size: 0.85rem; min-width: 3.2ch; text-align: right; color: #222; }
+      .control .hint { font-size: 0.75rem; color: #888; margin-top: 0.15rem; }
+      .presets { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.8rem 0 0.4rem; }
+      .preset-btn {
+        font-family: "Recursive", sans-serif; font-variation-settings: "MONO" 0, "CASL" 0, "wght" 600, "slnt" 0;
+        font-size: 0.82rem; padding: 0.55rem 0.9rem; border: 1px solid #222; background: #fff;
+        box-shadow: 3px 3px #000; cursor: pointer; transition: box-shadow 0.18s, transform 0.18s;
+      }
+      .preset-btn:hover { box-shadow: 1px 1px #000; transform: translate(1px, 1px); }
+      .preset-btn:active { box-shadow: none; transform: translate(3px, 3px); }
+      .preset-btn small { display: block; font-size: 0.68rem; color: #666; font-variation-settings: "MONO" 0, "CASL" 0, "wght" 400, "slnt" 0; margin-top: 0.1rem; }
+      .toggle-row { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.8rem; font-size: 0.88rem; flex-wrap: wrap; }
+      .toggle-row input { accent-color: #6b4db3; }
+      .btn-liquid {
+        position: relative;
+        background: #fff;
+        border: 1px solid #000;
+        box-shadow: 4px 4px #000;
+        font-variation-settings: "MONO" 1, "CASL" 0, "wght" 520, "slnt" 0;
+        letter-spacing: -0.01em;
+        transition:
+          background 0.62s cubic-bezier(0.25,0.46,0.45,0.94),
+          backdrop-filter 0.62s ease,
+          border-color 0.5s ease,
+          box-shadow 0.62s cubic-bezier(0.25,0.46,0.45,0.94),
+          transform 0.42s cubic-bezier(0.25,0.46,0.45,0.94),
+          font-variation-settings 0.66s cubic-bezier(0.25,0.46,0.45,0.94),
+          letter-spacing 0.66s cubic-bezier(0.25,0.46,0.45,0.94);
+      }
+      /* Aether-style liquid glass: frost base on the button, displacement on a
+         separate ::after layer so backdrop-filter + SVG never share one element.
+         That combo is what went black in Firefox and throttled Safari — split
+         them and each browser gets what it can composite. Chromium adds the
+         refract layer via .has-svg-liquid (JS feature-detect); everyone else
+         gets clean frost, which still reads as glass. */
+      #liquidBtnStage { --liquid-blur: 16px; }
+      .btn-liquid:hover {
+        background: rgba(255,255,255,0.24);
+        backdrop-filter: blur(var(--liquid-blur, 16px)) saturate(1.7) brightness(1.06);
+        -webkit-backdrop-filter: blur(var(--liquid-blur, 16px)) saturate(1.7) brightness(1.06);
+        border-color: rgba(255,255,255,0.6);
+        border-radius: 0;
+        box-shadow:
+          inset 0 1px 1px rgba(255,255,255,0.7),
+          inset 0 -1px 2px rgba(255,255,255,0.25),
+          0 1px 0 rgba(255,255,255,0.35),
+          0 12px 32px rgba(80,40,160,0.18),
+          0 4px 12px rgba(0,0,0,0.10),
+          2px 2px 0 rgba(0,0,0,0.9);
+        transform: translateY(-0.5px);
+        letter-spacing: 0.02em;
+        font-variation-settings: "MONO" 0.82, "CASL" 0.22, "wght" 560, "slnt" -1.2;
+      }
+      /* Refract layer — only when the browser passed the SVG-displacement check.
+         ::after carries the displacement + specular so the button element itself
+         never has filter:url() and backdrop-filter at once. */
+      .btn-liquid::after {
+        content: ""; position: absolute; inset: 0;
+        border-radius: inherit; pointer-events: none; opacity: 0;
+        transition: opacity 0.5s ease;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.08) 32%, transparent 55%),
+          linear-gradient(135deg, rgba(188,137,255,0.16) 0%, transparent 45%, rgba(255,232,163,0.12) 100%);
+      }
+      .has-svg-liquid .btn-liquid:hover::after {
+        opacity: 1;
+        filter: url(#liquid-button);
+      }
+      .has-svg-liquid .btn-liquid:hover {
+        /* displacement lives on ::after; button keeps frost + shadow only */
+        background: rgba(255,255,255,0.18);
+      }
+      .btn-liquid span.char {
+        display: inline-block;
+        transition: font-variation-settings 0.66s cubic-bezier(0.25,0.46,0.45,0.94);
+      }
+      .btn-liquid:hover span.char {
+        font-variation-settings: "MONO" 0.82, "CASL" 0.22, "wght" 560, "slnt" -1.2;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .btn-liquid, .btn-liquid span.char { transition: none !important; filter: none !important; }
+      }
+      .lab-footer { max-width: 980px; margin: 0 auto; padding: 1.2rem 1.25rem 2.5rem; font-size: 0.82rem; color: #777; border-top: 1px solid var(--lab-grid); background: #fff; }
+      .lab-footer a { text-decoration: underline; text-underline-offset: 3px; }
+    </style>
+  </head>
+  <body>
+    <header class="lab-header">
+      <h1>Glass lab — the plate under text</h1>
+      <p class="lead">
+        The plate is <code>main</code>'s frosted sheet and <code>.project-block</code> inheriting it. Tune translucency, blur, tint, and whether the block is frosted or opaque — over real copy and over the live field.
+      </p>
+      <p class="meta">
+        Dev-only. <a href="/">← back to site</a> · <a href="/type-lab/">type lab</a> · <a href="/button-lab/">button lab</a> · <a href="/background-lab/">background lab →</a>
+      </p>
+    </header>
+
+    <section class="lab-section">
+      <h2>Live glass over field</h2>
+      <p class="lab-note">The purple page and the sine field are live behind the plate. Move the sliders — the HUD shows the computed plate style.</p>
+
+      <div class="stage" id="stage">
+        <canvas id="glassBg"></canvas>
+        <div class="plate" id="plate">
+          <h1>Visualizing government</h1>
+          <div class="meta">Web, Visualization · 2022</div>
+          <p>A common type of map-based visualization designed for news production. Thicker strokes mark the choropleth; thinner ones carry the timeline. The pairing is set in Recursive for headings and Recursive for body — judge whether they rhyme.</p>
+          <p>The plate carries legibility: <strong>B6 measures 8.1:1</strong> worst-case composited contrast with the field at full alpha. Frost vs opaque changes that number, and the seam where <code>.project-block</code> meets <code>main</code> reads as a rendering fault if they don't match.</p>
+          <div class="block" id="block">
+            <p><strong>Project block</strong> — inherits the same frost as <code>main</code> so there's no seam. Toggle opaque to see the hard vertical edge the plate was introduced to fix (D4.12).</p>
+          </div>
+        </div>
+        <div style="position:absolute;left:0.7rem;bottom:0.7rem;background:rgba(17,17,17,0.92);color:#d8d8d8;font-family:ui-monospace,monospace;font-size:0.72rem;padding:0.4rem 0.6rem;border-radius:6px;pointer-events:none" id="hud">loading…</div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <label for="alpha">Plate — opacity</label>
+          <div class="row"><input id="alpha" type="range" min="0.55" max="1" step="0.01" value="0.82" /><output id="oAlpha">0.82</output></div>
+          <div class="hint">0.55 airy → 1.00 opaque</div>
+        </div>
+        <div class="control">
+          <label for="blur">Plate — blur</label>
+          <div class="row"><input id="blur" type="range" min="0" max="20" step="1" value="8" /><output id="oBlur">8px</output></div>
+          <div class="hint">0 none → 20px heavy frost</div>
+        </div>
+        <div class="control">
+          <label for="tint">Plate — tint</label>
+          <div class="row">
+            <select id="tint">
+              <option value="255,255,255">White — as shipped</option>
+              <option value="255,253,245">Warm — #fffdf5</option>
+              <option value="246,240,255">Purple — #f6f0ff</option>
+              <option value="255,247,230">Paper — #fff7e6</option>
+            </select>
+          </div>
+          <div class="hint">Warm reads softer over purple</div>
+        </div>
+        <div class="control">
+          <label for="blockMode">Block — .project-block</label>
+          <div class="row">
+            <select id="blockMode">
+              <option value="frosted">Frosted — inherits plate (no seam)</option>
+              <option value="opaque">Opaque — white (hard seam)</option>
+              <option value="transparent">Transparent — no block fill</option>
+            </select>
+          </div>
+          <div class="hint">Opaque re-introduces the seam</div>
+        </div>
+      </div>
+
+      <div class="presets">
+        <button class="preset-btn" data-preset="shipped">As shipped <small>0.82 · 8px · white · frosted</small></button>
+        <button class="preset-btn" data-preset="airy">Airy <small>0.68 · 12px · white</small></button>
+        <button class="preset-btn" data-preset="opaque">Opaque <small>1.00 · 0px · white block</small></button>
+        <button class="preset-btn" data-preset="warm">Warm <small>0.86 · 8px · warm tint</small></button>
+        <button class="preset-btn" data-preset="heavy">Heavy frost <small>0.78 · 16px · purple tint</small></button>
+        <button class="preset-btn" data-preset="glass">Glass <small>0.72 · 14px · warm</small></button>
+      </div>
+
+      <div class="toggle-row">
+        <input type="checkbox" id="chkField" checked />
+        <label for="chkField">Field visible behind plate</label>
+        <span style="flex:1"></span>
+        <span style="font-size:0.78rem;color:#888" id="readout">plate rgba(255,255,255,0.82) · blur 8px · block frosted</span>
+      </div>
+    </section>
+
+    <section class="lab-section">
+      <h2>What to judge</h2>
+      <p class="lab-note">
+        <strong>Legibility vs airiness:</strong> 0.68 / 12px is airy and shows the field, but does the grey text on the frost still hit 4.5:1? <strong>Seam:</strong> toggle block to opaque and watch the hard vertical edge appear where <code>.project-block</code> meets <code>main</code> — that's D4.12.
+        <strong>Tint:</strong> warm reads softer over the purple page than pure white. <strong>Blur 0</strong> is just translucency without frost — the field shows through sharp, which competes with text.
+      </p>
+      <p class="lab-note">
+        Creative directions: glass that <em>tints with scroll</em> (more opaque as you read), glass that <em>blurs more on hover</em>, or no glass at all on short pages (home) and glass only on long project pages.
+      </p>
+    </section>
+
+    <section class="lab-section">
+      <h2>Liquid glass buttons — hover bends the field</h2>
+      <p class="lab-note">
+        The same field, but the <em>buttons</em> are liquid glass on hover — <code>backdrop-filter: blur 16px</code> + SVG <code>feDisplacementMap</code> + morphing <code>28px</code> radius + highlight.
+        Hover any — the button becomes a lens that refracts the sine field behind its label. Per-letter wave keeps the phrase size stable (<code>MONO</code> stays 1).
+      </p>
+
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <filter id="liquid-button" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+          <feTurbulence baseFrequency="0.018" numOctaves="2" seed="3" result="turb" />
+          <feDisplacementMap in="SourceGraphic" in2="turb" scale="10" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </svg>
+
+      <div class="stage" id="liquidBtnStage" style="height: 380px;">
+        <canvas id="liquidBtnBg"></canvas>
+        <div style="position:relative; z-index:1; max-width:520px; margin: 1.2rem auto; display:grid; gap:0.6rem; padding: 1rem;">
+          <button class="btn-lab btn-liquid" data-wave-liquid>work</button>
+          <button class="btn-lab btn-liquid" data-wave-liquid>art</button>
+          <button class="btn-lab btn-liquid" data-wave-liquid>about</button>
+          <button class="btn-lab btn-liquid" data-wave-liquid>cv 🔒</button>
+          <button class="btn-lab btn-liquid" data-wave-liquid>github →</button>
+          <button class="btn-lab btn-liquid" data-wave-liquid>linkedin →</button>
+        </div>
+      </div>
+
+      <div class="presets" style="margin-top:0.8rem">
+        <button class="preset-btn" data-liquid="subtle">Subtle <small>blur 12px · scale 6</small></button>
+        <button class="preset-btn" data-liquid="frosted">Frosted <small>16px · scale 10</small></button>
+        <button class="preset-btn" data-liquid="heavy">Heavy <small>24px · scale 18</small></button>
+        <button class="preset-btn" data-liquid="clear">Clear <small>0px · scale 0</small></button>
+      </div>
+
+      <p class="lab-note">This is the honest liquid glass button: sharp brutalist at rest (<code>4px 4px #000</code>), lens on hover (frosted + displaced + rounded). The field is the same instanced shader — the button just bends it.</p>
+    </section>
+
+    <footer class="lab-footer">
+      Glass lab — plate + block over live field. The field is the same instanced shader as production.
+      &nbsp; <a href="/background-lab/">← background lab</a> · <a href="/">← home</a>
+    </footer>
+
+    <script>
+      import { mountBackground } from "../lib/background.ts";
+      const canvas = document.getElementById("glassBg");
+      const stage = document.getElementById("stage");
+      const plate = document.getElementById("plate");
+      const block = document.getElementById("block");
+      const hud = document.getElementById("hud");
+      const readout = document.getElementById("readout");
+      const alpha = document.getElementById("alpha");
+      const blur = document.getElementById("blur");
+      const tint = document.getElementById("tint");
+      const blockMode = document.getElementById("blockMode");
+      const chkField = document.getElementById("chkField");
+      const oAlpha = document.getElementById("oAlpha");
+      const oBlur = document.getElementById("oBlur");
+
+      let dispose = mountBackground(canvas, "/glass-lab/");
+
+      function sync() {
+        const a = parseFloat(alpha.value);
+        const b = parseInt(blur.value, 10);
+        const t = tint.value;
+        document.documentElement.style.setProperty("--glass-alpha", String(a));
+        document.documentElement.style.setProperty("--glass-blur", b + "px");
+        document.documentElement.style.setProperty("--glass-tint", t);
+        // block mode
+        plate.classList.toggle("opaque", blockMode.value === "opaque");
+        if (blockMode.value === "transparent") {
+          block.style.background = "transparent";
+          block.style.backdropFilter = "none";
+        } else if (blockMode.value === "opaque") {
+          block.style.background = "";
+          block.style.backdropFilter = "";
+        } else {
+          block.style.background = "";
+          block.style.backdropFilter = "";
+        }
+        // field toggle
+        canvas.style.display = chkField.checked ? "block" : "none";
+        oAlpha.textContent = a.toFixed(2);
+        oBlur.textContent = b + "px";
+        readout.textContent = `plate rgba(${t},${a.toFixed(2)}) · blur ${b}px · block ${blockMode.value}`;
+        hud.textContent = `plate rgba(${t},${a.toFixed(2)}) · blur ${b}px · ${blockMode.value} · field ${chkField.checked ? "on" : "off"}`;
+      }
+      for (const el of [alpha, blur, tint, blockMode, chkField]) el.addEventListener("input", sync);
+      // presets
+      for (const btn of document.querySelectorAll("[data-preset]")) {
+        btn.addEventListener("click", () => {
+          const p = btn.dataset.preset;
+          if (p === "shipped") { alpha.value = "0.82"; blur.value = "8"; tint.value = "255,255,255"; blockMode.value = "frosted"; }
+          if (p === "airy") { alpha.value = "0.68"; blur.value = "12"; tint.value = "255,255,255"; blockMode.value = "frosted"; }
+          if (p === "opaque") { alpha.value = "1"; blur.value = "0"; tint.value = "255,255,255"; blockMode.value = "opaque"; }
+          if (p === "warm") { alpha.value = "0.86"; blur.value = "8"; tint.value = "255,253,245"; blockMode.value = "frosted"; }
+          if (p === "heavy") { alpha.value = "0.78"; blur.value = "16"; tint.value = "246,240,255"; blockMode.value = "frosted"; }
+          if (p === "glass") { alpha.value = "0.72"; blur.value = "14"; tint.value = "255,253,245"; blockMode.value = "frosted"; }
+          sync();
+        });
+      }
+      sync();
+
+      // SVG-liquid feature detect: only Chromium composites filter:url() +
+      // backdrop-filter without going black or throttling. Everyone else gets
+      // clean frost (still glass, just no refraction). This is the aether
+      // lesson: one element must never carry both.
+      try {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+        const isChromium = "chrome" in window || navigator.userAgent.includes("Chrome");
+        if (isChromium && typeof SVGFilterElement !== "undefined") {
+          document.documentElement.classList.add("has-svg-liquid");
+        }
+      } catch (e) { /* frost fallback */ }
+
+      // Liquid glass buttons — second canvas with same field, per-letter wave
+      const liquidBg = document.getElementById("liquidBtnBg");
+      if (liquidBg) {
+        mountBackground(liquidBg, "/liquid/");
+        for (const btn of document.querySelectorAll("[data-wave-liquid]")) {
+          const text = btn.textContent;
+          const cid = [...btn.attributes].find(a => a.name.startsWith("data-astro-cid"))?.name;
+          btn.textContent = "";
+          for (let i = 0; i < text.length; i++) {
+            const s = document.createElement("span");
+            s.className = "char";
+            if (cid) s.setAttribute(cid, "");
+            s.textContent = text[i] === " " ? "\u00a0" : text[i];
+            s.style.transitionDelay = `${i * 54}ms`;
+            btn.appendChild(s);
+          }
+        }
+        const dispBtn = document.querySelector("#liquid-button feDisplacementMap");
+        for (const btn of document.querySelectorAll("[data-liquid]")) {
+          btn.addEventListener("click", () => {
+            const p = btn.dataset.liquid;
+            // update all liquid buttons' hover styles via inline override on :hover rule is CSS, so we toggle a class on the stage
+            const stage = document.getElementById("liquidBtnStage");
+            stage.dataset.liquid = p;
+            if (dispBtn) {
+              if (p === "subtle") dispBtn.setAttribute("scale", "6");
+              if (p === "frosted") dispBtn.setAttribute("scale", "10");
+              if (p === "heavy") dispBtn.setAttribute("scale", "18");
+              if (p === "clear") dispBtn.setAttribute("scale", "0");
+            }
+            // also update blur via CSS variable on the stage
+            if (p === "subtle") stage.style.setProperty("--liquid-blur", "12px");
+            if (p === "frosted") stage.style.setProperty("--liquid-blur", "16px");
+            if (p === "heavy") stage.style.setProperty("--liquid-blur", "24px");
+            if (p === "clear") stage.style.setProperty("--liquid-blur", "0px");
+          });
+        }
+      }
+    </script>
+  </body>
+</html>

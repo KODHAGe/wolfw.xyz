@@ -51,7 +51,8 @@
      610/1000 em for every glyph, within ~1.5% of the monospace fallbacks, so a
      swap reflow is a metric no-op (measured CLS 0.0000; the old sans fallback
      produced CLS 0.1048 on project pages). */
-  --font-display: "Necto Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas,
+  /* Recursive replaces Necto (type lab 2026-10-14, button lab ST2). Kept Necto as fallback — 55 KB latin subset, MONO 1 default so phrase never grows. */
+  --font-display: "Recursive", "Necto Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas,
     monospace;
   /* --font-mono is the legacy name for the same face; kept so the recovered
      selectors keep resolving, and it is what tokens.css:37 documented. */
@@ -63,7 +64,7 @@
      owner's decision on a self-hosted text face (IBM Plex Sans, ~30-45KB). When
      that binary lands, this line is the only change needed: drop the family in
      front and everything downstream follows. */
-  --font-text: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial,
+  --font-text: "Recursive", ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial,
     sans-serif;
 
   /* Glyphs Necto Mono does not carry (typography.md §2.1, defect T7): ∨ U+2228,
