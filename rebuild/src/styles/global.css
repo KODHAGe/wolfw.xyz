@@ -862,31 +862,38 @@ h1.wave span.char {
   }
 }
 
-@keyframes vt-out-left {
+@keyframes vt-fade-out {
   to {
     opacity: 0;
-    transform: translateX(-2rem);
   }
 }
 
-@keyframes vt-in-right {
+@keyframes vt-fade-in {
   from {
     opacity: 0;
-    transform: translateX(2rem);
   }
 }
 
-::view-transition-old(root) {
-  animation: 240ms var(--ease-in-out) both vt-out-left;
+/* The root snapshot must NOT move: sliding opaque snapshots sideways exposes
+ * the purple html at the viewport edges mid-transition — the harsh flash.
+ * The sheet is transition:persisted so it never leaves; only the named content
+ * crossfades, opacity-only, above the live field. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
 }
 
-::view-transition-new(root) {
-  animation: var(--dur-transition) var(--ease-out) 60ms both vt-in-right;
+::view-transition-old(content) {
+  animation: 180ms var(--ease-in-out) both vt-fade-out;
+}
+
+::view-transition-new(content) {
+  animation: var(--dur-transition) var(--ease-out) 40ms both vt-fade-in;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
+  ::view-transition-old(content),
+  ::view-transition-new(content) {
     animation: none;
   }
 }

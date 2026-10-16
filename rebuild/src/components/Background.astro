@@ -64,38 +64,50 @@ const { seed } = Astro.props;
 <script>
   import { mountBackground, type BackgroundHandle } from "../lib/background";
 
-  let handle: BackgroundHandle | null = null;
-  let mounted: HTMLCanvasElement | null = null;
+  // Astro re-executes this inline script on every ClientRouter navigation, so
+  // module-level `let handle` resets to null and mount() would recompile the
+  // shaders + restart the sweep on every page — the reload you see. The handle
+  // lives on globalThis instead, which survives script re-execution; the canvas
+  // carries dataset.mode once its program is linked, so a persisted canvas
+  // with a live handle is recognised and just reseeded on the running loop.
+  const KEY = "__wolfw_bg_handle";
+  function liveHandle(): BackgroundHandle | null {
+    const h = (globalThis as Record<string, unknown>)[KEY];
+    return typeof h === "function" ? (h as BackgroundHandle) : null;
+  }
 
   function mount() {
     const canvas = document.getElementById("background");
     if (!(canvas instanceof HTMLCanvasElement)) return;
-    // transition:persist keeps the SAME canvas element across navigations, so
-    // the field never recompiles — no blank, no sweep restart, just alive.
-    // New seed comes from location (persisted DOM keeps the old dataset.seed).
+    // New seed comes from location: with transition:persist the DOM keeps the
+    // old dataset.seed, so location is the only truthful source.
     const seed = window.location.pathname;
-    if (canvas === mounted && handle) {
-      canvas.dataset.seed = seed;
-      handle.update({ seed });
-      return;
-    }
-    mounted = canvas;
     canvas.dataset.seed = seed;
+    const live = liveHandle();
+    if (live && canvas.dataset.mode) {
+      try {
+        live.update({ seed });
+        return;
+      } catch {
+        /* fall through to a fresh mount */
+      }
+    }
     // Production life: gentle breathe + occasional lilac, sine identity kept.
     // Morph stays 0 (shape-morphing the shipped page needs explicit sign-off;
     // it's a lab/variant tool). Reduced-motion zeroes both in-shader anyway
     // (bursts via alive, breathing via t=0 static).
-    handle = mountBackground(canvas, seed, { lively: 0.35, burst: 0.3 });
+    (globalThis as Record<string, unknown>)[KEY] = mountBackground(canvas, seed, {
+      lively: 0.35,
+      burst: 0.3,
+    });
   }
 
   mount();
 
   /*
-   * ClientRouter swaps the body on navigation but never re-executes this module:
-   * it is an external ES module, which the browser deduplicates by module map.
-   * The canvas on the new page therefore stayed uninitialised and the field was
-   * blank on every page after the first (design/frontend-architecture.md#A2).
-   * astro:page-load fires after each swap and once on first load.
+   * ClientRouter swaps the body on navigation and re-runs this script; the
+   * globalThis handle above is what makes that harmless. astro:page-load fires
+   * after each swap and once on first load.
    *
    * With transition:persist the sheet+canvas survive the swap, so mount() just
    * updates the seed on the live program — the field stays animated across page

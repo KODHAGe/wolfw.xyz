@@ -86,7 +86,7 @@ const fullTitle = `${title} | ${siteTitle}`;
     <ClientRouter />
 
     <div>
-      <main class:list={[whitebox && "whitebox"]}>
+      <main class:list={[whitebox && "whitebox"]} transition:name="content">
         <slot />
       </main>
     </div>
