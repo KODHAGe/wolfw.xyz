@@ -28,6 +28,23 @@ const projects = all
   .filter((p) => p.data.categories.some((c) => categories.includes(c)))
   .filter((p) => !p.data.private) // D3.3 — never render private work
   .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+
+// typography.md §3.2 rule 2: "Once dates are honest: group by year,
+// reverse-chronological within year, with a --fs-h2 mono year heading per
+// group." The dates ARE honest now (recovered from Sanity, 2014-2022), so the
+// grouping the paper deferred is finally possible. Grouping also fixes what
+// the flat list hid: the corpus reads as a period (2014-2022) rather than a
+// stopped feed, because the years are printed.
+const byYear = new Map<number, typeof projects>();
+for (const p of projects) {
+  const y = p.data.publishedAt.getUTCFullYear();
+  const bucket = byYear.get(y);
+  if (bucket) bucket.push(p);
+  else byYear.set(y, [p]);
+}
+// Map preserves insertion order and `projects` is already newest-first, so the
+// year keys come out descending without a second sort.
+const years = [...byYear.entries()];
 ---
 
 <Layout title={title}>
@@ -41,50 +58,56 @@ const projects = all
     }
 
     {
-      projects.map((project) => {
-        const { thumbnail, thumbnailWidth: w, thumbnailHeight: h, titleLang, title } =
-          project.data;
-        return (
-          <a class="listlink" href={`/${project.data.slug}`}>
-            {thumbnail && (
-              <img
-                src={thumbnail}
-                alt=""
-                width={w}
-                height={h}
-                loading="lazy"
-                decoding="async"
-              />
-            )}
+      years.map(([year, list]) => (
+        <section class="listgroup" aria-labelledby={`year-${year}`}>
+          <h2 class="listyear" id={`year-${year}`}>
+            {year}
+          </h2>
+          {list.map((project) => {
+            const { thumbnail, thumbnailWidth: w, thumbnailHeight: h, titleLang, title } =
+              project.data;
+            return (
+              <a class="listlink" href={`/${project.data.slug}`}>
+                {thumbnail && (
+                  <img
+                    src={thumbnail}
+                    alt=""
+                    width={w}
+                    height={h}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
 
-            <div class="listtitle">
-              {/* recovered.md#R1.4 — category prefix, and a lock when the title
-                  contains "agency". The legacy isAgency() helper is reproduced
-                  exactly, case-insensitive substring. */}
-              <span>
-                {project.data.title.toLowerCase().includes("agency") ? "🔒 " : ""}
-              </span>
-              {/* typography.md §2.4 — mark the Finnish run of a title. A whole
-                  Finnish title gets one span; a "Ilmastonmuuttajat – Climate
-                  changers" title marks only the Finnish half. */}
-              {project.data.categories[0]}:{" "}
-              {titleLang === "fi" ? (
-                title.includes(" – ") ? (
-                  <>
-                    <span lang="fi">{title.split(" – ")[0]}</span>
-                    {` – ${title.split(" – ")[1]}`}
-                  </>
-                ) : (
-                  <span lang="fi">{title}</span>
-                )
-              ) : (
-                title
-              )}{" "}
-              →
-            </div>
-          </a>
-        );
-      })
+                <div class="listtitle">
+                  {/* recovered.md#R1.4 — lock glyph when the title contains
+                      "agency". The legacy isAgency() helper is reproduced
+                      exactly, case-insensitive substring. */}
+                  <span>
+                    {project.data.title.toLowerCase().includes("agency") ? "🔒 " : ""}
+                  </span>
+                  {/* typography.md §2.4 — mark the Finnish run of a title. A whole
+                      Finnish title gets one span; a "Ilmastonmuuttajat – Climate
+                      changers" title marks only the Finnish half. */}
+                  {titleLang === "fi" ? (
+                    title.includes(" – ") ? (
+                      <>
+                        <span lang="fi">{title.split(" – ")[0]}</span>
+                        {` – ${title.split(" – ")[1]}`}
+                      </>
+                    ) : (
+                      <span lang="fi">{title}</span>
+                    )
+                  ) : (
+                    title
+                  )}{" "}
+                  →
+                </div>
+              </a>
+            );
+          })}
+        </section>
+      ))
     }
   </div>
 </Layout>

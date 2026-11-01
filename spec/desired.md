@@ -462,6 +462,40 @@ fails with `seed is not defined`. A `data-` attribute on the canvas is the
 reliable interface, and it has the side benefit of being readable from the DOM
 for debugging.
 
+### D4.16 The listing groups by year, and drops the category prefix (2026-11-01)
+
+**Origin:** `design/typography.md` §3.2 rules 2–3 and its "one redundancy to
+remove" · **Decision:** accepted, shipped
+
+§3.2 deferred year grouping on dates: "**Once dates are honest:** group by year,
+reverse-chronological within year, with a `--fs-h2` mono year heading per group."
+D1 recovered the real `publishedAt` values from Sanity (2014–2022, `gaps.md#G1`),
+so the condition is met and the grouping is now built:
+
+- **`/work`** renders 7 year groups (2022, 2021, 2020, 2019, 2016, 2015, 2014),
+  12 cards. **`/art`** renders 4 groups, 6 cards. Groups descend, and cards are
+  reverse-chronological within a group.
+- Each year is an `h2` in the display face with `tabular-nums` at `--fs-h2`. It is
+  the correct level under the page `h1` — the harness heading outline now reads
+  `1,2,2,2,2,2,2,2` where it used to be `1`.
+- The year is printed **once per group**, not on every card. §3.2's card format
+  lists a year on the card; with grouping that would repeat the same number on
+  every card in the group, so the group heading is where the date renders. The
+  intent — "every date renders as a year, never `YYYY-MM-DD`" — is satisfied, and
+  the repetition is not.
+
+**The registered departure** is the category prefix. R1.4 recovered
+`{category}: {title} →` on every card (`ProjectList.astro:65`), which repeats what
+the page has already said: on `/art` every card was prefixed "Experiment:", on
+`/work` each said "Web" or "Visualization". §3.2 recommends dropping it and keeping
+the `→` affordance and the agency lock glyph, with the category living in
+`.project-meta` on the detail page. Shipped exactly that. The lock glyph and the
+Finnish `lang="fi"` title split are untouched.
+
+The duplicate-category behaviour is unchanged: a project tagged both `Web` and
+`Experiment` still appears on both pages, which the identical card format makes
+legible rather than confusing (§3.2).
+
 ### D4.9 Reduced motion is a hard requirement
 
 **Origin:** derived · **Decision:** proposed

@@ -348,6 +348,23 @@ main.whitebox {
   margin-top: var(--space-2);
 }
 
+/* typography.md §3.2 rule 2 — year groups. The dates are honest now (recovered
+ * from Sanity, 2014–2022), so the listing prints the years: the corpus reads as
+ * a period rather than a stopped feed. The group heading carries the date once
+ * per year instead of repeating it on every card, which is what grouping is
+ * for. h2 is the right level under the page h1. */
+.listgroup + .listgroup {
+  margin-top: var(--space-5);
+}
+
+.listyear {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-snug);
+  font-variant-numeric: tabular-nums;
+  margin-block: 0 var(--space-2);
+}
+
 .listlink {
   padding: var(--pad-item);
   max-width: var(--measure-text);
