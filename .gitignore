@@ -80,3 +80,11 @@ yarn-error.log
 # Vercel / Zeit
 .now
 .vercel
+# Dev-only lab pages. They live in rebuild/tools/ (committed there) and are
+# COPIED into src/pages/ by tools/labs.sh for preview only. Ignoring the copies
+# means "labs on" can never accidentally commit a 5th page that trips S1/S3.
+rebuild/src/pages/type-lab.astro
+rebuild/src/pages/button-lab.astro
+rebuild/src/pages/background-lab.astro
+rebuild/src/pages/background-playground.astro
+rebuild/src/pages/glass-lab.astro
